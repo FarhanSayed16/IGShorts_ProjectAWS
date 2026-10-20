@@ -1,0 +1,127 @@
+@startuml IGshorts_Capabilities_And_Dependencies
+title IGshorts — Capability Map\nWhat we need externally → What is hard → What we deliver
+
+skinparam backgroundColor #F8FAFC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 16
+skinparam ArrowColor #475569
+skinparam ArrowThickness 2
+skinparam ArrowFontColor #1E293B
+skinparam ArrowFontSize 12
+skinparam ArrowFontStyle bold
+skinparam packageStyle rectangle
+skinparam packageBorderThickness 2
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam packageFontSize 14
+skinparam rectangleBorderThickness 1.5
+skinparam rectangleFontColor #1E293B
+skinparam noteBackgroundColor #FFFBEB
+skinparam noteBorderColor #D97706
+skinparam noteFontColor #78350F
+skinparam noteFontSize 11
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #CBD5E1
+skinparam Padding 8
+skinparam nodesep 40
+skinparam ranksep 50
+
+top to bottom direction
+
+'════════════════════════════════════════
+' C — EXTERNAL (top = inputs first)
+'════════════════════════════════════════
+package "C  ·  WHAT WE REQUIRE EXTERNALLY\n(must come from outside our code)" as Ext #DBEAFE {
+
+  together {
+    rectangle "**1. Meta / Instagram**\n----\n• Graph API access\n• App Review approval\n• Rate-limit headroom" as Meta #BFDBFE
+
+    rectangle "**2. Content / Editorial**\n----\n• Watchlist 500–2000 creators\n• News · tickers · corrections\n• Niche + state / metro tags" as Editorial #93C5FD
+
+    rectangle "**3. Business / Ops**\n----\n• Domain (IGshorts.com)\n• Score rules sign-off\n• Privacy · ToS · brand" as Biz #60A5FA
+
+    rectangle "**4. Optional (later)**\n----\n• Creators claim profiles\n• Real Insights path\n• Licensed data vendor" as Later #3B82F6
+  }
+}
+
+'════════════════════════════════════════
+' B — CONSTRAINTS (middle)
+'════════════════════════════════════════
+package "B  ·  WHAT IS HARD / LIMITED\n(doable only with constraints)" as Hard #FFEDD5 {
+
+  together {
+    rectangle "**True IG impressions**\n----\nOnly for accounts we manage\nor creators who claim later\n→ MVP uses proxy score" as Impressions #FDE68A
+
+    rectangle "**Auto Top-by-state**\n----\nNo official IG geo chart\n→ We tag regions ourselves\n(editorial + watchlist)" as Geo #FCD34D
+
+    rectangle "**Full IG firehose**\n----\nCannot scrape all trends\n→ Watchlist + editorial\ninstead of open firehose" as Firehose #FBBF24
+  }
+}
+
+'════════════════════════════════════════
+' A — DELIVERABLES (bottom = outcome)
+'════════════════════════════════════════
+package "A  ·  WHAT WE CAN BUILD & DELIVER\n(fully in our control)" as Ours #DCFCE7 {
+
+  rectangle "**Platform foundation**\nAWS · API · DB · Redis · Admin" as Platform #86EFAC
+
+  together {
+    rectangle "**Rankings engine**\nIGshorts Score · history · ↑↓\nIndia / region / category charts" as Rank #4ADE80
+
+    rectangle "**Product surfaces**\nNews · hashtag tickers\nRegion explorer · methodology" as Surfaces #22C55E
+
+    rectangle "**Public charts website**\nBillboard + CMC style UI\nTop-10 · movers · filters" as Site #16A34A
+  }
+}
+
+' Force clean vertical story — few arrows only
+Ext -down-> Hard : **shape the approach**\n(limits + workarounds)
+Hard -down-> Ours : **define the MVP**\n(proxy score · watchlist · tags)
+Ext -down-> Ours : **feed the product**\n(API metrics · content · domain)
+
+' Keep internal A layout tidy without spaghetti
+Platform -down-> Rank
+Platform -down-> Surfaces
+Platform -down-> Site
+
+' Hidden links keep cards aligned in a row
+Meta -[hidden]right-> Editorial
+Editorial -[hidden]right-> Biz
+Biz -[hidden]right-> Later
+Impressions -[hidden]right-> Geo
+Geo -[hidden]right-> Firehose
+Rank -[hidden]right-> Surfaces
+Surfaces -[hidden]right-> Site
+
+note as N1
+  **How the pieces connect (read this instead of many arrows)**
+  |= From (C / B) |= Into (A) |= What it enables |
+  | Meta API | Rankings + Website | Profile / hashtag metrics + official embeds |
+  | Editorial team | Rankings + Surfaces | Watchlist, boosts, news, tickers, region tags |
+  | Business / Ops | Website | Domain, legal, scoring policy |
+  | Optional later | True impressions | Real Insights when creators claim |
+  | Hard limits | Rankings MVP | Proxy **IGshorts Score** (not raw impressions) |
+end note
+
+N1 .. Ours
+
+note as N2
+  **Team takeaway**
+  We own product, UI, scoring & cloud.
+  Without Meta + editorial + ops sign-off,
+  charts look empty, stale, or non-compliant.
+end note
+
+N2 .. Ext
+
+legend right
+  |= Zone |= Meaning |= Colour |
+  | **C** | External requirement | <#DBEAFE> Blue |
+  | **B** | Hard / constrained | <#FFEDD5> Amber |
+  | **A** | We can deliver | <#DCFCE7> Green |
+endlegend
+
+@enduml

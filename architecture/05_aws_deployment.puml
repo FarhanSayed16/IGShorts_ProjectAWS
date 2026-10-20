@@ -1,0 +1,111 @@
+@startuml IGshorts_AWS_Deployment
+title IGshorts — AWS Deployment Architecture
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 12
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.4
+skinparam ArrowFontColor #475569
+skinparam ArrowFontSize 10
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam rectangleBorderColor #94A3B8
+skinparam databaseBorderColor #0EA5E9
+skinparam cloudBorderColor #6366F1
+skinparam nodeBorderColor #64748B
+skinparam noteBackgroundColor #EFF6FF
+skinparam noteBorderColor #3B82F6
+skinparam noteFontColor #1E3A8A
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #E2E8F0
+
+actor "Users / Editors" as U #FEF3C7
+
+cloud "DNS & Edge" as Edge #EEF2FF {
+  rectangle "**Route 53**\nigshorts.com" as R53 #E0E7FF
+  rectangle "**CloudFront**\nCDN + HTTPS" as CF #C7D2FE
+  rectangle "**AWS WAF**\nOWASP rules · rate limit" as WAF #A5B4FC
+}
+
+package "AWS Region (e.g. ap-south-1)" as Region #F8FAFC {
+
+  package "Compute" as Compute #F0FDF4 {
+    rectangle "**Next.js App**\nAmplify Hosting\n— or —\nECS Fargate service" as WebApp #DCFCE7
+    rectangle "**API Service**\nECS Fargate + ALB\nNestJS / FastAPI" as ApiApp #BBF7D0
+    rectangle "**Workers**\nECS scheduled tasks\nor Lambda + EventBridge" as Workers #86EFAC
+  }
+
+  package "Data Tier (Private Subnets)" as DataTier #FDF2F8 {
+    database "**Aurora PostgreSQL**\nMulti-AZ (prod)" as Aurora #FCE7F3
+    database "**ElastiCache Redis**" as Redis #FBCFE8
+    rectangle "**S3 Buckets**\nassets · exports · backups" as S3 #F9A8D4
+  }
+
+  package "Security & Config" as Sec #FFF7ED {
+    rectangle "**Secrets Manager**\nMeta tokens · DB creds" as SM #FFEDD5
+    rectangle "**IAM Roles**\nLeast privilege" as IAM #FED7AA
+    rectangle "**VPC**\nPublic / Private subnets\nNAT · Security Groups" as VPC #FDBA74
+  }
+
+  package "Observability" as Obs #ECFEFF {
+    rectangle "**CloudWatch**\nLogs · Metrics · Alarms" as CW #CFFAFE
+    rectangle "**SNS Alerts**\nOn-call notifications" as SNS #A5F3FC
+  }
+}
+
+cloud "External" as Ext #F1F5F9 {
+  rectangle "**Meta Graph API**" as Meta #E2E8F0
+  rectangle "**GitHub Actions**\nCI/CD pipelines" as GH #CBD5E1
+}
+
+U --> R53
+R53 --> CF
+CF --> WAF
+WAF --> WebApp
+WAF --> ApiApp
+WebApp --> ApiApp : internal API calls
+ApiApp --> Aurora
+ApiApp --> Redis
+ApiApp --> S3
+ApiApp --> SM
+Workers --> Meta
+Workers --> Aurora
+Workers --> Redis
+Workers --> SM
+WebApp --> CW
+ApiApp --> CW
+Workers --> CW
+CW --> SNS
+GH --> WebApp : deploy
+GH --> ApiApp : deploy
+GH --> Workers : deploy
+ApiApp ..> VPC : runs inside
+Workers ..> IAM : assumes roles
+
+note right of Workers
+  Sync cadence example:
+  every **6–12 hours**
+  watchlist batches only
+end note
+
+note bottom of Aurora
+  Keep full **snapshot history**
+  so charts can show weekly movers (↑↓)
+end note
+
+legend right
+  |= Color |= Area |
+  | <#C7D2FE> | Edge / CDN |
+  | <#DCFCE7> | Compute |
+  | <#FCE7F3> | Data |
+  | <#FFEDD5> | Security |
+  | <#CFFAFE> | Observability |
+endlegend
+
+@enduml

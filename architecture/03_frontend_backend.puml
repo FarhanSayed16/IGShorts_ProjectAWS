@@ -1,0 +1,126 @@
+@startuml IGshorts_Frontend_Backend
+title IGshorts — Frontend & Backend Structure
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 12
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.4
+skinparam ArrowFontColor #475569
+skinparam ArrowFontSize 10
+skinparam packageStyle rectangle
+skinparam packageBorderColor #CBD5E1
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam rectangleBorderColor #94A3B8
+skinparam componentStyle rectangle
+skinparam noteBackgroundColor #FEF3C7
+skinparam noteBorderColor #F59E0B
+skinparam noteFontColor #78350F
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #E2E8F0
+
+left to right direction
+
+package "Frontend (Next.js)" as FE #F0FDF4 {
+
+  package "Public Pages" as Pages #DCFCE7 {
+    rectangle "Home\nIndia Top-10 + ticker" as Home
+    rectangle "Charts\nProfiles / Tags / Reels" as Charts
+    rectangle "Region Explorer\nState / Metro filters" as Regions
+    rectangle "Profile Detail\nScore · history · reels" as Profile
+    rectangle "News / Articles\nMedium-style reading" as News
+    rectangle "Methodology\nHow scoring works" as Method
+  }
+
+  package "UI Building Blocks" as Blocks #BBF7D0 {
+    rectangle "RankTable\n# · Name · Score · Δ" as RankTable
+    rectangle "NewsTicker" as Ticker
+    rectangle "HashtagTicker" as HashTicker
+    rectangle "Sparkline / Movers" as Spark
+    rectangle "RegionFilterChips" as Filters
+  }
+
+  package "Admin UI" as AdminFE #86EFAC {
+    rectangle "Watchlist Manager" as WL
+    rectangle "News CMS" as NewsCMS
+    rectangle "Editorial Boost" as Boost
+  }
+}
+
+package "Backend API" as BE #EFF6FF {
+
+  package "API Modules" as Mods #DBEAFE {
+    rectangle "ChartsService\nTop N by region/category" as ChartsSvc
+    rectangle "ProfilesService\nLookup · history" as ProfilesSvc
+    rectangle "HashtagsService" as TagsSvc
+    rectangle "NewsService" as NewsSvc
+    rectangle "ScoringService\nIGshorts Score formula" as ScoreSvc
+    rectangle "AdminService\nCRUD + boosts" as AdminSvc
+    rectangle "AuthService\n(Phase 2)" as AuthSvc
+  }
+
+  package "Shared Core" as Core #BFDBFE {
+    rectangle "Validation / DTOs" as DTO
+    rectangle "Cache Adapter (Redis)" as CacheAdp
+    rectangle "DB Repositories" as Repo
+    rectangle "Meta API Client" as MetaClient
+  }
+}
+
+package "Persistence" as Persist #FDF2F8 {
+  database "PostgreSQL" as PG #FCE7F3
+  database "Redis" as Redis #FBCFE8
+}
+
+Home --> RankTable
+Home --> Ticker
+Home --> HashTicker
+Charts --> RankTable
+Charts --> Spark
+Charts --> Filters
+Regions --> Filters
+Profile --> Spark
+
+Home -right-> ChartsSvc : GET /charts
+Charts -right-> ChartsSvc
+Regions -right-> ChartsSvc
+Profile -right-> ProfilesSvc
+News -right-> NewsSvc
+Method ..> ScoreSvc : documents formula
+WL -right-> AdminSvc
+NewsCMS -right-> AdminSvc
+Boost -right-> AdminSvc
+
+ChartsSvc --> ScoreSvc
+ChartsSvc --> CacheAdp
+ChartsSvc --> Repo
+ProfilesSvc --> Repo
+ProfilesSvc --> CacheAdp
+TagsSvc --> Repo
+NewsSvc --> Repo
+AdminSvc --> Repo
+ScoreSvc --> Repo
+Repo --> PG
+CacheAdp --> Redis
+MetaClient ..> ScoreSvc : feeds snapshots\n(via workers)
+
+note bottom of ScoreSvc
+  **IGshorts Score**
+  followers + engagement + growth
+  + reel velocity + editorial boost
+  + region relevance
+end note
+
+legend right
+  |= Color |= Side |
+  | <#DCFCE7> | Frontend pages |
+  | <#BBF7D0> | UI components |
+  | <#DBEAFE> | Backend services |
+  | <#FCE7F3> | Storage |
+endlegend
+
+@enduml

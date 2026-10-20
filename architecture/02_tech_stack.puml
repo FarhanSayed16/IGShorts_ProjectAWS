@@ -1,0 +1,84 @@
+@startuml IGshorts_Tech_Stack
+title IGshorts — Technical Stack (Layers)
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 12
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.4
+skinparam ArrowFontColor #475569
+skinparam ArrowFontSize 11
+skinparam packageStyle rectangle
+skinparam packageBorderColor #CBD5E1
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam rectangleBorderColor #94A3B8
+skinparam noteBackgroundColor #ECFEFF
+skinparam noteBorderColor #06B6D4
+skinparam noteFontColor #164E63
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #E2E8F0
+
+top to bottom direction
+
+package "01  Client Experience" as L1 #F0FDF4 {
+  rectangle "**Next.js 14+ (TypeScript)**\nSSR / SSG for SEO charts" as Next #DCFCE7
+  rectangle "**React UI**\nTailwind CSS · Rank tables\nTickers · Sparklines" as UI #BBF7D0
+  rectangle "**Design refs**\nBillboard · CoinMarketCap · Medium" as Design #86EFAC
+}
+
+package "02  API & Domain Services" as L2 #EFF6FF {
+  rectangle "**NestJS or FastAPI**\nREST (GraphQL optional later)" as Backend #DBEAFE
+  rectangle "**Domain modules**\nProfiles · Charts · Hashtags\nNews · Regions · Scoring" as Domain #BFDBFE
+  rectangle "**Auth (Phase 2)**\nCognito / Auth.js" as Auth #93C5FD
+}
+
+package "03  Data Platform" as L3 #FDF2F8 {
+  rectangle "**Aurora PostgreSQL**\nSource of truth + history" as DB #FCE7F3
+  rectangle "**Redis**\nHot charts & tickers cache" as Cache #FBCFE8
+  rectangle "**S3**\nStatic assets & cache files" as ObjectStore #F9A8D4
+}
+
+package "04  Integration & Automation" as L4 #FFF7ED {
+  rectangle "**Meta Graph API SDK**\nBusiness Discovery · Hashtags" as IG #FFEDD5
+  rectangle "**Workers / Jobs**\nECS Fargate or Lambda" as Jobs #FED7AA
+  rectangle "**EventBridge**\nScheduled sync windows" as Sched #FDBA74
+}
+
+package "05  Cloud & DevOps (AWS)" as L5 #EEF2FF {
+  rectangle "**CloudFront + WAF**" as Edge #E0E7FF
+  rectangle "**Amplify / ECS / ALB**\nApp hosting" as Host #C7D2FE
+  rectangle "**Secrets Manager**\nAPI tokens & keys" as Secrets #A5B4FC
+  rectangle "**CloudWatch + Alerts**\nLogs · Metrics · Uptime" as Obs #818CF8
+  rectangle "**GitHub Actions CI/CD**\nBuild · Test · Deploy" as CICD #6366F1
+}
+
+L1 -down-> L2 : HTTPS JSON APIs
+L2 -down-> L3 : read / write
+L2 -down-> L4 : trigger / consume sync
+L4 -down-> L3 : persist snapshots & scores
+L5 -up-> L1 : serve & protect
+L5 -up-> L2 : host & secure
+L5 -up-> L4 : schedule & observe
+
+note as N1
+  **Stack principle**
+  SEO-first frontend + relational rankings history
+  + cache for hot Top-10 + Meta-compliant ingestion.
+end note
+
+N1 .. L2
+
+legend right
+  |= Layer |= Focus |
+  | <#DCFCE7> | Frontend |
+  | <#BFDBFE> | Backend |
+  | <#FCE7F3> | Data |
+  | <#FED7AA> | Integrations |
+  | <#C7D2FE> | AWS / DevOps |
+endlegend
+
+@enduml

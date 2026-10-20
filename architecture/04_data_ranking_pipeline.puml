@@ -1,0 +1,95 @@
+@startuml IGshorts_Data_Ranking_Pipeline
+title IGshorts — Data Ingestion & Ranking Pipeline
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 12
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.6
+skinparam ArrowFontColor #334155
+skinparam ArrowFontSize 11
+skinparam activityBackgroundColor #DBEAFE
+skinparam activityBorderColor #3B82F6
+skinparam activityFontColor #1E3A8A
+skinparam activityDiamondBackgroundColor #FEF3C7
+skinparam activityDiamondBorderColor #F59E0B
+skinparam activityDiamondFontColor #78350F
+skinparam partitionBorderColor #CBD5E1
+skinparam partitionFontColor #0F172A
+skinparam partitionFontStyle bold
+skinparam noteBackgroundColor #ECFDF5
+skinparam noteBorderColor #10B981
+skinparam noteFontColor #065F46
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #E2E8F0
+
+|Editorial Ops|
+start
+:Maintain **Creator Watchlist**
+(username · niche · state/metro);
+:Publish **News** + hashtag ticker items;
+:Optional **Editorial Boost**
+(feature / correct ranks);
+
+|Scheduler|
+:EventBridge triggers sync
+(every 6–12 hours);
+
+|Ingestion Worker|
+:Load due watchlist batch
+(respect Meta rate limits);
+:Call **Meta Graph API**
+Business Discovery / Hashtag Search;
+
+if (API success?) then (yes)
+  :Normalize profile & media metrics;
+  :Write **MetricSnapshot** to PostgreSQL;
+else (retry / skip)
+  :Log failure · backoff · alert;
+  stop
+endif
+
+|Scoring Engine|
+:Compute **IGshorts Score**
+followers_norm
++ engagement_rate
++ growth_30d
++ reel_velocity
++ editorial_boost
++ region_relevance;
+:Store score on snapshot;
+
+|Chart Builder|
+:Rank within
+**India / Region / Category**;
+:Build Top-N chart entries
+with ↑↓ vs previous period;
+:Refresh **Redis** hot charts
++ ticker payloads;
+
+|Public Website|
+:Serve charts via API / SSR;
+:Users browse Top-10,
+regions, news, methodology;
+
+stop
+
+legend right
+  |= Stage |= Owner |
+  | Editorial Ops | Content team |
+  | Scheduler / Worker | Engineering |
+  | Scoring / Charts | Engineering |
+  | Public Website | Product |
+endlegend
+
+note right
+  **Important**
+  We do **not** scrape Instagram.
+  Pipeline is watchlist + Meta-compliant APIs
+  + editorial enrichment.
+end note
+
+@enduml

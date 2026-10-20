@@ -1,0 +1,97 @@
+@startuml IGshorts_System_Architecture
+title IGshorts — High-Level System Architecture
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 14
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.5
+skinparam ArrowFontColor #475569
+skinparam ArrowFontSize 11
+skinparam packageStyle rectangle
+skinparam packageBorderColor #CBD5E1
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam packageTitleAlignment left
+skinparam rectangleBorderColor #94A3B8
+skinparam rectangleFontColor #1E293B
+skinparam databaseBorderColor #0EA5E9
+skinparam cloudBorderColor #6366F1
+skinparam actorBorderColor #F59E0B
+skinparam noteBackgroundColor #FFFBEB
+skinparam noteBorderColor #F59E0B
+skinparam noteFontColor #78350F
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #E2E8F0
+
+actor "Public Users" as Users #FEF3C7
+actor "Editors / Content Team" as Editors #DBEAFE
+actor "Creators (Phase 2)" as Creators #E0E7FF
+
+cloud "Internet / CDN Edge" as Edge #EEF2FF {
+  rectangle "**CloudFront + WAF**\nHTTPS · Caching · Bot protection" as CF #E0E7FF
+}
+
+package "Presentation Layer" as Pres #F0FDF4 {
+  rectangle "**Next.js Web App**\nHome · Charts · Regions\nNews · Profile pages · Tickers" as Web #DCFCE7
+  rectangle "**Admin / CMS UI**\nWatchlist · News · Boosts" as Admin #BBF7D0
+}
+
+package "Application Layer" as App #EFF6FF {
+  rectangle "**API Gateway / ALB**" as GW #DBEAFE
+  rectangle "**IGshorts API**\nRankings · Search · Profiles\nNews · Auth (later)" as API #BFDBFE
+}
+
+package "Data & Cache" as Data #FDF2F8 {
+  database "**Aurora PostgreSQL**\nProfiles · Snapshots\nCharts · News · Regions" as PG #FCE7F3
+  database "**Redis (ElastiCache)**\nHot Top-10 · Tickers\nRate-limit counters" as Redis #FBCFE8
+  rectangle "**S3 Media Cache**\nThumbnails · Assets" as S3 #F9A8D4
+}
+
+package "Ingestion & Jobs" as Jobs #FFF7ED {
+  rectangle "**Scheduler**\nEventBridge Cron" as Cron #FFEDD5
+  rectangle "**Ingestion Workers**\nSync watchlist metrics\nCompute IGshorts Score" as Worker #FED7AA
+}
+
+cloud "External Services" as Ext #F8FAFC {
+  rectangle "**Meta Instagram\nGraph API**\nBusiness Discovery\nHashtag Search" as Meta #E2E8F0
+  rectangle "**Analytics**\nGA4 / Amplitude" as Analytics #E2E8F0
+}
+
+Users --> CF
+Editors --> CF
+Creators ..> CF : claim profile (later)
+CF --> Web
+CF --> Admin
+Web --> GW
+Admin --> GW
+GW --> API
+API --> PG
+API --> Redis
+API --> S3
+Cron --> Worker
+Worker --> Meta
+Worker --> PG
+Worker --> Redis
+Web ..> Analytics : page events
+Web ..> Meta : oEmbed / official embeds
+
+legend right
+  |= Color |= Layer |
+  | <#DCFCE7> | Presentation |
+  | <#BFDBFE> | Application |
+  | <#FCE7F3> | Data |
+  | <#FED7AA> | Background jobs |
+  | <#E2E8F0> | External |
+endlegend
+
+note right of Worker
+  **Compliant path only**
+  Watchlist-based sync.
+  No scraping architecture.
+end note
+
+@enduml
