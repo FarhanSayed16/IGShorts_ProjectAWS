@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+build/
+coverage/
+pnpm-lock.yaml
+*.puml
+*.xlsx
+*.pdf
+docs/
+packages/db/prisma/migrations/
+cdk.out/
+infra/cdk.out/
+infra/**/*.js
+infra/**/*.d.ts

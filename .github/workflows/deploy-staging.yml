@@ -1,0 +1,84 @@
+name: Deploy to Staging (AWS ap-south-1)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  deploy:
+    name: Migrate & CDK Deploy Staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.17.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run Prisma Database Migrations
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          echo "[Migration] Running Prisma migrate deploy against staging RDS..."
+          pnpm --filter @igshorts/db migrate:deploy
+
+      - name: CDK Deploy Staging
+        working-directory: infra
+        env:
+          CERTIFICATE_ARN: ${{ secrets.STAGING_CERTIFICATE_ARN }}
+          ALERT_EMAIL: ${{ secrets.STAGING_ALERT_EMAIL }}
+        run: |
+          CONTEXT_ARGS=()
+          if [ -n "$CERTIFICATE_ARN" ]; then
+            CONTEXT_ARGS+=(--context "certificateArn=$CERTIFICATE_ARN")
+          fi
+          if [ -n "$ALERT_EMAIL" ]; then
+            CONTEXT_ARGS+=(--context "alertEmail=$ALERT_EMAIL")
+          fi
+          npx cdk deploy IgshortsStagingStack --require-approval never "${CONTEXT_ARGS[@]}"
+
+      - name: Automated Smoke Tests
+        env:
+          STAGING_ENDPOINT: ${{ secrets.STAGING_ENDPOINT_URL }}
+        run: |
+          if [ -z "$STAGING_ENDPOINT" ]; then
+            echo "STAGING_ENDPOINT_URL is not set; skip live smoke until the ALB URL is known."
+            exit 0
+          fi
+
+          echo "[Smoke Test] Verifying API Health Endpoint..."
+          curl -sf "$STAGING_ENDPOINT/api/v1/health" | grep -q '"status":"ok"' || { echo "Health check failed"; exit 1; }
+
+          echo "[Smoke Test] Verifying Public Global Chart Endpoint..."
+          curl -sf "$STAGING_ENDPOINT/api/v1/charts/global_persons" | grep -q '"chartKey":"global_persons"' || { echo "Global chart endpoint failed"; exit 1; }
+
+          echo "[Smoke Test] Verifying Web Homepage..."
+          curl -sf "$STAGING_ENDPOINT/" | grep -iq "IGshorts" || { echo "Web frontend failed smoke test"; exit 1; }
+
+          echo "[Smoke Test] All staging smoke tests PASSED successfully!"

@@ -1,0 +1,65 @@
+name: igshorts
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: igshorts-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: igshorts
+      POSTGRES_PASSWORD: igshorts_dev_password
+      POSTGRES_DB: igshorts_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - igshorts_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U igshorts -d igshorts_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: igshorts-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://igshorts:igshorts_dev_password@postgres:5432/igshorts_db?schema=public
+      ADMIN_JWT_SECRET: local-dev-only-change-me-please
+      ADMIN_BOOTSTRAP_EMAIL: admin@localhost
+      ADMIN_BOOTSTRAP_PASSWORD: change-me-now
+      CORS_ORIGIN: http://localhost:3000
+      PROVIDER: seed
+      CRON_ENABLED: 'false'
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    container_name: igshorts-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      API_INTERNAL_URL: http://api:4000/api/v1
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+
+volumes:
+  igshorts_pgdata:

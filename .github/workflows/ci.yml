@@ -1,0 +1,52 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.17.0
+
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Monorepo Code Formatting Check
+        run: pnpm format:check
+
+      - name: Linting
+        run: pnpm lint
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Run Unit Tests
+        run: pnpm test
+
+      - name: Build Monorepo (Packages, API, Web, Infra)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SITE_URL: 'https://staging.igshorts.com'
+          NEXT_PUBLIC_API_URL: 'https://staging.api.igshorts.com/api/v1'

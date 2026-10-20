@@ -1,0 +1,16 @@
+.git
+.github
+.cursor
+**/.next
+**/dist
+**/node_modules
+infra/cdk.out
+**/*.md
+docs
+architecture
+**/*.tsbuildinfo
+.env
+.env.*
+!.env.example
+coverage
+**/.DS_Store
