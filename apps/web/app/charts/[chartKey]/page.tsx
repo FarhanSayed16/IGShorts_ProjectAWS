@@ -26,13 +26,16 @@ export default async function FutureChartPage({
     <div className="flex flex-col min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)]">
       <PublicHeader />
       <main id="main-content" className="flex-1 max-w-3xl mx-auto w-full px-4 py-16 text-center">
-        <h1 className="text-3xl font-serif font-bold mb-3">This chart is not live yet</h1>
-        <p className="text-sm text-slate-600 mb-6">
-          <code className="font-mono">{chartKey}</code> is reserved for a later tab (brands, teams,
-          or scoring v2). v1 only publishes Global and India people charts.
+        <h1 className="chart-title text-4xl sm:text-5xl mb-3">This chart is not live yet</h1>
+        <p className="text-sm text-[var(--ink-muted)] mb-6">
+          <code className="font-mono text-[var(--ink)]">{chartKey}</code> is reserved for a later
+          tab (brands, teams, or scoring v2). v1 only publishes Global and India people charts.
         </p>
-        <Link href="/charts" className="text-sm font-bold text-[var(--color-navy)] hover:underline">
-          Back to charts index
+        <Link
+          href="/charts"
+          className="text-sm font-bold uppercase tracking-[0.16em] underline underline-offset-4"
+        >
+          Back to charts
         </Link>
       </main>
       <PublicFooter />
