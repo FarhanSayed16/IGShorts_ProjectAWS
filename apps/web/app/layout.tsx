@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Outfit, JetBrains_Mono } from 'next/font/google';
+import { Inter, Oswald, JetBrains_Mono } from 'next/font/google';
 import { ReactQueryProvider } from '@/lib/api/query-provider';
 import { ThemeProvider } from '@/lib/theme/theme-provider';
 import { CommandPalette } from '@/components/chrome/command-palette';
@@ -11,9 +11,9 @@ const inter = Inter({
   display: 'swap',
 });
 
-const outfit = Outfit({
+const oswald = Oswald({
   subsets: ['latin'],
-  weight: ['600', '700', '800'],
+  weight: ['500', '600', '700'],
   variable: '--font-display',
   display: 'swap',
 });
@@ -66,7 +66,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
+      data-theme="light"
+      className={`${inter.variable} ${oswald.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <body
@@ -76,12 +77,12 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('igshorts-theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light')}catch(e){}",
+              "try{var t=localStorage.getItem('igshorts-theme');var d=t==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',d);if(d==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){};if(typeof navigator!=='undefined'&&'serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(function(r){for(var s of r){s.unregister()}})}",
           }}
         />
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--color-navy)] focus:text-white focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-gold)] text-xs font-bold"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--brand-navy)] focus:text-white focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-accent)] text-xs font-bold"
         >
           Skip to main content
         </a>

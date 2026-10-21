@@ -26,9 +26,9 @@ const NAV_ITEMS = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Watchlist', href: '/admin/watchlist', icon: Users },
   { label: 'Import Seed', href: '/admin/import', icon: FileSpreadsheet },
-  { label: 'Sync', href: '/admin/sync', icon: RefreshCw },
-  { label: 'Rankings', href: '/admin/rankings', icon: Trophy },
-  { label: 'Job Pipelines', href: '/admin/jobs', icon: Activity },
+  { label: 'Sync Pipeline', href: '/admin/sync', icon: RefreshCw },
+  { label: 'Rankings Engine', href: '/admin/rankings', icon: Trophy },
+  { label: 'Job Schedules', href: '/admin/jobs', icon: Activity },
   { label: 'Audit Trail', href: '/admin/audit', icon: History },
 ];
 
@@ -71,18 +71,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
-      <aside className="w-full md:w-64 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-gold)] text-[var(--color-navy)] flex items-center justify-center font-bold">
+    <div className="min-h-screen bg-[var(--brand-deep)] text-[var(--neutral-100)] flex flex-col md:flex-row font-sans">
+      {/* Sidebar Navigation (§12.10) */}
+      <aside className="w-full md:w-64 bg-[var(--brand-deep)] border-r border-[var(--brand-slate)] flex flex-col shrink-0">
+        <div className="p-5 border-b border-[var(--brand-slate)] flex items-center justify-between">
+          <Link href="/admin" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-400/40 text-sky-400 flex items-center justify-center font-bold shadow-[0_0_12px_rgba(14,165,233,0.25)]">
               <Trophy className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-serif font-bold text-base text-white tracking-tight">
-                IG<span className="text-[var(--color-gold)]">shorts</span>
+              <span className="font-display font-bold text-base text-white tracking-tight">
+                IG<span className="text-sky-400">shorts</span>
               </span>
-              <span className="block text-[10px] font-mono uppercase tracking-wider text-slate-400">
+              <span className="block text-[10px] font-mono uppercase tracking-wider text-[var(--neutral-400)]">
                 Admin Console
               </span>
             </div>
@@ -99,30 +100,30 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-[var(--color-navy)] text-white border border-[var(--color-navy-2)] shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    ? 'bg-[var(--brand-slate)] text-sky-400 border border-sky-400/30 border-l-4 border-l-sky-400 shadow-sm'
+                    : 'text-[var(--neutral-400)] hover:text-white hover:bg-[var(--brand-slate)]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-4 h-4 ${isActive ? 'text-[var(--color-gold)]' : 'text-slate-400'}`}
+                    className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-[var(--neutral-400)]'}`}
                   />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-[var(--color-gold)]" />}
+                {isActive && <ChevronRight className="w-3.5 h-3.5 text-sky-400" />}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800 space-y-3">
-          <div className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        <div className="p-4 border-t border-[var(--brand-slate)] space-y-3">
+          <div className="px-3.5 py-2.5 rounded-xl bg-[var(--brand-slate)]/60 border border-[var(--neutral-700)]/40 text-xs">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--neutral-400)]">
               Authenticated Operator
             </span>
-            <span className="font-mono text-slate-300 truncate block text-[11px] mt-0.5">
+            <span className="font-mono text-white truncate block text-[11px] mt-0.5 font-medium">
               {adminEmail || 'Signed in'}
             </span>
           </div>
@@ -131,10 +132,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-[var(--neutral-400)] hover:text-white transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span>Public Site</span>
+              <span>Public Dashboard</span>
             </Link>
 
             <button
@@ -148,15 +149,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 bg-canvas">
-        <header className="h-14 bg-slate-950 border-b border-slate-800 px-6 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="font-mono text-slate-400">API: {environmentLabel()}</span>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#070B14]">
+        <header className="h-14 bg-[var(--brand-deep)] border-b border-[var(--brand-slate)] px-6 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-[var(--status-up)] animate-pulse" />
+            <span className="font-mono text-[var(--neutral-400)] text-[11px]">
+              API: {environmentLabel()}
+            </span>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950 border border-emerald-800 text-emerald-400 font-mono text-[11px]">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Admin session</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-mono text-[11px]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[var(--status-up)]" />
+            <span>Operator Mode Active</span>
           </div>
         </header>
 

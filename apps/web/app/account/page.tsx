@@ -11,14 +11,14 @@ export const metadata: Metadata = {
 
 export default function AccountShellPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--color-canvas)]">
+    <div className="flex flex-col min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)]">
       <PublicHeader />
       <main id="main-content" className="flex-1 max-w-xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-serif font-bold mb-3">Public accounts</h1>
-        <p className="text-sm text-slate-600 mb-6">
+        <h1 className="chart-title text-4xl sm:text-5xl mb-3">Accounts</h1>
+        <p className="text-sm text-[var(--ink-muted)] mb-6">
           Sign-in for the public site is a later feature. Charts stay readable without an account.
         </p>
-        <Link href="/" className="text-sm font-bold text-[var(--color-navy)] hover:underline">
+        <Link href="/" className="text-sm font-bold uppercase tracking-[0.16em] underline underline-offset-4">
           Back home
         </Link>
       </main>

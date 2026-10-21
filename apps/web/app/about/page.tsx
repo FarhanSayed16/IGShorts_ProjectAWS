@@ -1,88 +1,56 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Trophy, ShieldCheck, Globe, ArrowRight, Zap, Target } from 'lucide-react';
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 
 export const metadata: Metadata = {
-  title: 'About IGshorts — The Discovery Platform for Instagram',
+  title: 'About',
   description:
-    'Learn about IGshorts, our mission to bring Billboard-style transparency and discovery to Instagram creator rankings.',
+    'IGshorts is a public chart of famous Instagram people, ranked by follower count on a tracked watchlist.',
 };
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-canvas text-ink">
+    <div className="flex flex-col min-h-screen bg-[var(--canvas)] text-[var(--ink)]">
       <PublicHeader />
 
-      <main id="main-content" className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-12">
-        <div className="mb-10 pb-8 border-b border-slate-200">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gold/15 text-gold mb-3">
-            <Trophy className="w-3.5 h-3.5 text-gold" />
-            About IGshorts
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 tracking-tight">
-            Billboard × CoinMarketCap for Instagram
-          </h1>
-          <p className="text-base sm:text-lg text-slate-600 mt-3 leading-relaxed">
-            IGshorts was created to solve a simple problem: the lack of a transparent, credible, and
-            public discovery leaderboard for Instagram personalities.
-          </p>
-        </div>
+      <main id="main-content" className="flex-1 max-w-[720px] mx-auto w-full px-4 sm:px-6 py-12">
+        <h1 className="chart-title text-5xl sm:text-7xl mb-6">About</h1>
+        <p className="text-lg text-[var(--ink-muted)] leading-relaxed mb-10">
+          Billboard tells you who leads music. This site tells you who leads Instagram — on a
+          curated watchlist, ranked only by public follower count.
+        </p>
 
-        <div className="space-y-8 text-sm text-slate-700 leading-relaxed">
-          <section className="space-y-3">
-            <h2 className="text-xl font-serif font-bold text-slate-900">Our Mission</h2>
-            <p>
-              In the music industry, Billboard defines who dominates the charts. In crypto,
-              CoinMarketCap provides clear price and volume rankings. But for social media’s biggest
-              stage—Instagram—discovery has been fragmented across spammy scraper sites, dubious
-              marketing blogs, and closed advertising tools.
-            </p>
-            <p>
-              IGshorts delivers public discovery tables with clean aesthetic polish, verifiable
-              numbers, and historical tracking.
+        <div className="space-y-8 text-sm leading-relaxed text-[var(--ink)]">
+          <section>
+            <h2 className="chart-title text-2xl mb-3">What it is</h2>
+            <p className="text-[var(--ink-muted)]">
+              IGshorts is an independent editorial chart. Not Meta. Not a scraper of private data.
+              People only on the default boards — brands and clubs stay off.
             </p>
           </section>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
-            <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
-              <ShieldCheck className="w-6 h-6 text-emerald-600 mb-2" />
-              <h3 className="font-bold text-slate-900 mb-1">Zero Scraping Spam</h3>
-              <p className="text-xs text-slate-600">
-                We monitor a verified universe with non-invasive API observation, never illegal
-                firehose scrapers.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
-              <Target className="w-6 h-6 text-gold mb-2" />
-              <h3 className="font-bold text-slate-900 mb-1">Human Figures First</h3>
-              <p className="text-xs text-slate-600">
-                Brands and sports franchises are tracked separately, keeping creator rankings pure.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
-              <Zap className="w-6 h-6 text-blue-600 mb-2" />
-              <h3 className="font-bold text-slate-900 mb-1">Auditable Ranks</h3>
-              <p className="text-xs text-slate-600">
-                Every follower count maps to an immutable snapshot and a direct link to Instagram.
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-6">
-            <Link
-              href="/methodology"
-              className="inline-flex items-center gap-2 font-semibold text-navy hover:text-gold transition-colors"
-            >
-              <span>Read our complete ranking methodology</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <section>
+            <h2 className="chart-title text-2xl mb-3">How we rank</h2>
+            <p className="text-[var(--ink-muted)]">
+              Competition rank by verified public followers. Missing counts stay blank, never zero.
+              Ties share a rank (1, 2, 2, 4).
+            </p>
+          </section>
+          <section>
+            <h2 className="chart-title text-2xl mb-3">Portraits</h2>
+            <p className="text-[var(--ink-muted)]">
+              Photos come from Wikipedia / Wikimedia Commons until live Instagram media is allowed
+              through Meta App Review.
+            </p>
+          </section>
         </div>
+
+        <p className="mt-12">
+          <Link href="/methodology" className="text-sm font-bold uppercase tracking-[0.16em] underline underline-offset-4">
+            Read the methodology
+          </Link>
+        </p>
       </main>
 
       <PublicFooter />
