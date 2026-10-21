@@ -1,0 +1,58 @@
+{
+  "brand": {
+    "name": "IGshorts",
+    "tagline": "Public Instagram people charts",
+    "mission": "Public charts of famous Instagram people on our tracked watchlist, ranked by public follower count. Not all of Instagram. Not impressions."
+  },
+  "nav": {
+    "home": "Home",
+    "charts": "Charts",
+    "global": "Global Top Persons",
+    "india": "India Top Persons",
+    "movers": "Movers",
+    "profiles": "Profiles",
+    "methodology": "Methodology",
+    "about": "About",
+    "faq": "FAQ"
+  },
+  "disclaimer": {
+    "editorial": "IGshorts tracks a curated universe of public accounts, not the entire Instagram graph. Follower counts reflect point-in-time public snapshots. We never scrape private data or guess missing metrics."
+  },
+  "methodology": {
+    "title": "Editorial & Ranking Methodology",
+    "subtitle": "How IGshorts gathers public data, enforces competition ranking, and maintains absolute transparency.",
+    "points": {
+      "watchlist": "Tracked Watchlist: We monitor a defined, verified universe of high-impact public personalities across Global and Indian categories rather than attempting to scrape the full Instagram graph.",
+      "persons_only": "Persons-Only Leaderboards: Corporate brands, sports franchises, and platform accounts are isolated from the main charts to keep individual creator rankings pure and comparable.",
+      "metric_precision": "Verified Followers: Rankings are calculated exclusively on public follower counts. We never use opaque engagement scores or impressions.",
+      "null_handling": "Honest Null Handling: Accounts with missing follower numbers are marked unranked and excluded from competition ranks. We never coerce null values into zero.",
+      "competition_rank": "Standard Competition Ranking: Tied metrics receive identical ranks (e.g. 1, 2, 2, 4), with secondary sorting by alphabetical handle for visual clarity.",
+      "cadence": "Systematic Observation Cadence: Metrics are appended non-destructively to produce verifiable rank deltas (↑, ↓, –) between sequential observation runs."
+    }
+  },
+  "states": {
+    "unranked": "Listed, not yet ranked",
+    "unranked_explanation": "This profile is part of our tracked universe, but does not yet have a verified follower snapshot from the latest ranking run. Missing metrics remain null and are never guessed as zero.",
+    "baseline_history": "Baseline snapshot recorded. Trendline history will display following subsequent observation runs.",
+    "empty_movers": "Baseline snapshot active. Rank movers require at least two sequential observation runs to compute verified deltas.",
+    "error_banner": "Unable to connect to the IGshorts API. No placeholder ranks are shown."
+  },
+  "comingSoon": {
+    "badge": "Roadmap v2 planned feature",
+    "back": "Return to leaderboards"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about our tracked universe, metrics, and ranking standards.",
+    "official_q": "Is this official Instagram?",
+    "official_a": "No. IGshorts is an independent editorial dashboard. We are not affiliated with Meta or Instagram.",
+    "impressions_q": "Why don’t you rank by impressions or engagement?",
+    "impressions_a": "v1 ranks only on public follower count. Impressions and similar metrics are not public for these accounts and are not used."
+  },
+  "charts": {
+    "global_title": "Global Top Instagram Personalities",
+    "global_subtitle": "Public ranking of the world’s most followed people on our tracked watchlist.",
+    "india_title": "India Top Instagram Personalities",
+    "india_subtitle": "Public ranking of India’s most followed people on our tracked watchlist."
+  }
+}
