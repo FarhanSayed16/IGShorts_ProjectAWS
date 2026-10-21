@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service.js';
 
-const WIKI_UA = 'IGshorts/0.1 (public-figures watchlist; wikipedia portraits; not Instagram scraping)';
+const WIKI_UA =
+  'IGshorts/0.1 (public-figures watchlist; wikipedia portraits; not Instagram scraping)';
 const DELAY_MS = 180;
 
 interface WikiSearchResult {
@@ -74,7 +75,11 @@ export class WikipediaEnrichmentService {
         continue;
       }
       try {
-        const hit = await this.lookupPerson(profile.displayName, profile.category, profile.igUsername);
+        const hit = await this.lookupPerson(
+          profile.displayName,
+          profile.category,
+          profile.igUsername,
+        );
         await this.sleep(DELAY_MS);
         if (!hit) {
           report.skipped += 1;
@@ -137,8 +142,10 @@ export class WikipediaEnrichmentService {
 
   private fromSummary(summary: WikiSummary): { image: string | null; extract: string | null } {
     const raw = summary.thumbnail?.source || summary.originalimage?.source || null;
+    const clean = raw ? raw.split('?')[0] : null;
+    const image = clean;
     return {
-      image: raw ? raw.split('?')[0] : null,
+      image,
       extract: summary.extract?.trim() || null,
     };
   }

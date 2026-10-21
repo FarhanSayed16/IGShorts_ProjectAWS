@@ -1,5 +1,17 @@
 # IGshorts — Complete UI/UX Redesign Specification
 
+> **v2 (Oct 2026) — Billboard chart system, now the source of truth.**
+>
+> v1 (“Observatory”: navy + gold/cyan, SaaS landing, circular avatars, inverted-neutral dark mode) looked AI-generated and fought the product. The live UI now follows **Billboard Hot 100**, not a dashboard template.
+>
+> **Look:** light gray canvas, white header, black chart subnav, condensed Oswald titles (`GLOBAL 100`), square portraits, mint `#00D26A` only on #1, black/white everywhere else.
+> **Home is the chart**, not a marketing hero with three CTAs.
+> **Dark mode** overrides semantic tokens (`--canvas`, `--ink`, `--surface`) instead of flipping the entire gray scale.
+> **Portraits** are square, face-cropped, Wikimedia thumbs upscaled to 640–800px.
+> **Default theme is light.** Caching: `force-dynamic` + `cache: 'no-store'` on chart/profile fetches.
+
+---
+
 > **Document Version:** 1.0  
 > **Date:** October 2026  
 > **Author:** Senior UI/UX Design Analysis  
@@ -36,12 +48,12 @@ IGshorts is a **public, editorial-grade Instagram personality ranking dashboard*
 
 ### Target Users
 
-| Audience | Goals | Design Implications |
-|---|---|---|
-| **Casual visitors** | Browse who leads Instagram, share rankings | Fast visual hierarchy, scannable tables, mobile-first |
-| **Journalists & media** | Cite rank data, embed charts | Clean typography, print-friendly data, SEO metadata |
-| **Stakeholders / investors** | Evaluate platform credibility | Trust signals, professional polish, transparent methodology |
-| **Admin operators** | Import seed data, trigger pipelines | Dense operational dashboard, clear status indicators |
+| Audience                     | Goals                                      | Design Implications                                         |
+| ---------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| **Casual visitors**          | Browse who leads Instagram, share rankings | Fast visual hierarchy, scannable tables, mobile-first       |
+| **Journalists & media**      | Cite rank data, embed charts               | Clean typography, print-friendly data, SEO metadata         |
+| **Stakeholders / investors** | Evaluate platform credibility              | Trust signals, professional polish, transparent methodology |
+| **Admin operators**          | Import seed data, trigger pipelines        | Dense operational dashboard, clear status indicators        |
 
 ### Why Redesign?
 
@@ -59,42 +71,52 @@ The current implementation is **functional and well-structured** but suffers fro
 ## 2. Current State Audit & Pain Points
 
 ### Header (`PublicHeader`)
+
 - ✅ Good: Sticky, logo with trophy icon, active state underline
 - ❌ Issues: Gold badge text too small to read; mobile menu has no transition animation; search icon leads to `/profiles` with no search modal/palette UX
 
 ### Hero Section (Home)
+
 - ✅ Good: Clear headline, 3 CTA buttons, category badge
 - ❌ Issues: Navy hero bleeds into navy header making them visually identical; buttons lack visual hierarchy (all same size); no dynamic element (particle, gradient, or animated counter) to create engagement
 
 ### Podium Cards
+
 - ✅ Good: Crown/Medal badges, rank numbering, gold wash for #1
 - ❌ Issues: Cards are the same height regardless of rank; #1 card `sm:-translate-y-2` is too subtle; no avatar border glow or rank-specific styling beyond background wash
 
 ### Rank Tables
+
 - ✅ Good: Sticky columns, wash rows for top 3, hover states
 - ❌ Issues: Row density is tight on mobile; category badges are plain grey pills; sparkline is a simple 2-color bar with no shape/curve; external link icon is low contrast
 
 ### Chart View (Global/India)
+
 - ✅ Good: Scope switcher tabs, search + category filters, pagination
 - ❌ Issues: Metrics badge (Ranked People / Algorithm) looks disconnected; filter chips are visually identical to the scope switcher creating confusion; no loading shimmer beyond skeleton rectangles
 
 ### Profile Detail (`/profiles/[username]`)
+
 - ✅ Good: Back navigation, nearby ranks, history table
 - ❌ Issues: 3-column stat cards are plain; `HistoryChart` is just a placeholder; no hero/banner treatment for the profile; "View on Instagram" button is small and buried
 
 ### Movers Page
+
 - ✅ Good: Gainers/Decliners split, scope selector
 - ❌ Issues: Baseline snapshot empty state is repetitive; no visual distinction between climbers and decliners beyond icon color
 
 ### Methodology Page
+
 - ✅ Good: Numbered sections with icons, good editorial structure
 - ❌ Issues: Long-form text with no visual breaks or callout boxes; icons are tiny and don't create enough visual anchoring
 
 ### Footer
+
 - ✅ Good: 4-column grid, disclaimer copy
 - ❌ Issues: Very dark navy-on-navy; footer links lack hover underlines; bottom bar is text-only with no visual separation
 
 ### Admin Dashboard
+
 - ✅ Good: Dark theme, stat cards, action triggers
 - ❌ Issues: Cards are all `bg-slate-950` creating a wall of darkness; no visual differentiation for health/warning states; quick links look identical
 
@@ -108,13 +130,13 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 
 ### Design Principles
 
-| Principle | Application |
-|---|---|
-| **Clarity over decoration** | Every visual element must serve data comprehension; no decorative noise |
-| **Contextual colour** | Colour communicates meaning (rank tiers, movement direction, data freshness) not brand alone |
-| **Rhythmic density** | Tables and grids should breathe with purposeful whitespace, alternating micro-patterns |
-| **Progressive disclosure** | Hero → Podium → Tables → Details: each scroll reveals deeper data layers |
-| **Kinetic confidence** | Subtle motion (number counters, rank transitions, hover reveals) signals living data |
+| Principle                   | Application                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| **Clarity over decoration** | Every visual element must serve data comprehension; no decorative noise                      |
+| **Contextual colour**       | Colour communicates meaning (rank tiers, movement direction, data freshness) not brand alone |
+| **Rhythmic density**        | Tables and grids should breathe with purposeful whitespace, alternating micro-patterns       |
+| **Progressive disclosure**  | Hero → Podium → Tables → Details: each scroll reveals deeper data layers                     |
+| **Kinetic confidence**      | Subtle motion (number counters, rank transitions, hover reveals) signals living data         |
 
 ---
 
@@ -122,71 +144,65 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 
 ### 4.1 Primary Brand Colours
 
-| Token | Name | Hex | HSL | Usage |
-|---|---|---|---|---|
-| `--brand-deep` | Obsidian | `#0A0F1A` | 225° 38% 7% | Darkest backgrounds, header/footer |
-| `--brand-navy` | Midnight Navy | `#0D1B2A` | 213° 53% 11% | Primary dark surface |
-| `--brand-slate` | Charcoal Slate | `#1B2838` | 210° 35% 16% | Secondary dark surface, cards in dark mode |
-| `--brand-accent` | Amber Gold | `#D4A843` | 42° 60% 55% | Primary accent, CTA buttons, active states, rank #1 |
-| `--brand-accent-light` | Champagne | `#F0DCA0` | 42° 72% 78% | Accent hover, gold washes, badge backgrounds |
-| `--brand-accent-glow` | Gold Glow | `rgba(212, 168, 67, 0.15)` | — | Subtle glow/halo around gold elements |
+| Token                  | Name           | Hex                        | HSL          | Usage                                               |
+| ---------------------- | -------------- | -------------------------- | ------------ | --------------------------------------------------- |
+| `--brand-deep`         | Obsidian       | `#0A0F1A`                  | 225° 38% 7%  | Darkest backgrounds, header/footer                  |
+| `--brand-navy`         | Midnight Navy  | `#0D1B2A`                  | 213° 53% 11% | Primary dark surface                                |
+| `--brand-slate`        | Charcoal Slate | `#1B2838`                  | 210° 35% 16% | Secondary dark surface, cards in dark mode          |
+| `--brand-accent`       | Amber Gold     | `#D4A843`                  | 42° 60% 55%  | Primary accent, CTA buttons, active states, rank #1 |
+| `--brand-accent-light` | Champagne      | `#F0DCA0`                  | 42° 72% 78%  | Accent hover, gold washes, badge backgrounds        |
+| `--brand-accent-glow`  | Gold Glow      | `rgba(212, 168, 67, 0.15)` | —            | Subtle glow/halo around gold elements               |
 
 ### 4.2 Neutral Scale (Light Mode)
 
-| Token | Name | Hex | Usage |
-|---|---|---|---|
-| `--neutral-0` | Pure White | `#FFFFFF` | Card surfaces, table backgrounds |
-| `--neutral-50` | Snow | `#F8FAFC` | Page canvas, alternating table rows |
-| `--neutral-100` | Mist | `#F1F5F9` | Input backgrounds, muted surfaces |
-| `--neutral-200` | Silver | `#E2E8F0` | Borders, dividers |
-| `--neutral-300` | Pewter | `#CBD5E1` | Disabled states, secondary borders |
-| `--neutral-400` | Stone | `#94A3B8` | Placeholder text, muted icons |
-| `--neutral-500` | Graphite | `#64748B` | Secondary text, labels |
-| `--neutral-600` | Carbon | `#475569` | Body text, descriptions |
-| `--neutral-700` | Slate Dark | `#334155` | Strong secondary text |
-| `--neutral-800` | Onyx | `#1E293B` | Primary headings, table header text |
-| `--neutral-900` | Near Black | `#0F172A` | Maximum contrast text |
+| Token           | Name       | Hex       | Usage                               |
+| --------------- | ---------- | --------- | ----------------------------------- |
+| `--neutral-0`   | Pure White | `#FFFFFF` | Card surfaces, table backgrounds    |
+| `--neutral-50`  | Snow       | `#F8FAFC` | Page canvas, alternating table rows |
+| `--neutral-100` | Mist       | `#F1F5F9` | Input backgrounds, muted surfaces   |
+| `--neutral-200` | Silver     | `#E2E8F0` | Borders, dividers                   |
+| `--neutral-300` | Pewter     | `#CBD5E1` | Disabled states, secondary borders  |
+| `--neutral-400` | Stone      | `#94A3B8` | Placeholder text, muted icons       |
+| `--neutral-500` | Graphite   | `#64748B` | Secondary text, labels              |
+| `--neutral-600` | Carbon     | `#475569` | Body text, descriptions             |
+| `--neutral-700` | Slate Dark | `#334155` | Strong secondary text               |
+| `--neutral-800` | Onyx       | `#1E293B` | Primary headings, table header text |
+| `--neutral-900` | Near Black | `#0F172A` | Maximum contrast text               |
 
 ### 4.3 Semantic Status Colours
 
-| Token | Name | Hex | Pair (Background) | Usage |
-|---|---|---|---|---|
-| `--status-up` | Emerald Rise | `#10B981` | `#ECFDF5` | Rank climb, positive delta, green sparkline |
-| `--status-up-vivid` | Bright Green | `#059669` | — | Strong positive emphasis |
-| `--status-down` | Coral Drop | `#EF4444` | `#FEF2F2` | Rank decline, negative delta |
-| `--status-down-vivid` | Deep Red | `#DC2626` | — | Strong negative emphasis |
-| `--status-flat` | Neutral Grey | `#94A3B8` | `#F8FAFC` | No change delta (— —) |
-| `--status-stale` | Warning Amber | `#F59E0B` | `#FFFBEB` | Stale data indicator |
-| `--status-info` | Azure | `#3B82F6` | `#EFF6FF` | Informational notices |
-| `--status-danger` | Crimson | `#B91C1C` | `#FEF2F2` | Error states, API failures |
+| Token                 | Name          | Hex       | Pair (Background) | Usage                                       |
+| --------------------- | ------------- | --------- | ----------------- | ------------------------------------------- |
+| `--status-up`         | Emerald Rise  | `#10B981` | `#ECFDF5`         | Rank climb, positive delta, green sparkline |
+| `--status-up-vivid`   | Bright Green  | `#059669` | —                 | Strong positive emphasis                    |
+| `--status-down`       | Coral Drop    | `#EF4444` | `#FEF2F2`         | Rank decline, negative delta                |
+| `--status-down-vivid` | Deep Red      | `#DC2626` | —                 | Strong negative emphasis                    |
+| `--status-flat`       | Neutral Grey  | `#94A3B8` | `#F8FAFC`         | No change delta (— —)                       |
+| `--status-stale`      | Warning Amber | `#F59E0B` | `#FFFBEB`         | Stale data indicator                        |
+| `--status-info`       | Azure         | `#3B82F6` | `#EFF6FF`         | Informational notices                       |
+| `--status-danger`     | Crimson       | `#B91C1C` | `#FEF2F2`         | Error states, API failures                  |
 
 ### 4.4 Rank-Specific Colours
 
-| Token | Name | Hex | Usage |
-|---|---|---|---|
-| `--rank-1-fill` | Gold Crown | `#D4A843` | #1 podium background, rank number |
-| `--rank-1-wash` | Gold Mist | `#FDF6E3` | #1 row highlight wash |
-| `--rank-2-fill` | Platinum Silver | `#A8B8C8` | #2 medal, rank number |
-| `--rank-2-wash` | Silver Mist | `#F0F4F8` | #2 row highlight wash |
-| `--rank-3-fill` | Bronze | `#CD7F32` | #3 medal, rank number |
-| `--rank-3-wash` | Bronze Mist | `#FDF5EB` | #3 row highlight wash |
-| `--rank-top10` | Deep Blue | `#1E40AF` | Rank #4–#10 accent dot |
-| `--rank-default` | Slate | `#64748B` | Rank #11+ number colour |
+| Token            | Name            | Hex       | Usage                             |
+| ---------------- | --------------- | --------- | --------------------------------- |
+| `--rank-1-fill`  | Gold Crown      | `#D4A843` | #1 podium background, rank number |
+| `--rank-1-wash`  | Gold Mist       | `#FDF6E3` | #1 row highlight wash             |
+| `--rank-2-fill`  | Platinum Silver | `#A8B8C8` | #2 medal, rank number             |
+| `--rank-2-wash`  | Silver Mist     | `#F0F4F8` | #2 row highlight wash             |
+| `--rank-3-fill`  | Bronze          | `#CD7F32` | #3 medal, rank number             |
+| `--rank-3-wash`  | Bronze Mist     | `#FDF5EB` | #3 row highlight wash             |
+| `--rank-top10`   | Deep Blue       | `#1E40AF` | Rank #4–#10 accent dot            |
+| `--rank-default` | Slate           | `#64748B` | Rank #11+ number colour           |
 
 ### 4.5 Gradient Definitions
 
 ```css
 /* Hero section gradient — dramatic top-to-bottom with glow */
---gradient-hero: linear-gradient(
-  175deg,
-  #0A0F1A 0%,
-  #0D1B2A 40%,
-  #1B2838 70%,
-  #0D1B2A 100%
-);
+--gradient-hero: linear-gradient(175deg, #0a0f1a 0%, #0d1b2a 40%, #1b2838 70%, #0d1b2a 100%);
 
 /* Gold accent gradient — CTA buttons, active tabs */
---gradient-gold: linear-gradient(135deg, #D4A843 0%, #E8C867 50%, #D4A843 100%);
+--gradient-gold: linear-gradient(135deg, #d4a843 0%, #e8c867 50%, #d4a843 100%);
 
 /* Card hover glow — subtle directional light */
 --gradient-card-hover: linear-gradient(
@@ -196,15 +212,10 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 );
 
 /* Rank #1 podium card — warm celebration */
---gradient-podium-gold: linear-gradient(
-  180deg,
-  #FDF6E3 0%,
-  #FBF0D1 50%,
-  #FFFFFF 100%
-);
+--gradient-podium-gold: linear-gradient(180deg, #fdf6e3 0%, #fbf0d1 50%, #ffffff 100%);
 
 /* Status ribbon subtle gradient */
---gradient-ribbon: linear-gradient(90deg, #0D1B2A 0%, #1B2838 100%);
+--gradient-ribbon: linear-gradient(90deg, #0d1b2a 0%, #1b2838 100%);
 ```
 
 ---
@@ -213,32 +224,32 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 
 ### 5.1 Font Stack
 
-| Role | Font | Weights | Fallback Stack |
-|---|---|---|---|
-| **Display** (headlines) | **Outfit** | 600, 700, 800 | `system-ui, -apple-system, sans-serif` |
-| **Body** (reading) | **Inter** | 400, 500, 600, 700 | `system-ui, -apple-system, sans-serif` |
+| Role                     | Font               | Weights            | Fallback Stack                            |
+| ------------------------ | ------------------ | ------------------ | ----------------------------------------- |
+| **Display** (headlines)  | **Outfit**         | 600, 700, 800      | `system-ui, -apple-system, sans-serif`    |
+| **Body** (reading)       | **Inter**          | 400, 500, 600, 700 | `system-ui, -apple-system, sans-serif`    |
 | **Data** (numbers, code) | **JetBrains Mono** | 400, 500, 600, 700 | `ui-monospace, SFMono-Regular, monospace` |
 
 > **Rationale:** Replacing Playfair Display with **Outfit** — a geometric sans-serif with personality. Playfair's high-contrast serifs work well for editorial print but feel heavy on data-dense dashboards. Outfit provides authority and modern elegance while being more legible at small sizes and in tables.
 
 ### 5.2 Type Scale
 
-| Token | Size | Weight | Line Height | Letter Spacing | Usage |
-|---|---|---|---|---|---|
-| `--text-hero` | 56px / 3.5rem | 800 | 1.08 | -0.03em | Home hero headline only |
-| `--text-h1` | 40px / 2.5rem | 700 | 1.15 | -0.025em | Page titles (Global Top...) |
-| `--text-h2` | 28px / 1.75rem | 700 | 1.2 | -0.02em | Section headings |
-| `--text-h3` | 22px / 1.375rem | 600 | 1.3 | -0.015em | Card titles, subsection heads |
-| `--text-h4` | 18px / 1.125rem | 600 | 1.35 | -0.01em | Table group headers |
-| `--text-body` | 15px / 0.9375rem | 400 | 1.6 | 0 | Paragraphs, descriptions |
-| `--text-body-sm` | 13px / 0.8125rem | 400 | 1.5 | 0 | Secondary descriptions |
-| `--text-caption` | 12px / 0.75rem | 500 | 1.4 | 0.01em | Timestamps, helper text |
-| `--text-label` | 11px / 0.6875rem | 700 | 1.3 | 0.06em | UPPERCASE labels, badges |
-| `--text-data-xl` | 36px / 2.25rem | 700 | 1.1 | -0.01em | Hero stat counters |
-| `--text-data-lg` | 24px / 1.5rem | 700 | 1.15 | 0 | Card stat values |
-| `--text-data-md` | 16px / 1rem | 600 | 1.2 | 0 | Table follower counts |
-| `--text-data-sm` | 13px / 0.8125rem | 600 | 1.3 | 0 | Inline metrics, deltas |
-| `--text-rank` | 16px / 1rem | 700 | 1 | -0.02em | Rank numbers in tables |
+| Token            | Size             | Weight | Line Height | Letter Spacing | Usage                         |
+| ---------------- | ---------------- | ------ | ----------- | -------------- | ----------------------------- |
+| `--text-hero`    | 56px / 3.5rem    | 800    | 1.08        | -0.03em        | Home hero headline only       |
+| `--text-h1`      | 40px / 2.5rem    | 700    | 1.15        | -0.025em       | Page titles (Global Top...)   |
+| `--text-h2`      | 28px / 1.75rem   | 700    | 1.2         | -0.02em        | Section headings              |
+| `--text-h3`      | 22px / 1.375rem  | 600    | 1.3         | -0.015em       | Card titles, subsection heads |
+| `--text-h4`      | 18px / 1.125rem  | 600    | 1.35        | -0.01em        | Table group headers           |
+| `--text-body`    | 15px / 0.9375rem | 400    | 1.6         | 0              | Paragraphs, descriptions      |
+| `--text-body-sm` | 13px / 0.8125rem | 400    | 1.5         | 0              | Secondary descriptions        |
+| `--text-caption` | 12px / 0.75rem   | 500    | 1.4         | 0.01em         | Timestamps, helper text       |
+| `--text-label`   | 11px / 0.6875rem | 700    | 1.3         | 0.06em         | UPPERCASE labels, badges      |
+| `--text-data-xl` | 36px / 2.25rem   | 700    | 1.1         | -0.01em        | Hero stat counters            |
+| `--text-data-lg` | 24px / 1.5rem    | 700    | 1.15        | 0              | Card stat values              |
+| `--text-data-md` | 16px / 1rem      | 600    | 1.2         | 0              | Table follower counts         |
+| `--text-data-sm` | 13px / 0.8125rem | 600    | 1.3         | 0              | Inline metrics, deltas        |
+| `--text-rank`    | 16px / 1rem      | 700    | 1           | -0.02em        | Rank numbers in tables        |
 
 ### 5.3 Font Feature Settings
 
@@ -246,7 +257,9 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 /* Tabular lining figures for all numeric displays */
 .data-text {
   font-variant-numeric: tabular-nums lining-nums;
-  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-feature-settings:
+    'tnum' 1,
+    'lnum' 1;
 }
 
 /* Stylistic alternates for Outfit headings */
@@ -261,29 +274,29 @@ IGshorts is a **digital observatory** — a place where you look through a refin
 
 ### 6.1 Spacing Scale (4px base)
 
-| Token | Value | Usage |
-|---|---|---|
-| `--space-0` | 0px | — |
-| `--space-1` | 4px | Tight inner padding, icon gaps |
-| `--space-2` | 8px | Chip padding, small gaps |
-| `--space-3` | 12px | Input padding, list item gaps |
-| `--space-4` | 16px | Card inner padding (compact) |
-| `--space-5` | 20px | Standard card padding |
-| `--space-6` | 24px | Section gaps, card padding (comfortable) |
-| `--space-8` | 32px | Large section separation |
-| `--space-10` | 40px | Page section vertical spacing |
-| `--space-12` | 48px | Hero padding, footer padding |
-| `--space-16` | 64px | Hero vertical rhythm |
-| `--space-20` | 80px | Major section breathing room |
+| Token        | Value | Usage                                    |
+| ------------ | ----- | ---------------------------------------- |
+| `--space-0`  | 0px   | —                                        |
+| `--space-1`  | 4px   | Tight inner padding, icon gaps           |
+| `--space-2`  | 8px   | Chip padding, small gaps                 |
+| `--space-3`  | 12px  | Input padding, list item gaps            |
+| `--space-4`  | 16px  | Card inner padding (compact)             |
+| `--space-5`  | 20px  | Standard card padding                    |
+| `--space-6`  | 24px  | Section gaps, card padding (comfortable) |
+| `--space-8`  | 32px  | Large section separation                 |
+| `--space-10` | 40px  | Page section vertical spacing            |
+| `--space-12` | 48px  | Hero padding, footer padding             |
+| `--space-16` | 64px  | Hero vertical rhythm                     |
+| `--space-20` | 80px  | Major section breathing room             |
 
 ### 6.2 Layout Containers
 
-| Container | Max Width | Padding | Usage |
-|---|---|---|---|
-| `container-narrow` | 720px | 16–24px | Methodology, About, legal pages |
-| `container-default` | 1120px | 16–24px | Chart tables, profiles grid |
-| `container-wide` | 1280px | 16–24px | Home page, admin dashboard |
-| `container-full` | 100% | 0 | Hero sections, footer |
+| Container           | Max Width | Padding | Usage                           |
+| ------------------- | --------- | ------- | ------------------------------- |
+| `container-narrow`  | 720px     | 16–24px | Methodology, About, legal pages |
+| `container-default` | 1120px    | 16–24px | Chart tables, profiles grid     |
+| `container-wide`    | 1280px    | 16–24px | Home page, admin dashboard      |
+| `container-full`    | 100%      | 0       | Hero sections, footer           |
 
 ### 6.3 Grid System
 
@@ -318,44 +331,45 @@ Admin dashboard:
 
 ### Shadow Scale
 
-| Token | Value | Usage |
-|---|---|---|
-| `--shadow-xs` | `0 1px 2px rgba(0, 0, 0, 0.04)` | Subtle depth for inputs, chips |
-| `--shadow-sm` | `0 2px 8px rgba(0, 0, 0, 0.06)` | Default card shadow |
-| `--shadow-md` | `0 4px 16px rgba(0, 0, 0, 0.08)` | Hovered cards, dropdowns |
-| `--shadow-lg` | `0 8px 32px rgba(0, 0, 0, 0.10)` | Modals, elevated cards |
-| `--shadow-xl` | `0 16px 48px rgba(0, 0, 0, 0.14)` | Floating podium card (#1) |
-| `--shadow-gold` | `0 4px 20px rgba(212, 168, 67, 0.2)` | Gold CTA button glow |
-| `--shadow-inner` | `inset 0 1px 2px rgba(0, 0, 0, 0.06)` | Input fields, search bars |
+| Token            | Value                                 | Usage                          |
+| ---------------- | ------------------------------------- | ------------------------------ |
+| `--shadow-xs`    | `0 1px 2px rgba(0, 0, 0, 0.04)`       | Subtle depth for inputs, chips |
+| `--shadow-sm`    | `0 2px 8px rgba(0, 0, 0, 0.06)`       | Default card shadow            |
+| `--shadow-md`    | `0 4px 16px rgba(0, 0, 0, 0.08)`      | Hovered cards, dropdowns       |
+| `--shadow-lg`    | `0 8px 32px rgba(0, 0, 0, 0.10)`      | Modals, elevated cards         |
+| `--shadow-xl`    | `0 16px 48px rgba(0, 0, 0, 0.14)`     | Floating podium card (#1)      |
+| `--shadow-gold`  | `0 4px 20px rgba(212, 168, 67, 0.2)`  | Gold CTA button glow           |
+| `--shadow-inner` | `inset 0 1px 2px rgba(0, 0, 0, 0.06)` | Input fields, search bars      |
 
 ### Depth Layers (z-index)
 
-| Layer | z-index | Elements |
-|---|---|---|
-| Base | 0 | Page content |
-| Card | 1 | Cards, tables |
-| Sticky | 10 | Sticky table columns/headers |
-| Ribbon | 20 | Status ribbon |
-| Header | 40 | Navigation header |
-| Overlay | 50 | Mobile menu backdrop |
-| Modal | 60 | Command palette, dialogs |
-| Toast | 70 | Notifications |
+| Layer   | z-index | Elements                     |
+| ------- | ------- | ---------------------------- |
+| Base    | 0       | Page content                 |
+| Card    | 1       | Cards, tables                |
+| Sticky  | 10      | Sticky table columns/headers |
+| Ribbon  | 20      | Status ribbon                |
+| Header  | 40      | Navigation header            |
+| Overlay | 50      | Mobile menu backdrop         |
+| Modal   | 60      | Command palette, dialogs     |
+| Toast   | 70      | Notifications                |
 
 ---
 
 ## 8. Border Radius & Corner Strategy
 
-| Token | Value | Usage |
-|---|---|---|
-| `--radius-xs` | 4px | Inline code snippets, tiny badges |
-| `--radius-sm` | 6px | Category chips, filter pills |
-| `--radius-md` | 8px | Input fields, small buttons |
-| `--radius-lg` | 12px | Cards, dropdowns, table wrapper |
-| `--radius-xl` | 16px | Large cards, modals, podium cards |
-| `--radius-2xl` | 20px | Hero content blocks, admin cards |
-| `--radius-full` | 9999px | Avatars, round buttons, badges |
+| Token           | Value  | Usage                             |
+| --------------- | ------ | --------------------------------- |
+| `--radius-xs`   | 4px    | Inline code snippets, tiny badges |
+| `--radius-sm`   | 6px    | Category chips, filter pills      |
+| `--radius-md`   | 8px    | Input fields, small buttons       |
+| `--radius-lg`   | 12px   | Cards, dropdowns, table wrapper   |
+| `--radius-xl`   | 16px   | Large cards, modals, podium cards |
+| `--radius-2xl`  | 20px   | Hero content blocks, admin cards  |
+| `--radius-full` | 9999px | Avatars, round buttons, badges    |
 
 ### Strategy
+
 - **Data containers** (tables, chart cards): `--radius-lg` for a contained, professional feel
 - **Interactive elements** (buttons, chips): `--radius-md` for subtle softness without playfulness
 - **Decorative elements** (avatars, rank badges): `--radius-full` for visual distinctiveness
@@ -366,61 +380,91 @@ Admin dashboard:
 
 ### 9.1 Duration Scale
 
-| Token | Value | Usage |
-|---|---|---|
-| `--duration-instant` | 80ms | Colour changes, opacity toggles |
-| `--duration-fast` | 150ms | Button hover, chip press, row highlight |
-| `--duration-normal` | 250ms | Card hover lift, dropdown open |
-| `--duration-slow` | 400ms | Page transitions, modal fade |
-| `--duration-dramatic` | 600ms | Hero counter roll-up, podium entrance |
+| Token                 | Value | Usage                                   |
+| --------------------- | ----- | --------------------------------------- |
+| `--duration-instant`  | 80ms  | Colour changes, opacity toggles         |
+| `--duration-fast`     | 150ms | Button hover, chip press, row highlight |
+| `--duration-normal`   | 250ms | Card hover lift, dropdown open          |
+| `--duration-slow`     | 400ms | Page transitions, modal fade            |
+| `--duration-dramatic` | 600ms | Hero counter roll-up, podium entrance   |
 
 ### 9.2 Easing Curves
 
-| Token | Value | Usage |
-|---|---|---|
-| `--ease-out` | `cubic-bezier(0.22, 1, 0.36, 1)` | Most UI transitions |
-| `--ease-in-out` | `cubic-bezier(0.4, 0, 0.2, 1)` | Symmetric animations |
+| Token           | Value                               | Usage                             |
+| --------------- | ----------------------------------- | --------------------------------- |
+| `--ease-out`    | `cubic-bezier(0.22, 1, 0.36, 1)`    | Most UI transitions               |
+| `--ease-in-out` | `cubic-bezier(0.4, 0, 0.2, 1)`      | Symmetric animations              |
 | `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Rank delta chip pop, badge bounce |
-| `--ease-decel` | `cubic-bezier(0, 0, 0.2, 1)` | Elements entering view |
+| `--ease-decel`  | `cubic-bezier(0, 0, 0.2, 1)`        | Elements entering view            |
 
 ### 9.3 Animation Definitions
 
 ```css
 /* Hero counter roll-up */
 @keyframes counter-roll {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Podium card stagger entrance */
 @keyframes podium-rise {
-  from { transform: translateY(24px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Rank delta chip pop */
 @keyframes delta-pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.08); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Table row shimmer (loading) */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* Subtle pulse for live data indicators */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Card hover micro-lift */
 .card-hover {
-  transition: transform var(--duration-normal) var(--ease-out),
-              box-shadow var(--duration-normal) var(--ease-out);
+  transition:
+    transform var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
 }
 .card-hover:hover {
   transform: translateY(-2px);
@@ -438,13 +482,13 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 
 ### Icon Sizing Convention
 
-| Context | Size | Usage |
-|---|---|---|
-| Inline text | 14px (w-3.5) | Inside buttons, links, chips |
-| Default | 16px (w-4) | Navigation, table actions |
-| Section header | 20px (w-5) | Section title decorators |
-| Feature icon | 24px (w-6) | Trust section, empty states |
-| Hero icon | 32px (w-8) | Hero decorative, admin stat cards |
+| Context        | Size         | Usage                             |
+| -------------- | ------------ | --------------------------------- |
+| Inline text    | 14px (w-3.5) | Inside buttons, links, chips      |
+| Default        | 16px (w-4)   | Navigation, table actions         |
+| Section header | 20px (w-5)   | Section title decorators          |
+| Feature icon   | 24px (w-6)   | Trust section, empty states       |
+| Hero icon      | 32px (w-8)   | Hero decorative, admin stat cards |
 
 ### Custom Visual Elements
 
@@ -459,6 +503,7 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 ### 11.1 Button System
 
 #### Primary Button (Gold CTA)
+
 ```css
 .btn-primary {
   background: var(--gradient-gold);
@@ -483,10 +528,11 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 ```
 
 #### Secondary Button (Ghost/Outline)
+
 ```css
 .btn-secondary {
   background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 600;
   font-size: 14px;
   padding: 12px 24px;
@@ -502,6 +548,7 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 ```
 
 #### Tertiary Button (Text link)
+
 ```css
 .btn-tertiary {
   background: none;
@@ -567,11 +614,27 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 }
 
 /* Variants */
-.badge-default { background: var(--neutral-100); color: var(--neutral-600); }
-.badge-gold { background: var(--brand-accent-glow); color: var(--brand-accent); border: 1px solid rgba(212, 168, 67, 0.25); }
-.badge-success { background: #ECFDF5; color: #059669; }
-.badge-danger { background: #FEF2F2; color: #DC2626; }
-.badge-info { background: #EFF6FF; color: #2563EB; }
+.badge-default {
+  background: var(--neutral-100);
+  color: var(--neutral-600);
+}
+.badge-gold {
+  background: var(--brand-accent-glow);
+  color: var(--brand-accent);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+}
+.badge-success {
+  background: #ecfdf5;
+  color: #059669;
+}
+.badge-danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.badge-info {
+  background: #eff6ff;
+  color: #2563eb;
+}
 ```
 
 ### 11.4 Rank Delta Chip (Redesigned)
@@ -587,15 +650,15 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
   font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  background: #ECFDF5;
+  background: #ecfdf5;
   color: #059669;
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 /* Down delta */
 .delta-down {
-  background: #FEF2F2;
-  color: #DC2626;
+  background: #fef2f2;
+  color: #dc2626;
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -623,7 +686,9 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 }
 .search-input:focus {
   border-color: var(--brand-accent);
-  box-shadow: 0 0 0 3px var(--brand-accent-glow), var(--shadow-inner);
+  box-shadow:
+    0 0 0 3px var(--brand-accent-glow),
+    var(--shadow-inner);
   outline: none;
 }
 .search-input::placeholder {
@@ -654,7 +719,7 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 }
 .filter-chip--active {
   background: var(--brand-navy);
-  color: #FFFFFF;
+  color: #ffffff;
   border-color: var(--brand-navy);
   box-shadow: var(--shadow-xs);
 }
@@ -671,10 +736,22 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
 }
 
 /* Size variants */
-.avatar-sm { width: 36px; height: 36px; }
-.avatar-md { width: 44px; height: 44px; }
-.avatar-lg { width: 64px; height: 64px; }
-.avatar-xl { width: 88px; height: 88px; }
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+}
+.avatar-md {
+  width: 44px;
+  height: 44px;
+}
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+}
+.avatar-xl {
+  width: 88px;
+  height: 88px;
+}
 
 /* Rank-specific border ring */
 .avatar-rank-1 {
@@ -705,7 +782,7 @@ Continue using **Lucide React** (current choice — excellent coverage, consiste
   background: var(--rank-1-wash);
 }
 .table-row--rank-1:hover {
-  background: #FBF0C8;
+  background: #fbf0c8;
 }
 .table-row--rank-2 {
   background: var(--rank-2-wash);
@@ -1174,20 +1251,20 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ### Dark Mode Colour Mapping
 
-| Light Token | Light Value | Dark Value | Notes |
-|---|---|---|---|
-| `--neutral-0` (surface) | `#FFFFFF` | `#111827` | Card backgrounds |
-| `--neutral-50` (canvas) | `#F8FAFC` | `#0B1220` | Page background |
-| `--neutral-100` (muted) | `#F1F5F9` | `#1E293B` | Input, stripe bg |
-| `--neutral-200` (border) | `#E2E8F0` | `#334155` | Borders |
-| `--neutral-600` (body) | `#475569` | `#94A3B8` | Body text |
-| `--neutral-800` (heading) | `#1E293B` | `#F1F5F9` | Headings |
-| `--neutral-900` (contrast) | `#0F172A` | `#F8FAFC` | Max contrast |
-| `--brand-accent` | `#D4A843` | `#E8C867` | Slightly brighter gold for dark bg |
-| `--rank-1-wash` | `#FDF6E3` | `rgba(212, 168, 67, 0.1)` | Gold wash transparent |
-| `--status-up bg` | `#ECFDF5` | `rgba(16, 185, 129, 0.1)` | Transparent tint |
-| `--status-down bg` | `#FEF2F2` | `rgba(239, 68, 68, 0.1)` | Transparent tint |
-| `--shadow-sm` | `0 2px 8px rgba(0,0,0,.06)` | `0 2px 8px rgba(0,0,0,.25)` | Deeper in dark |
+| Light Token                | Light Value                 | Dark Value                  | Notes                              |
+| -------------------------- | --------------------------- | --------------------------- | ---------------------------------- |
+| `--neutral-0` (surface)    | `#FFFFFF`                   | `#111827`                   | Card backgrounds                   |
+| `--neutral-50` (canvas)    | `#F8FAFC`                   | `#0B1220`                   | Page background                    |
+| `--neutral-100` (muted)    | `#F1F5F9`                   | `#1E293B`                   | Input, stripe bg                   |
+| `--neutral-200` (border)   | `#E2E8F0`                   | `#334155`                   | Borders                            |
+| `--neutral-600` (body)     | `#475569`                   | `#94A3B8`                   | Body text                          |
+| `--neutral-800` (heading)  | `#1E293B`                   | `#F1F5F9`                   | Headings                           |
+| `--neutral-900` (contrast) | `#0F172A`                   | `#F8FAFC`                   | Max contrast                       |
+| `--brand-accent`           | `#D4A843`                   | `#E8C867`                   | Slightly brighter gold for dark bg |
+| `--rank-1-wash`            | `#FDF6E3`                   | `rgba(212, 168, 67, 0.1)`   | Gold wash transparent              |
+| `--status-up bg`           | `#ECFDF5`                   | `rgba(16, 185, 129, 0.1)`   | Transparent tint                   |
+| `--status-down bg`         | `#FEF2F2`                   | `rgba(239, 68, 68, 0.1)`    | Transparent tint                   |
+| `--shadow-sm`              | `0 2px 8px rgba(0,0,0,.06)` | `0 2px 8px rgba(0,0,0,.25)` | Deeper in dark                     |
 
 ### Dark Mode Specific Rules
 
@@ -1203,14 +1280,14 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ### Breakpoints
 
-| Token | Width | Target |
-|---|---|---|
-| `xs` | 0–479px | Small phones |
-| `sm` | 480–639px | Large phones |
-| `md` | 640–767px | Tablets (portrait) |
-| `lg` | 768–1023px | Tablets (landscape), small laptops |
-| `xl` | 1024–1279px | Desktop |
-| `2xl` | 1280px+ | Large desktop |
+| Token | Width       | Target                             |
+| ----- | ----------- | ---------------------------------- |
+| `xs`  | 0–479px     | Small phones                       |
+| `sm`  | 480–639px   | Large phones                       |
+| `md`  | 640–767px   | Tablets (portrait)                 |
+| `lg`  | 768–1023px  | Tablets (landscape), small laptops |
+| `xl`  | 1024–1279px | Desktop                            |
+| `2xl` | 1280px+     | Large desktop                      |
 
 ### Mobile-First Priorities
 
@@ -1243,16 +1320,16 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ### WCAG 2.1 AA Compliance Targets
 
-| Criterion | Standard | Implementation |
-|---|---|---|
-| **Colour contrast** | 4.5:1 normal text, 3:1 large text | All text/background combos verified with WCAG checker |
-| **Focus indicators** | Visible focus ring on all interactive elements | 3px gold (`--brand-accent`) ring with 2px offset |
-| **Skip navigation** | Keyboard skip link to main content | Already implemented — keep |
-| **ARIA landmarks** | Proper `<main>`, `<nav>`, `<aside>`, `<footer>` | Audit and add missing landmarks |
-| **Table accessibility** | `<caption>`, `<thead>`, scope attributes | Already implemented — enhance |
-| **Reduced motion** | `prefers-reduced-motion` media query | Already implemented — keep |
-| **Touch targets** | Minimum 44×44px touch targets | Audit all clickable elements |
-| **Screen reader** | Meaningful alt text, aria-labels | Audit all icons and images |
+| Criterion               | Standard                                        | Implementation                                        |
+| ----------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| **Colour contrast**     | 4.5:1 normal text, 3:1 large text               | All text/background combos verified with WCAG checker |
+| **Focus indicators**    | Visible focus ring on all interactive elements  | 3px gold (`--brand-accent`) ring with 2px offset      |
+| **Skip navigation**     | Keyboard skip link to main content              | Already implemented — keep                            |
+| **ARIA landmarks**      | Proper `<main>`, `<nav>`, `<aside>`, `<footer>` | Audit and add missing landmarks                       |
+| **Table accessibility** | `<caption>`, `<thead>`, scope attributes        | Already implemented — enhance                         |
+| **Reduced motion**      | `prefers-reduced-motion` media query            | Already implemented — keep                            |
+| **Touch targets**       | Minimum 44×44px touch targets                   | Audit all clickable elements                          |
+| **Screen reader**       | Meaningful alt text, aria-labels                | Audit all icons and images                            |
 
 ### Focus Ring Specification
 
@@ -1271,15 +1348,15 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ### Colour Contrast Verification Matrix
 
-| Combination | Contrast Ratio | Pass? |
-|---|---|---|
-| `--neutral-900` on `--neutral-0` | 17.4:1 | ✅ AAA |
-| `--neutral-600` on `--neutral-0` | 5.8:1 | ✅ AA |
-| `--neutral-400` on `--neutral-0` | 3.5:1 | ✅ AA (large text only) |
-| `--brand-accent` on `--brand-deep` | 7.2:1 | ✅ AA |
-| White on `--brand-navy` | 14.1:1 | ✅ AAA |
-| `--status-up` on white | 4.6:1 | ✅ AA |
-| `--status-down` on white | 4.6:1 | ✅ AA |
+| Combination                        | Contrast Ratio | Pass?                   |
+| ---------------------------------- | -------------- | ----------------------- |
+| `--neutral-900` on `--neutral-0`   | 17.4:1         | ✅ AAA                  |
+| `--neutral-600` on `--neutral-0`   | 5.8:1          | ✅ AA                   |
+| `--neutral-400` on `--neutral-0`   | 3.5:1          | ✅ AA (large text only) |
+| `--brand-accent` on `--brand-deep` | 7.2:1          | ✅ AA                   |
+| White on `--brand-navy`            | 14.1:1         | ✅ AAA                  |
+| `--status-up` on white             | 4.6:1          | ✅ AA                   |
+| `--status-down` on white           | 4.6:1          | ✅ AA                   |
 
 ---
 
@@ -1287,49 +1364,49 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ### Phase 1: Design System Foundation (Effort: 1–2 days)
 
-| Task | File(s) | Description |
-|---|---|---|
-| 1.1 | `tokens.css`, `globals.css` | Replace all CSS custom properties with new palette tokens |
-| 1.2 | `layout.tsx` | Switch from Playfair Display to Outfit Google Font |
-| 1.3 | `tokens.css` | Add all new shadow, radius, motion, and spacing tokens |
-| 1.4 | `globals.css` | Update dark mode variable mappings |
-| 1.5 | `tokens.css` | Add gradient definitions |
+| Task | File(s)                     | Description                                               |
+| ---- | --------------------------- | --------------------------------------------------------- |
+| 1.1  | `tokens.css`, `globals.css` | Replace all CSS custom properties with new palette tokens |
+| 1.2  | `layout.tsx`                | Switch from Playfair Display to Outfit Google Font        |
+| 1.3  | `tokens.css`                | Add all new shadow, radius, motion, and spacing tokens    |
+| 1.4  | `globals.css`               | Update dark mode variable mappings                        |
+| 1.5  | `tokens.css`                | Add gradient definitions                                  |
 
 ### Phase 2: Core Components (Effort: 2–3 days)
 
-| Task | File(s) | Description |
-|---|---|---|
-| 2.1 | `public-header.tsx` | Redesigned header with animated active indicator, new colours |
-| 2.2 | `public-footer.tsx` | Updated footer with new colour scheme, hover effects |
-| 2.3 | `rank-table.tsx` | Enhanced table with rank-coloured numbers, category badges, better sparklines |
-| 2.4 | `rank-delta-chip.tsx` | Redesigned delta chips with backgrounds and borders |
-| 2.5 | `podium-card.tsx` | Enhanced podium with larger offset, avatar rings, gold glow |
-| 2.6 | `avatar.tsx` | Rank-coloured border rings, size variants |
-| 2.7 | `status-ribbon.tsx` | Gradient background, data freshness indicator |
-| 2.8 | `sparkline.tsx` | Replace bar with SVG mini area chart |
+| Task | File(s)               | Description                                                                   |
+| ---- | --------------------- | ----------------------------------------------------------------------------- |
+| 2.1  | `public-header.tsx`   | Redesigned header with animated active indicator, new colours                 |
+| 2.2  | `public-footer.tsx`   | Updated footer with new colour scheme, hover effects                          |
+| 2.3  | `rank-table.tsx`      | Enhanced table with rank-coloured numbers, category badges, better sparklines |
+| 2.4  | `rank-delta-chip.tsx` | Redesigned delta chips with backgrounds and borders                           |
+| 2.5  | `podium-card.tsx`     | Enhanced podium with larger offset, avatar rings, gold glow                   |
+| 2.6  | `avatar.tsx`          | Rank-coloured border rings, size variants                                     |
+| 2.7  | `status-ribbon.tsx`   | Gradient background, data freshness indicator                                 |
+| 2.8  | `sparkline.tsx`       | Replace bar with SVG mini area chart                                          |
 
 ### Phase 3: Page Redesigns (Effort: 3–4 days)
 
-| Task | File(s) | Description |
-|---|---|---|
-| 3.1 | `app/page.tsx` | Home page hero gradient, podium animation, movers ticker |
-| 3.2 | `chart-view.tsx` | Segmented control, enhanced table, sticky pagination |
-| 3.3 | `app/movers/page.tsx` | Coloured accent borders, enhanced empty states |
-| 3.4 | `app/profiles/page.tsx` | Grid cards with category accents, sort dropdown |
-| 3.5 | `app/profiles/[username]/page.tsx` | Hero banner, stat card counters, chart integration |
-| 3.6 | `app/methodology/page.tsx` | Accent borders, callout boxes, sticky TOC |
-| 3.7 | `app/faq/page.tsx` | Accordion component with animations |
-| 3.8 | `app/about/page.tsx`, legal pages | Typography polish, narrow layout |
+| Task | File(s)                            | Description                                              |
+| ---- | ---------------------------------- | -------------------------------------------------------- |
+| 3.1  | `app/page.tsx`                     | Home page hero gradient, podium animation, movers ticker |
+| 3.2  | `chart-view.tsx`                   | Segmented control, enhanced table, sticky pagination     |
+| 3.3  | `app/movers/page.tsx`              | Coloured accent borders, enhanced empty states           |
+| 3.4  | `app/profiles/page.tsx`            | Grid cards with category accents, sort dropdown          |
+| 3.5  | `app/profiles/[username]/page.tsx` | Hero banner, stat card counters, chart integration       |
+| 3.6  | `app/methodology/page.tsx`         | Accent borders, callout boxes, sticky TOC                |
+| 3.7  | `app/faq/page.tsx`                 | Accordion component with animations                      |
+| 3.8  | `app/about/page.tsx`, legal pages  | Typography polish, narrow layout                         |
 
 ### Phase 4: Admin & Polish (Effort: 1–2 days)
 
-| Task | File(s) | Description |
-|---|---|---|
-| 4.1 | `app/admin/*` | Sidebar navigation, enhanced stat cards, activity feed |
-| 4.2 | `not-found.tsx`, `error.tsx` | Branded 404/error pages |
-| 4.3 | All | Accessibility audit (contrast, focus, ARIA) |
-| 4.4 | All | Responsive testing across breakpoints |
-| 4.5 | All | Performance audit (font loading, animation jank) |
+| Task | File(s)                      | Description                                            |
+| ---- | ---------------------------- | ------------------------------------------------------ |
+| 4.1  | `app/admin/*`                | Sidebar navigation, enhanced stat cards, activity feed |
+| 4.2  | `not-found.tsx`, `error.tsx` | Branded 404/error pages                                |
+| 4.3  | All                          | Accessibility audit (contrast, focus, ARIA)            |
+| 4.4  | All                          | Responsive testing across breakpoints                  |
+| 4.5  | All                          | Performance audit (font loading, animation jank)       |
 
 ### Total Estimated Effort: 7–11 days
 
@@ -1340,57 +1417,57 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 ```css
 :root {
   /* Brand */
-  --brand-deep: #0A0F1A;
-  --brand-navy: #0D1B2A;
-  --brand-slate: #1B2838;
-  --brand-accent: #D4A843;
-  --brand-accent-light: #F0DCA0;
+  --brand-deep: #0a0f1a;
+  --brand-navy: #0d1b2a;
+  --brand-slate: #1b2838;
+  --brand-accent: #d4a843;
+  --brand-accent-light: #f0dca0;
   --brand-accent-glow: rgba(212, 168, 67, 0.15);
 
   /* Neutrals */
-  --neutral-0: #FFFFFF;
-  --neutral-50: #F8FAFC;
-  --neutral-100: #F1F5F9;
-  --neutral-200: #E2E8F0;
-  --neutral-300: #CBD5E1;
-  --neutral-400: #94A3B8;
-  --neutral-500: #64748B;
+  --neutral-0: #ffffff;
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
   --neutral-600: #475569;
   --neutral-700: #334155;
-  --neutral-800: #1E293B;
-  --neutral-900: #0F172A;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
 
   /* Status */
-  --status-up: #10B981;
+  --status-up: #10b981;
   --status-up-vivid: #059669;
-  --status-up-bg: #ECFDF5;
-  --status-down: #EF4444;
-  --status-down-vivid: #DC2626;
-  --status-down-bg: #FEF2F2;
-  --status-flat: #94A3B8;
-  --status-flat-bg: #F8FAFC;
-  --status-stale: #F59E0B;
-  --status-stale-bg: #FFFBEB;
-  --status-info: #3B82F6;
-  --status-info-bg: #EFF6FF;
-  --status-danger: #B91C1C;
-  --status-danger-bg: #FEF2F2;
+  --status-up-bg: #ecfdf5;
+  --status-down: #ef4444;
+  --status-down-vivid: #dc2626;
+  --status-down-bg: #fef2f2;
+  --status-flat: #94a3b8;
+  --status-flat-bg: #f8fafc;
+  --status-stale: #f59e0b;
+  --status-stale-bg: #fffbeb;
+  --status-info: #3b82f6;
+  --status-info-bg: #eff6ff;
+  --status-danger: #b91c1c;
+  --status-danger-bg: #fef2f2;
 
   /* Ranks */
-  --rank-1-fill: #D4A843;
-  --rank-1-wash: #FDF6E3;
-  --rank-2-fill: #A8B8C8;
-  --rank-2-wash: #F0F4F8;
-  --rank-3-fill: #CD7F32;
-  --rank-3-wash: #FDF5EB;
-  --rank-top10: #1E40AF;
-  --rank-default: #64748B;
+  --rank-1-fill: #d4a843;
+  --rank-1-wash: #fdf6e3;
+  --rank-2-fill: #a8b8c8;
+  --rank-2-wash: #f0f4f8;
+  --rank-3-fill: #cd7f32;
+  --rank-3-wash: #fdf5eb;
+  --rank-top10: #1e40af;
+  --rank-default: #64748b;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.14);
   --shadow-gold: 0 4px 20px rgba(212, 168, 67, 0.2);
   --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -1416,11 +1493,15 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
   --ease-decel: cubic-bezier(0, 0, 0.2, 1);
 
   /* Gradients */
-  --gradient-hero: linear-gradient(175deg, #0A0F1A 0%, #0D1B2A 40%, #1B2838 70%, #0D1B2A 100%);
-  --gradient-gold: linear-gradient(135deg, #D4A843 0%, #E8C867 50%, #D4A843 100%);
-  --gradient-card-hover: linear-gradient(145deg, rgba(212, 168, 67, 0.04) 0%, rgba(255, 255, 255, 0) 60%);
-  --gradient-podium-gold: linear-gradient(180deg, #FDF6E3 0%, #FBF0D1 50%, #FFFFFF 100%);
-  --gradient-ribbon: linear-gradient(90deg, #0D1B2A 0%, #1B2838 100%);
+  --gradient-hero: linear-gradient(175deg, #0a0f1a 0%, #0d1b2a 40%, #1b2838 70%, #0d1b2a 100%);
+  --gradient-gold: linear-gradient(135deg, #d4a843 0%, #e8c867 50%, #d4a843 100%);
+  --gradient-card-hover: linear-gradient(
+    145deg,
+    rgba(212, 168, 67, 0.04) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --gradient-podium-gold: linear-gradient(180deg, #fdf6e3 0%, #fbf0d1 50%, #ffffff 100%);
+  --gradient-ribbon: linear-gradient(90deg, #0d1b2a 0%, #1b2838 100%);
 
   /* Spacing */
   --space-1: 4px;
@@ -1441,16 +1522,16 @@ Dark mode isn't just an inversion — it's a distinct experience optimized for l
 
 ## Appendix B: Category Colour Map
 
-| Category | Text Colour | Background | Border |
-|---|---|---|---|
-| Athlete / Sports | `#2563EB` | `#EFF6FF` | `rgba(37, 99, 235, 0.2)` |
-| Actor / Cinema | `#B45309` | `#FFFBEB` | `rgba(180, 83, 9, 0.2)` |
-| Musician / Singer | `#7C3AED` | `#EDE9FE` | `rgba(124, 58, 237, 0.2)` |
-| Digital Creator | `#059669` | `#ECFDF5` | `rgba(5, 150, 105, 0.2)` |
-| Fashion / Model | `#E11D48` | `#FFF1F2` | `rgba(225, 29, 72, 0.2)` |
-| Public Figure | `#475569` | `#F1F5F9` | `rgba(71, 85, 105, 0.2)` |
-| Comedian | `#EA580C` | `#FFF7ED` | `rgba(234, 88, 12, 0.2)` |
+| Category          | Text Colour | Background | Border                    |
+| ----------------- | ----------- | ---------- | ------------------------- |
+| Athlete / Sports  | `#2563EB`   | `#EFF6FF`  | `rgba(37, 99, 235, 0.2)`  |
+| Actor / Cinema    | `#B45309`   | `#FFFBEB`  | `rgba(180, 83, 9, 0.2)`   |
+| Musician / Singer | `#7C3AED`   | `#EDE9FE`  | `rgba(124, 58, 237, 0.2)` |
+| Digital Creator   | `#059669`   | `#ECFDF5`  | `rgba(5, 150, 105, 0.2)`  |
+| Fashion / Model   | `#E11D48`   | `#FFF1F2`  | `rgba(225, 29, 72, 0.2)`  |
+| Public Figure     | `#475569`   | `#F1F5F9`  | `rgba(71, 85, 105, 0.2)`  |
+| Comedian          | `#EA580C`   | `#FFF7ED`  | `rgba(234, 88, 12, 0.2)`  |
 
 ---
 
-*End of UI/UX Redesign Specification v1.0*
+_End of UI/UX Redesign Specification v1.0_

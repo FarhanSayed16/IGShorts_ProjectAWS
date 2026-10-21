@@ -1,344 +1,273 @@
 @import 'tailwindcss';
 @import '../styles/tokens.css';
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
+
 @theme {
-  --color-brand-deep: #0A0F1A;
-  --color-brand-navy: #0D1B2A;
-  --color-brand-slate: #1B2838;
-  --color-brand-accent: #D4A843;
-  --color-brand-accent-light: #F0DCA0;
-  
-  --color-navy: #0D1B2A;
-  --color-navy-2: #1B2838;
-  --color-gold: #D4A843;
-  --color-gold-soft: #F0DCA0;
-  --color-canvas: #F8FAFC;
-  --color-ink: #0F172A;
-  --color-ink-soft: #475569;
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #F1F5F9;
-  --color-line: #E2E8F0;
-  --color-up: #10B981;
-  --color-down: #EF4444;
-  --color-flat: #94A3B8;
-  --color-warn: #B45309;
-  --color-rank-1: #D4A843;
-  --color-rank-2: #A8B8C8;
-  --color-rank-3: #CD7F32;
+  --color-canvas: var(--canvas);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-muted);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-line: var(--line);
+  --color-navy: #111111;
+  --color-navy-2: #1c1c1c;
+  --color-gold: var(--accent);
+  --color-gold-soft: #3eea8f;
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-flat: var(--flat);
+  --color-warn: var(--warn);
+  --color-rank-1: var(--rank-1);
+  --color-rank-2: var(--rank-2);
+  --color-rank-3: var(--rank-3);
+  --color-brand-accent: var(--accent);
+  --color-brand-navy: #111111;
+  --color-brand-deep: #111111;
+  --color-brand-slate: #1c1c1c;
+  --color-brand-accent-light: #3eea8f;
 }
 
 @layer base {
+  html {
+    background-color: var(--canvas);
+  }
+
   body {
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    font-family: var(
-      --font-inter,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      sans-serif
-    );
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   .font-display {
-    font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-display), Impact, 'Arial Narrow', sans-serif;
+    letter-spacing: 0.01em;
+    font-weight: 700;
+  }
+
+  .chart-title {
+    font-family: var(--font-display), Impact, 'Arial Narrow', sans-serif;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 700;
+    line-height: 0.9;
   }
 
   .font-serif {
-    font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-display), Impact, sans-serif;
   }
 
   .font-mono {
-    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
-  /* Tabular lining figures for all numeric displays (§5.3) */
   .tabular-nums,
   .data-text {
     font-variant-numeric: tabular-nums lining-nums;
     font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
-  /* Stylistic alternates for Outfit display headings (§5.3) */
-  .display-text {
-    font-feature-settings: 'ss01' 1;
-  }
-
-  /* Focus ring specification (§15.2) */
   *:focus-visible {
-    outline: 2px solid var(--brand-accent);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
-  }
-
-  a,
-  button,
-  .transition-all,
-  .transition-colors,
-  .transition-transform {
-    transition-duration: var(--duration-fast);
-    transition-timing-function: var(--ease-out);
   }
 }
 
-/* =====================================================================
- * Reusable Component Utility Classes (§11)
- * ===================================================================== */
-
-/* Primary Button (Gold CTA) (§11.1) */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--gradient-gold);
-  color: var(--brand-deep);
+  background: #111111;
+  color: #ffffff;
   font-weight: 700;
-  font-size: 14px;
-  padding: 12px 24px;
-  border-radius: var(--radius-md);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  border-radius: 2px;
   border: none;
-  box-shadow: var(--shadow-gold);
-  transition: all var(--duration-fast) var(--ease-out);
   cursor: pointer;
   text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 24px rgba(212, 168, 67, 0.35);
-  transform: translateY(-1px);
-}
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-xs);
+  background: #000000;
 }
 
-/* Secondary Button (Ghost/Glass) (§11.1) */
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
-  font-weight: 600;
-  font-size: 14px;
-  padding: 12px 24px;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  transition: all var(--duration-fast) var(--ease-out);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 11px 18px;
+  border-radius: 2px;
+  border: 1px solid var(--ink);
   cursor: pointer;
   text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast)
+    var(--ease-out);
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
+  background: var(--ink);
+  color: var(--surface);
 }
 
-/* Tertiary Button (Text Link) (§11.1) */
 .btn-tertiary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: none;
-  color: var(--brand-accent);
+  color: var(--ink);
   font-weight: 600;
   font-size: 13px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  padding: 6px 0;
   border: none;
-  transition: all var(--duration-instant) var(--ease-out);
   cursor: pointer;
   text-decoration: none;
+  border-bottom: 1px solid transparent;
 }
 .btn-tertiary:hover {
-  background: var(--brand-accent-glow);
+  border-bottom-color: var(--ink);
 }
 
-/* Card Component (§11.2) */
-.card-base {
-  background: var(--neutral-0);
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-normal) var(--ease-out);
-}
-.card-base:hover {
-  border-color: var(--neutral-300);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.card-elevated {
-  background: var(--neutral-0);
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
+.card-base,
+.card-elevated,
 .card-gold {
-  background: var(--gradient-podium-gold);
-  border: 1px solid rgba(212, 168, 67, 0.35);
-  box-shadow: var(--shadow-gold);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: none;
 }
 
-/* Badges (§11.3) */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.badge-default { background: var(--neutral-100); color: var(--neutral-600); }
-.badge-gold { background: var(--brand-accent-glow); color: var(--brand-accent); border: 1px solid rgba(212, 168, 67, 0.25); }
-.badge-success { background: #ECFDF5; color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
-.badge-danger { background: #FEF2F2; color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.2); }
-.badge-info { background: #EFF6FF; color: #2563EB; border: 1px solid rgba(37, 99, 235, 0.2); }
+.badge-default {
+  background: var(--canvas);
+  color: var(--ink-muted);
+  border: 1px solid var(--line);
+}
+.badge-gold,
+.badge-cyan,
+.badge-info {
+  background: var(--accent);
+  color: #111111;
+  border: none;
+}
+.badge-success {
+  background: var(--up-bg);
+  color: var(--up);
+}
+.badge-danger {
+  background: var(--down-bg);
+  color: var(--down);
+}
 
-/* Delta Chips (§11.4) */
-.delta-up {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  background: var(--status-up-bg);
-  color: var(--status-up-vivid);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-}
-.delta-down {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  background: var(--status-down-bg);
-  color: var(--status-down-vivid);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-}
+.delta-up,
+.delta-down,
 .delta-flat {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
+  padding: 2px 6px;
+  border-radius: 2px;
   font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  background: var(--status-flat-bg);
-  color: var(--status-flat);
-  border: 1px solid var(--neutral-200);
+}
+.delta-up {
+  background: var(--up-bg);
+  color: var(--up);
+}
+.delta-down {
+  background: var(--down-bg);
+  color: var(--down);
+}
+.delta-flat {
+  background: var(--flat-bg);
+  color: var(--flat);
 }
 
-/* Filter Chip (§11.6) */
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
+  padding: 7px 12px;
+  border-radius: 2px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid var(--neutral-200);
-  background: var(--neutral-0);
-  color: var(--neutral-600);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-muted);
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
   white-space: nowrap;
 }
 .filter-chip:hover {
-  border-color: var(--neutral-300);
-  background: var(--neutral-100);
+  color: var(--ink);
+  border-color: var(--ink);
 }
 .filter-chip--active {
-  background: var(--brand-navy);
-  color: #FFFFFF;
-  border-color: var(--brand-navy);
-  box-shadow: var(--shadow-xs);
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
 }
 
-/* Avatar Variants (§11.7) */
-.avatar-rank-1 {
-  border: 3px solid var(--rank-1-fill);
-  box-shadow: 0 0 14px rgba(212, 168, 67, 0.35);
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 2px;
 }
-.avatar-rank-2 {
-  border: 3px solid var(--rank-2-fill);
-}
-.avatar-rank-3 {
-  border: 3px solid var(--rank-3-fill);
+.search-input::placeholder {
+  color: var(--ink-faint);
 }
 
-/* Skeleton Shimmer (§11.9) */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--neutral-100) 25%,
-    var(--neutral-200) 50%,
-    var(--neutral-100) 75%
-  );
+  background: linear-gradient(90deg, var(--canvas) 25%, var(--line) 50%, var(--canvas) 75%);
   background-size: 400% 100%;
-  animation: shimmer 1.6s infinite var(--ease-in-out);
-  border-radius: var(--radius-sm);
-}
-
-/* =====================================================================
- * Animation Keyframes (§9.3)
- * ===================================================================== */
-
-@keyframes counter-roll {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes podium-rise {
-  from { transform: translateY(28px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes delta-pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.08); }
-  100% { transform: scale(1); opacity: 1; }
+  animation: shimmer 1.6s infinite linear;
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.animate-podium-rise {
-  animation: podium-rise var(--duration-dramatic) var(--ease-out) both;
-}
-
-.animate-delta-pop {
-  animation: delta-pop var(--duration-normal) var(--ease-spring) both;
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .animate-pulse-dot {
   animation: pulse-dot 2s infinite ease-in-out;
 }
 
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

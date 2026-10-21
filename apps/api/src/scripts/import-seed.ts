@@ -13,10 +13,7 @@ async function runSeedImport() {
 
   try {
     const ingestionService = app.get(IngestionService);
-    const report = await ingestionService.importSeedWatchlist(
-      process.argv[2],
-      'cli_seed_importer',
-    );
+    const report = await ingestionService.importSeedWatchlist(process.argv[2], 'cli_seed_importer');
 
     console.log('\n--- Import Report Summary ---');
     console.log(`Status:                  ${report.status.toUpperCase()}`);
