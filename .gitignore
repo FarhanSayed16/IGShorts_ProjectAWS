@@ -20,6 +20,10 @@ infra/**/*.d.ts
 .env.test.local
 .env.production.local
 .env.supabase
+.env.render
+.env.vercel
+.env.production
+deploy.env
 *.pem
 *.key
 

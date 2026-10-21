@@ -75,20 +75,7 @@ If those public URLs end up different, just paste the real ones into the env var
 
 **Do not set `PORT`.** Render injects it. The app already binds `0.0.0.0`.
 
-Environment variables:
-
-```text
-NODE_ENV=production
-HOST=0.0.0.0
-API_PREFIX=api/v1
-CORS_ORIGIN=https://igshorts.vercel.app
-PROVIDER=seed
-CRON_ENABLED=false
-DATABASE_URL=postgresql://postgres.wixhshvrgojmgdsfzemi:[DB-PASSWORD]@aws-1-ap-south-1.pooler.supabase.com:5432/igshorts?sslmode=require
-ADMIN_JWT_SECRET=<new long random string — not the BillPush JWT>
-ADMIN_BOOTSTRAP_EMAIL=admin@localhost
-ADMIN_BOOTSTRAP_PASSWORD=change-me-now
-```
+Copy env vars from **`deploy.env`** at the repo root (gitignored). Paste them as **Environment Variables** on Render, not Secret Files.
 
 `DATABASE_URL` must end with **`/igshorts`**.  
 First admin already exists on that database (`admin@localhost`). Bootstrap only runs if the table is empty, so those two bootstrap vars are a safety net.
