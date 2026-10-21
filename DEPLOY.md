@@ -1,83 +1,136 @@
-# IGshorts — deploy readiness
+# IGshorts — Render + Vercel deploy
 
-**Local MVP works.** Cloud **database is now ready** on a **separate** Postgres database named `igshorts`.  
-**Vercel-only deploy is still not enough** — the Nest API needs its own host.
+You will deploy **two services**. Database work is already done.
 
----
+## Cost — be realistic
 
-## What I did with the keys you pasted
-
-The URL you sent belongs to the same Supabase project as BillPush (`wixhshvrgojmgdsfzemi`). I did **not** write IGshorts into `schema=billpush` or into the `postgres` database.
-
-| Existing (untouched) | New (IGshorts only) |
-|---|---|
-| Database `postgres` → schemas `billpush`, `kbc_game`, `swachhcity`, `public` | Database **`igshorts`** (empty except our tables) |
-
-Created `CREATE DATABASE igshorts`, then migrated and seeded **only there**. BillPush tables are still present (`stores`, `invoices`, `users`, …).
-
-### Cloud data check (just now)
-
-| Check | Result |
-|---|---|
-| Database name | `igshorts` |
-| Tables | `creator_profiles`, `metric_snapshots`, `ranking_runs`, `ranking_entries`, … |
-| Profiles | 331 |
-| Portraits / bios copied from local | 182 |
-| Global 100 | `#1 Cristiano Ronaldo` 680M · 125 ranked |
-| India 100 | `#1 Virat Kohli` 271.2M · 69 ranked |
-| BillPush schema | unchanged |
-
-Production connection string must use **`/igshorts`**, not `/postgres` and not `schema=billpush`:
-
-```text
-DATABASE_URL=postgresql://postgres.wixhshvrgojmgdsfzemi:[DB-PASSWORD]@aws-1-ap-south-1.pooler.supabase.com:5432/igshorts?sslmode=require
-```
-
-Local `pnpm dev` still uses Docker Postgres (`RUN.md`). That is intentional.
-
----
-
-## Redis / Upstash / S3 / BillPush JWT
-
-**Not used by IGshorts. Do not plug those in.**
-
-| You pasted | IGshorts |
-|---|---|
-| `REDIS_URL` (Upstash) | Not in this repo. Ranking jobs run inside Nest. |
-| `JWT_SECRET` / refresh JWT | Different app. We use `ADMIN_JWT_SECRET`. |
-| `S3_BUCKET_NAME` | Seed Excel lives in the repo. Not required for MVP. |
-| `PORT=3000` | API listens on **4000**. Web is 3000. |
-
-You do **not** need to give me Upstash keys.
-
-**Rotate the secrets you pasted in chat** on the BillPush project when you can: database password, `JWT_SECRET`, Upstash Redis URL, and the earlier service_role key. They are full-access credentials.
-
----
-
-## Vercel is only the website
-
-This repo is two apps:
-
-| App | Stack | Where it can live |
+| Piece | Plan | Money |
 |---|---|---|
-| `apps/web` | Next.js 15 | **Vercel** — good fit |
-| `apps/api` | NestJS on port 4000 | **Not Vercel.** Needs an always-on Node host |
+| Website | Vercel Hobby | **$0** |
+| API | Render Web Service, instance **Free** | **$0** |
+| Database | Supabase `igshorts` (already created) | **$0** extra |
+| Redis / Upstash | Not used | skip |
+
+Docker on Render is **not a paid add-on**. Docker vs Node is just how the app is built. What costs money is the **instance type**. In the Render form you must pick **Free** ($0, 512 MB). If you pick Starter it is **$7/month**.
+
+Free Render is a **demo**, not 24/7 production:
+
+- Sleeps after **15 minutes** with no traffic
+- Next visitor waits **~1 minute** while it wakes
+- 512 MB RAM, 0.1 CPU — Nest + Prisma should fit, but it can be tight
+- 750 free instance-hours/month (sleeping does not count)
+- Render may restart it anytime
+- Do **not** create Render Postgres — we already have Supabase. Their free DB expires in 30 days.
+
+If you later want the API always awake: Render Starter **$7/month**. Until then, Free is the honest $0 plan.
 
 ```text
-Browser  →  Vercel (Next.js)
+You  →  Vercel (Next.js site)
               │
-              └── NEXT_PUBLIC_API_URL=https://<api-host>/api/v1
+              └── NEXT_PUBLIC_API_URL = https://<render-api>/api/v1
 
-API      →  Render / Railway / Fly.io  (Nest)
+API  →  Render (NestJS Docker)
               │
-              └── DATABASE_URL=...pooler...:5432/igshorts?sslmode=require
+              └── DATABASE_URL = .../igshorts  (already seeded)
 ```
 
-**Next thing you need:** a Render (or Railway/Fly) account for the API. Suggested: [Render Web Service](https://render.com/) from `apps/api/Dockerfile`.
+Do **not** put Redis, Upstash, BillPush JWT, or S3 on either host.
 
-When we deploy:
+---
 
-**Vercel (`apps/web`)**
+## 0. Before you click Deploy
+
+1. Push this repo to GitHub (`FarhanSayed16/IGShorts_ProjectAWS`). Render and Vercel pull from GitHub.
+2. Pick names now (example):
+   - Render service: `igshorts-api` → `https://igshorts-api.onrender.com`
+   - Vercel project: `igshorts` → `https://igshorts.vercel.app`
+3. Cloud DB is ready: database **`igshorts`** (not `postgres`, not `schema=billpush`).
+
+If those public URLs end up different, just paste the real ones into the env vars below.
+
+---
+
+## 1. Render — API first
+
+[https://dashboard.render.com](https://dashboard.render.com) → **New** → **Web Service** → this GitHub repo.
+
+| Setting | Value |
+|---|---|
+| Runtime | **Docker** |
+| Branch | `main` |
+| Root Directory | **leave empty** |
+| Dockerfile | repo-root `Dockerfile` (this Render form has no Dockerfile Path field) |
+| Instance type | **Free** — not Starter ($7). Look for $0 / 512 MB |
+
+**Advanced (this screen):**
+
+| Field | Value |
+|---|---|
+| Secret Files | skip |
+| Environment groups | skip |
+| Health Check Path | `/api/v1/health` (not `/healthz`) |
+| Pre-Deploy Command | leave empty |
+| Auto-Deploy | On Commit |
+| Build Filters | leave empty |
+
+**Do not set `PORT`.** Render injects it. The app already binds `0.0.0.0`.
+
+Environment variables:
+
+```text
+NODE_ENV=production
+HOST=0.0.0.0
+API_PREFIX=api/v1
+CORS_ORIGIN=https://igshorts.vercel.app
+PROVIDER=seed
+CRON_ENABLED=false
+DATABASE_URL=postgresql://postgres.wixhshvrgojmgdsfzemi:[DB-PASSWORD]@aws-1-ap-south-1.pooler.supabase.com:5432/igshorts?sslmode=require
+ADMIN_JWT_SECRET=<new long random string — not the BillPush JWT>
+ADMIN_BOOTSTRAP_EMAIL=admin@localhost
+ADMIN_BOOTSTRAP_PASSWORD=change-me-now
+```
+
+`DATABASE_URL` must end with **`/igshorts`**.  
+First admin already exists on that database (`admin@localhost`). Bootstrap only runs if the table is empty, so those two bootstrap vars are a safety net.
+
+Health check path: `/api/v1/health`
+
+Deploy, then in the browser:
+
+```text
+https://igshorts-api.onrender.com/api/v1/health
+https://igshorts-api.onrender.com/api/v1/health/ready
+https://igshorts-api.onrender.com/api/v1/charts/global_persons?limit=1
+```
+
+You want `status: ok`, `database: connected`, and Ronaldo at rank 1.  
+If health is slow the first time, wait ~1 minute (free instance cold start).
+
+Copy the Render URL. You need it for Vercel.
+
+---
+
+## 2. Vercel — website second
+
+[https://vercel.com/new](https://vercel.com/new) → same GitHub repo.
+
+| Setting | Value |
+|---|---|
+| Framework | Next.js |
+| Root Directory | `apps/web` |
+| Include files outside root | **On** (needed for `packages/shared`) |
+| Install | `pnpm install` (from repo; Vercel should detect the workspace) |
+| Build | `cd ../.. && pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build` |
+| Output | leave default (Next) |
+| Node | **22** |
+
+If Vercel’s Root Directory UI already runs install at the monorepo root, this also works:
+
+```text
+Build Command: pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build
+```
+
+Environment variables (Production + Preview):
 
 ```text
 NEXT_PUBLIC_API_URL=https://igshorts-api.onrender.com/api/v1
@@ -85,35 +138,53 @@ NEXT_PUBLIC_SITE_URL=https://igshorts.vercel.app
 API_INTERNAL_URL=https://igshorts-api.onrender.com/api/v1
 ```
 
-**Render (`apps/api`)**
+Deploy. Open:
 
 ```text
-NODE_ENV=production
-PORT=4000
-DATABASE_URL=postgresql://postgres.wixhshvrgojmgdsfzemi:[DB-PASSWORD]@aws-1-ap-south-1.pooler.supabase.com:5432/igshorts?sslmode=require
-CORS_ORIGIN=https://igshorts.vercel.app
-PROVIDER=seed
-ADMIN_JWT_SECRET=<new long random — not the BillPush JWT>
-ADMIN_BOOTSTRAP_EMAIL=<your email>
-ADMIN_BOOTSTRAP_PASSWORD=<strong password>
-CRON_ENABLED=false
+https://igshorts.vercel.app
+https://igshorts.vercel.app/charts/global
+https://igshorts.vercel.app/charts/india
 ```
 
-Do not reuse `JWT_SECRET=billpush-...` or `admin@localhost` / `change-me-now` in production.
-
-Small code tweak at deploy time: Next `output: 'standalone'` is for Docker; Vercel may need that gated off.
+If charts are empty, the site cannot see the API: check `NEXT_PUBLIC_API_URL` and Render CORS.
 
 ---
 
-## Verdict
+## 3. Wire CORS if the Vercel URL is not what you guessed
 
-| Ready? | Item |
-|---|---|
-| Yes | Local run & demo (`RUN.md`) |
-| Yes | Isolated cloud database `igshorts` (tables + seed + ranks) |
-| Yes | No Redis / Upstash / BillPush S3 |
-| Yes | BillPush / other schemas left alone |
-| No | Vercel-only deploy |
-| Blocked on you | **API host** (Render / Railway / Fly), then Vercel for the site |
+On Render, set `CORS_ORIGIN` to the **exact** Vercel origin (no trailing slash), then **Redeploy** the API.
 
-Database work is done. Say when you have a Render (or Railway/Fly) account and we can deploy the API, then the Vercel frontend.
+```text
+CORS_ORIGIN=https://igshorts.vercel.app
+```
+
+Custom domain later: add both, comma-separated:
+
+```text
+CORS_ORIGIN=https://igshorts.vercel.app,https://www.yourdomain.com
+```
+
+---
+
+## 4. After it is live — 2-minute check
+
+1. Home shows Global 100 / India 100.
+2. `#1` is Ronaldo / Kohli.
+3. Watchlist and Methodology load.
+4. `https://<render>/api/v1/health/ready` → `database: connected`.
+5. Admin login (change that password after first login).
+
+---
+
+## Do not
+
+- Point `DATABASE_URL` at `/postgres` or `schema=billpush`
+- Add Redis / Upstash / BillPush `JWT_SECRET` / S3
+- Expect Vercel to run the Nest API
+- Commit `.env` files
+
+---
+
+## Known tweak
+
+`apps/web/next.config.ts` has `output: 'standalone'` for Docker. If the Vercel build fails on that, say so — it should be gated off for Vercel (`VERCEL` env is set automatically). Local Docker web image can keep standalone.
