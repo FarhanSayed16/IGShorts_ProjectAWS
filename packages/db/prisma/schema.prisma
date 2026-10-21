@@ -1,0 +1,165 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model DataSource {
+  id          String   @id @default(cuid())
+  code        String   @unique // seed_xlsx, meta_graph, editorial, vendor
+  displayName String   @map("display_name")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  metricSnapshots MetricSnapshot[]
+
+  @@map("data_sources")
+}
+
+model CreatorProfile {
+  id                String    @id @default(cuid())
+  igUsername        String    @unique @map("ig_username") // lowercase, no @
+  displayName       String    @map("display_name")
+  profileUrl        String    @map("profile_url")
+  avatarUrl         String?   @map("avatar_url")
+  avatarSource      String?   @map("avatar_source")
+  shortBio          String?   @map("short_bio")
+  entityType        String    @default("person") @map("entity_type") // person, brand, team, platform, other
+  category          String?
+  countryRegion     String?   @map("country_region")
+  isListed          Boolean   @default(true) @map("is_listed") // false = hidden from charts
+  isActive          Boolean   @default(true) @map("is_active")
+  isVerifiedHandle  Boolean   @default(false) @map("is_verified_handle")
+  igUserId          String?   @map("ig_user_id") // Meta IG business id
+  lastSyncedAt      DateTime? @map("last_synced_at")
+  lastSyncStatus    String?   @map("last_sync_status") // success, error
+  lastSyncError     String?   @map("last_sync_error")
+  seedRank          Int?      @map("seed_rank")
+  seedConfidence    String?   @map("seed_confidence") // Medium, Low
+  seedNotes         String?   @map("seed_notes")
+  rankingSourceUrl  String?   @map("ranking_source_url")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  scopes            ProfileScope[]
+  metricSnapshots   MetricSnapshot[]
+  rankingEntries    RankingEntry[]
+
+  @@index([entityType])
+  @@index([isListed, isActive])
+  @@map("creator_profiles")
+}
+
+model ProfileScope {
+  id         String   @id @default(cuid())
+  profileId  String   @map("profile_id")
+  scope      String   // india, global
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  profile    CreatorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, scope])
+  @@index([scope])
+  @@map("profile_scopes")
+}
+
+model MetricSnapshot {
+  id              String   @id @default(cuid())
+  profileId       String   @map("profile_id")
+  sourceId        String   @map("source_id")
+  metricName      String   @default("follower_count") @map("metric_name")
+  metricValue     BigInt?  @map("metric_value") // Nullable! Missing is null, never zero
+  observedAt      DateTime @map("observed_at")
+  ingestedAt      DateTime @default(now()) @map("ingested_at")
+  rawPayloadRef   String?  @map("raw_payload_ref")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  profile         CreatorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  source          DataSource     @relation(fields: [sourceId], references: [id])
+
+  @@index([profileId, metricName, observedAt(sort: Desc)])
+  @@map("metric_snapshots")
+}
+
+model RankingRun {
+  id               String    @id @default(cuid())
+  chartKey         String    @map("chart_key") // global_persons, india_persons
+  algorithmVersion String    @default("followers_v1") @map("algorithm_version")
+  status           String    @default("running") // running, success, failed
+  startedAt        DateTime  @default(now()) @map("started_at")
+  finishedAt       DateTime? @map("finished_at")
+  profileCount     Int       @default(0) @map("profile_count")
+  notes            String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  entries          RankingEntry[]
+
+  @@index([chartKey, status, finishedAt(sort: Desc)])
+  @@map("ranking_runs")
+}
+
+model RankingEntry {
+  id                   String   @id @default(cuid())
+  runId                String   @map("run_id")
+  profileId            String   @map("profile_id")
+  rank                 Int
+  previousRank         Int?     @map("previous_rank")
+  rankDelta            Int      @default(0) @map("rank_delta")
+  metricValue          BigInt?  @map("metric_value")
+  previousMetricValue  BigInt?  @map("previous_metric_value")
+  metricDelta          BigInt   @default(0) @map("metric_delta")
+  isTied               Boolean  @default(false) @map("is_tied")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  run                  RankingRun     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  profile              CreatorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, profileId])
+  @@index([runId, rank])
+  @@map("ranking_entries")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("editor") // admin, editor
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  actor         String   // user email or system job
+  action        String   // profile_create, profile_hide, seed_import, ranking_run, login
+  entityType    String?  @map("entity_type")
+  entityId      String?  @map("entity_id")
+  beforeSummary String?  @map("before_summary")
+  afterSummary  String?  @map("after_summary")
+  ip            String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([action, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model JobRun {
+  id         String    @id @default(cuid())
+  jobName    String    @map("job_name")
+  status     String    // running, success, failed
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  stats      String?   // JSON summary of processed/failed/skipped
+  error      String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([jobName, startedAt(sort: Desc)])
+  @@map("job_runs")
+}
