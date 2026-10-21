@@ -106,24 +106,30 @@ Copy the Render URL. You need it for Vercel.
 | Framework | Next.js |
 | Root Directory | `apps/web` |
 | Include files outside root | **On** (needed for `packages/shared`) |
-| Install | `pnpm install` (from repo; Vercel should detect the workspace) |
-| Build | `cd ../.. && pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build` |
-| Output | leave default (Next) |
 | Node | **22** |
+| Install / Build | from `apps/web/vercel.json` (do not leave Build as `pnpm run build`) |
 
-If Vercel’s Root Directory UI already runs install at the monorepo root, this also works:
-
-```text
-Build Command: pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build
-```
-
-Environment variables (Production + Preview):
+If the dashboard still says Build Command `pnpm run build`, override it to:
 
 ```text
-NEXT_PUBLIC_API_URL=https://igshorts-api.onrender.com/api/v1
-NEXT_PUBLIC_SITE_URL=https://igshorts.vercel.app
-API_INTERNAL_URL=https://igshorts-api.onrender.com/api/v1
+cd ../.. && pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build
 ```
+
+Install override (skips Prisma / API):
+
+```text
+cd ../.. && pnpm install --frozen-lockfile --filter @igshorts/web...
+```
+
+Environment variables (Production + Preview) — also in `deploy.env`:
+
+```text
+NEXT_PUBLIC_API_URL=https://igshorts-projectaws.onrender.com/api/v1
+API_INTERNAL_URL=https://igshorts-projectaws.onrender.com/api/v1
+NEXT_PUBLIC_SITE_URL=https://igshorts-projectaws.vercel.app
+```
+
+If Vercel assigns a different domain, change `NEXT_PUBLIC_SITE_URL` to that origin (no trailing slash) and Redeploy. Charts still work from `NEXT_PUBLIC_API_URL` even if SITE_URL is slightly wrong.
 
 Deploy. Open:
 

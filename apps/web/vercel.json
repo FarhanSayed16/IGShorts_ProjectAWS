@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile --filter @igshorts/web...",
+  "buildCommand": "cd ../.. && pnpm --filter @igshorts/shared build && pnpm --filter @igshorts/web build"
+}

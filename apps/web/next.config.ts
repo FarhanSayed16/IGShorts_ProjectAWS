@@ -3,7 +3,8 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@igshorts/shared'],
-  output: 'standalone',
+  // Docker/ECS needs standalone. Vercel sets VERCEL=1 and uses its own output.
+  output: process.env.VERCEL ? undefined : 'standalone',
   images: {
     remotePatterns: [
       {
