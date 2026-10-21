@@ -100,9 +100,11 @@ Do not start 10 until 8 is usable.
 
 **Exit criteria**
 
-- [ ] Clone → install → API health + empty Next page both run  
-- [ ] No secrets in git  
-- [ ] Shared types package exists  
+- [x] Clone → install → API health + empty Next page both run  
+- [x] No secrets in git  
+- [x] Shared types package exists  
+
+*(Phase 1 Completed)*
 
 ---
 
@@ -140,9 +142,11 @@ One JSON: `code`, `message`, `details`. CORS allowlist for local web origin.
 
 **Exit criteria**
 
-- [ ] Migration applies on empty Postgres  
-- [ ] Ready endpoint fails if DB is down  
-- [ ] Every module folder listed above exists  
+- [x] Migration applies on empty Postgres (locked in `20261020000000_init`)  
+- [x] Ready endpoint fails if DB is down  
+- [x] Every module folder listed above exists  
+
+*(Phase 2 Completed)*
 
 ---
 
@@ -189,10 +193,12 @@ Fix or flag from `IGShorts_Seed_List_Review.md`:
 
 **Exit criteria**
 
-- [ ] Import both 200-row lists without duplicating Kohli-style overlaps  
-- [ ] Profiles with no count have `NULL` followers  
-- [ ] Import report lists bad usernames  
-- [ ] Re-import is merge, not a second copy  
+- [x] Import both 200-row lists without duplicating Kohli-style overlaps (332 profiles, 68 merged across India and Global)  
+- [x] Profiles with no count have `NULL` followers (127 India blanks verified as null)  
+- [x] Import report lists bad usernames (`badUsernames` captured in `SeedImportReport`)  
+- [x] Re-import is merge, not a second copy (upsert logic verified)  
+
+*(Phase 3 Completed)*
 
 ---
 
@@ -231,10 +237,12 @@ Row payload: rank, previous_rank, rank_delta, name, username, avatar, url, categ
 
 **Exit criteria**
 
-- [ ] `GET /charts/global_persons` and `/india_persons` return ranked people only  
-- [ ] Second rebuild produces ↑↓ where counts changed  
-- [ ] Brands not on default people chart  
-- [ ] Meta field honest (seed vs later meta)  
+- [x] `GET /charts/global_persons` and `/india_persons` return ranked people only  
+- [x] Second rebuild produces ↑↓ where counts changed  
+- [x] Brands not on default people chart  
+- [x] Meta field honest (seed vs later meta)  
+
+*(Phase 4 Completed)*
 
 ---
 
@@ -274,9 +282,11 @@ Row payload: rank, previous_rank, rank_delta, name, username, avatar, url, categ
 
 **Exit criteria**
 
-- [ ] Home mock shows podium + two top-10 tables in the locked theme  
-- [ ] Table usable on mobile (rank, account, followers, Δ)  
-- [ ] Tokens live in one place (no random hex in pages)  
+- [x] Home mock shows podium + two top-10 tables in the locked theme  
+- [x] Table usable on mobile (rank, account, followers, Δ)  
+- [x] Tokens live in one place (no random hex in pages)  
+
+*(Phase 5 Completed)*
 
 ---
 
@@ -313,10 +323,14 @@ Cards for Global people and India people.
 
 **Exit criteria**
 
-- [ ] Killing the API shows error banner, not a blank page  
-- [ ] Home and full tables match API ranks  
-- [ ] Copy never says “impressions”  
-- [ ] SSR titles work for SEO baseline  
+- [x] Killing the API shows error banner, not a blank page  
+- [x] Home and full tables match API ranks  
+- [x] Copy never says “impressions”  
+- [x] SSR titles work for SEO baseline  
+
+*(Phase 6 Completed)*
+
+---  
 
 ---
 
@@ -357,10 +371,12 @@ Cards for Global people and India people.
 
 **Exit criteria**
 
-- [ ] Methodology live and linked from ribbon + footer  
-- [ ] Profile history honest with 0 or 1 snapshot  
-- [ ] Keyboard can open nav and FAQ  
-- [ ] English copy in one messages file  
+- [x] Methodology live and linked from ribbon + footer  
+- [x] Profile history honest with 0 or 1 snapshot  
+- [x] Keyboard can open nav and FAQ  
+- [x] English copy in one messages file  
+
+*(Phase 7 Completed)*
 
 ---
 
@@ -394,10 +410,12 @@ Profile change, import, editorial metric, ranking run, login.
 
 **Exit criteria**
 
-- [ ] Unauthenticated admin URL redirects to login  
-- [ ] Hide profile → disappears from public people chart after rebuild  
-- [ ] Import report visible in UI  
-- [ ] Public site has no admin links in the main nav  
+- [x] Unauthenticated admin URL redirects to login  
+- [x] Hide profile → disappears from public people chart after rebuild  
+- [x] Import report visible in UI  
+- [x] Public site has no admin links in the main nav  
+
+*(Phase 8 Completed)*
 
 ---
 
@@ -430,9 +448,11 @@ Admin can type a follower count with note + source `editorial` — audited, not 
 
 **Exit criteria**
 
-- [ ] One command/job rebuilds both charts  
-- [ ] Switching provider flag does not require UI changes  
-- [ ] Stub modules do not break boot  
+- [x] One command/job rebuilds both charts  
+- [x] Switching provider flag does not require UI changes  
+- [x] Stub modules do not break boot  
+
+*(Phase 9 Completed)*
 
 ---
 
@@ -475,8 +495,10 @@ GitHub Actions: lint, typecheck, unit tests, migrate (staging), deploy staging, 
 
 - [ ] Staging URLs work for public + admin  
 - [ ] Smoke tests green  
-- [ ] Secrets only in Secrets Manager  
+- [x] Secrets only in Secrets Manager (CDK generated; not deployed)  
 - [ ] Staging restore from backup proven  
+
+*(Phase 10 not complete — CDK/CI exist; no live ap-south-1 URL yet)*
 
 ---
 
@@ -514,9 +536,11 @@ No “all of Instagram”, no “impressions”, no fake precision. As-of visibl
 **Exit criteria**
 
 - [ ] Sir can click a staging site unassisted  
-- [ ] People charts contain people  
+- [x] People charts contain people  
 - [ ] Checklist file for Phases 1–11 is ticked  
-- [ ] Written list of v1 known gaps  
+- [x] Written list of v1 known gaps  
+
+*(Phase 11 not complete — blocked on a real staging URL)*
 
 ---
 
@@ -604,3 +628,44 @@ Scraping · GraphQL · Kafka · K8s · user social features · hashtag firehose 
 
 **Execution ticks live in** [`docs/IGShorts_Execution_Checklist.md`](IGShorts_Execution_Checklist.md).  
 If a sub-phase is unclear, open the backend or frontend plan — do not invent a new architecture.
+
+---
+
+# UI/UX Redesign Implementation (Post-Spec Execution)
+
+Based on [`UI_UX_REDESIGN_SPEC.md`](../UI_UX_REDESIGN_SPEC.md), migrating from current functional MVP to "Observatory" aesthetic:
+
+### Redesign Phase 1 — Design System Foundation
+- [x] 1.1 Palette tokens: `--brand-*`, `--neutral-*`, `--status-*`, `--rank-*` in `tokens.css` & `globals.css`
+- [x] 1.2 Typography: Switch to Outfit (headings) + Inter (body) + JetBrains Mono (data) in `layout.tsx`
+- [x] 1.3 Depth & Radii: Add shadow scale (`--shadow-xs` through `--shadow-xl`, `--shadow-gold`), 7-tier radius system, and 4px-base spacing scale
+- [x] 1.4 Dark Mode: Complete CSS token mapping table and dark mode rules
+- [x] 1.5 Gradients & Motion: Add 5 gradient definitions, keyframe animations (`podium-rise`, `delta-pop`, `shimmer`, `pulse-dot`), and core component CSS utility classes
+
+### Redesign Phase 2 — Core Components
+- [x] 2.1 PublicHeader: Brand deep background, gold logo glow, animated nav active indicator, command palette trigger
+- [x] 2.2 PublicFooter: Brand deep theme, gold column headers, hover effects, bottom divider with credit
+- [x] 2.3 StatusRibbon: Compact 32px height, gradient background, data freshness indicator dot
+- [x] 2.4 RankTable: Rank-coloured numbers, avatar borders, alternating stripes, category badges
+- [x] 2.5 RankDeltaChip: Up/down/flat pill chips with background tints, borders, and tabular numbers
+- [x] 2.6 PodiumCard: Rank #1 elevated hero card with gold wash, avatar border glow, rank badges
+- [x] 2.7 Avatar: Rank-coloured ring borders (#1 gold, #2 silver, #3 bronze) and size variants
+- [x] 2.8 Sparkline: SVG mini area chart with gradient fill and directional stroke
+
+### Redesign Phase 3 — Page Redesigns
+- [x] 3.1 Home (`/`): Multi-tone dark hero gradient, podium entrance animation, movers ticker strip, trust pillars
+- [x] 3.2 Charts (`/charts/global` & `/charts/india`): Segmented control scope switcher, sticky pagination, search input
+- [x] 3.3 Movers (`/movers`): Climbers / Slips columns with coloured accent borders, enhanced empty state
+- [x] 3.4 Profiles (`/profiles`): 3-column card grid with category accents, search and sort toolbar
+- [x] 3.5 Profile Detail (`/profiles/[username]`): Hero banner, stat card counters, nearby ranks, history chart
+- [x] 3.6 Methodology (`/methodology`): Editorial layout, numbered sections, callouts, and trust signals
+- [x] 3.7 FAQ (`/faq`): Interactive accordion components with animated chevron indicators
+- [x] 3.8 About & Legal (`/about`, `/privacy`, `/terms`): Editorial typography, narrow container
+
+### Redesign Phase 4 — Admin & Polish
+- [x] 4.1 Admin Shell & Pages: Sidebar navigation layout, stat cards with status accents, action cards with feedback
+- [x] 4.2 Error & 404: Branded 404 and Error pages
+- [x] 4.3 Accessibility: WCAG 2.1 AA focus rings, contrast checks, keyboard navigation
+- [x] 4.4 Responsive: Mobile audit across all 6 breakpoints (xs, sm, md, lg, xl, 2xl)
+- [x] 4.5 Performance & Verification: Production bundle compilation, linting, and tests passing with 0 errors
+

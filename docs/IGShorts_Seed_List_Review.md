@@ -34,7 +34,7 @@ Sources used (hafi.pro, FastSocial, trendingpunjabi) are **public ranking pages*
 | People vs brands | Sir asked for **people**. Sheet includes IPL teams, Zomato, Swiggy, Nike, Apple, @instagram, luxury brands. |
 | Overlap | **68 usernames** sit in both India and Global (expected, but we must tag `scope`, not duplicate as two products). |
 | Broken username | India #154 **MC Stan** is `@m cstan` (space). Must be `@mcstan`. |
-| Unofficial / weak rows | India #91 “Ranbir Kapoor fan/official availability check”; #113 Danish Zehen legacy; Global #176 Avicii legacy. |
+| Unofficial / weak rows | India #91 “Ranbir Kapoor fan/official availability check”; #113 Danish Zehen legacy; Global #176 Avicii legacy. **Decision (v1):** keep the rows in the watchlist, set `is_listed = false` on first import, seed note explains why. They do not appear on people charts. An admin can list them later if the handle is verified as the real person. |
 | Encoding | Global #171 `Sadio Mané`, #172 `Sergio Agüero` may show as `Man�` / `Ag�ero`. |
 | Rounded millions | Counts are rounded public-page figures. Dashboard must store **exact integers** once we sync. |
 

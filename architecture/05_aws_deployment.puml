@@ -1,5 +1,5 @@
 @startuml IGshorts_AWS_Deployment
-title IGshorts — AWS Deployment Architecture
+title IGshorts — AWS Staging Stack (CDK, ap-south-1)
 
 skinparam backgroundColor #F7F9FC
 skinparam shadowing false
@@ -17,91 +17,80 @@ skinparam packageFontColor #0F172A
 skinparam packageFontStyle bold
 skinparam rectangleBorderColor #94A3B8
 skinparam databaseBorderColor #0EA5E9
-skinparam cloudBorderColor #6366F1
-skinparam nodeBorderColor #64748B
 skinparam noteBackgroundColor #EFF6FF
 skinparam noteBorderColor #3B82F6
 skinparam noteFontColor #1E3A8A
 skinparam legendBackgroundColor #FFFFFF
 skinparam legendBorderColor #E2E8F0
 
-actor "Users / Editors" as U #FEF3C7
+actor "Public users / editors" as U #FEF3C7
 
-cloud "DNS & Edge" as Edge #EEF2FF {
-  rectangle "**Route 53**\nigshorts.com" as R53 #E0E7FF
-  rectangle "**CloudFront**\nCDN + HTTPS" as CF #C7D2FE
-  rectangle "**AWS WAF**\nOWASP rules · rate limit" as WAF #A5B4FC
-}
+package "AWS Region ap-south-1" as Region #F8FAFC {
 
-package "AWS Region (e.g. ap-south-1)" as Region #F8FAFC {
-
-  package "Compute" as Compute #F0FDF4 {
-    rectangle "**Next.js App**\nAmplify Hosting\n— or —\nECS Fargate service" as WebApp #DCFCE7
-    rectangle "**API Service**\nECS Fargate + ALB\nNestJS / FastAPI" as ApiApp #BBF7D0
-    rectangle "**Workers**\nECS scheduled tasks\nor Lambda + EventBridge" as Workers #86EFAC
+  package "Edge" as Edge #EEF2FF {
+    rectangle "**Application Load Balancer**\nHTTP :80 · HTTPS :443 if ACM ARN set\npath: / → web · /api/* → API" as ALB #C7D2FE
+    rectangle "**AWS WAF**\nrate limit · common rule set" as WAF #A5B4FC
   }
 
-  package "Data Tier (Private Subnets)" as DataTier #FDF2F8 {
-    database "**Aurora PostgreSQL**\nMulti-AZ (prod)" as Aurora #FCE7F3
-    database "**ElastiCache Redis**" as Redis #FBCFE8
-    rectangle "**S3 Buckets**\nassets · exports · backups" as S3 #F9A8D4
+  package "Compute (ECS Fargate)" as Compute #F0FDF4 {
+    rectangle "**Web task**\nNext.js standalone\nport 3000" as WebApp #DCFCE7
+    rectangle "**API task**\nNestJS Fastify\nport 4000" as ApiApp #BBF7D0
+    rectangle "**Pipeline task**\nEventBridge 02:00 UTC\nnode apps/api/dist/scripts/run-pipeline.js" as Workers #86EFAC
   }
 
-  package "Security & Config" as Sec #FFF7ED {
-    rectangle "**Secrets Manager**\nMeta tokens · DB creds" as SM #FFEDD5
-    rectangle "**IAM Roles**\nLeast privilege" as IAM #FED7AA
-    rectangle "**VPC**\nPublic / Private subnets\nNAT · Security Groups" as VPC #FDBA74
+  package "Data (private / isolated subnets)" as DataTier #FDF2F8 {
+    database "**RDS PostgreSQL 16**\nSecrets Manager credentials" as RDS #FCE7F3
+    rectangle "**S3 imports bucket**\nseed files · private" as S3 #F9A8D4
+  }
+
+  package "Security" as Sec #FFF7ED {
+    rectangle "**Secrets Manager**\nJWT · API key · jobs secret · DB" as SM #FFEDD5
+    rectangle "**VPC**\npublic / compute / isolated DB" as VPC #FDBA74
   }
 
   package "Observability" as Obs #ECFEFF {
-    rectangle "**CloudWatch**\nLogs · Metrics · Alarms" as CW #CFFAFE
-    rectangle "**SNS Alerts**\nOn-call notifications" as SNS #A5F3FC
+    rectangle "**CloudWatch**\nlogs · EMF JobFailed / freshness" as CW #CFFAFE
+    rectangle "**SNS alerts**\n5xx · failed job · stale ranks" as SNS #A5F3FC
   }
 }
 
-cloud "External" as Ext #F1F5F9 {
-  rectangle "**Meta Graph API**" as Meta #E2E8F0
-  rectangle "**GitHub Actions**\nCI/CD pipelines" as GH #CBD5E1
+cloud "CI" as Ext #F1F5F9 {
+  rectangle "**GitHub Actions**\npnpm 11.17 · CDK asset deploy" as GH #CBD5E1
 }
 
-U --> R53
-R53 --> CF
-CF --> WAF
-WAF --> WebApp
-WAF --> ApiApp
-WebApp --> ApiApp : internal API calls
-ApiApp --> Aurora
-ApiApp --> Redis
+U --> WAF
+WAF --> ALB
+ALB --> WebApp
+ALB --> ApiApp
+WebApp --> ApiApp : SSR uses API_INTERNAL_URL
+ApiApp --> RDS
 ApiApp --> S3
 ApiApp --> SM
-Workers --> Meta
-Workers --> Aurora
-Workers --> Redis
+Workers --> RDS
 Workers --> SM
 WebApp --> CW
 ApiApp --> CW
 Workers --> CW
 CW --> SNS
-GH --> WebApp : deploy
-GH --> ApiApp : deploy
-GH --> Workers : deploy
-ApiApp ..> VPC : runs inside
-Workers ..> IAM : assumes roles
+GH --> WebApp : cdk fromAsset repo root
+GH --> ApiApp : cdk fromAsset repo root
+GH --> Workers : same API image
 
-note right of Workers
-  Sync cadence example:
-  every **6–12 hours**
-  watchlist batches only
+note right of ALB
+  HTTPS requires context
+  **certificateArn**.
+  Without it, staging is HTTP-only.
 end note
 
-note bottom of Aurora
-  Keep full **snapshot history**
-  so charts can show weekly movers (↑↓)
+note bottom of RDS
+  API builds Prisma URL from
+  **host / username / password / dbname**
+  secret fields (not DATABASE_URL key).
 end note
 
 legend right
   |= Color |= Area |
-  | <#C7D2FE> | Edge / CDN |
+  | <#C7D2FE> | Edge |
   | <#DCFCE7> | Compute |
   | <#FCE7F3> | Data |
   | <#FFEDD5> | Security |
