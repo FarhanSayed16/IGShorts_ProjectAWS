@@ -1,4 +1,6 @@
-# Multi-stage Dockerfile for @igshorts/api
+# Multi-stage Dockerfile for @igshorts/api (build context = repo root)
+# Keep in sync with the root Dockerfile used by Render.
+
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -6,14 +8,14 @@ RUN corepack enable && corepack prepare pnpm@11.17.0 --activate
 
 WORKDIR /app
 
-# Stage 1: Dependencies & Build
 FROM base AS builder
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
 COPY apps/api/package.json ./apps/api/
 
-RUN pnpm install --frozen-lockfile
+RUN printf "node-linker=hoisted\n" > .npmrc \
+  && pnpm install --frozen-lockfile
 
 COPY tsconfig.base.json ./
 COPY packages/shared ./packages/shared
@@ -24,16 +26,17 @@ RUN pnpm --filter @igshorts/shared build
 RUN pnpm --filter @igshorts/db build
 RUN pnpm --filter @igshorts/api build
 
-# Stage 2: Production Runner
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=4000
+ENV HOST=0.0.0.0
+ENV NODE_PATH=/app/node_modules
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nestjs
 
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
 COPY --from=builder /app/packages/db/dist ./packages/db/dist
