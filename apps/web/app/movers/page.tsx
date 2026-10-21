@@ -7,12 +7,13 @@ import { PublicFooter } from '@/components/chrome/public-footer';
 import { Avatar } from '@/components/rank/avatar';
 import { FollowerCount } from '@/components/rank/follower-count';
 import { RankDeltaChip } from '@/components/rank/rank-delta-chip';
+import { FollowerDelta } from '@/components/rank/follower-delta';
 import { ErrorBanner } from '@/components/feedback/error-banner';
 import { fetchChartMovers } from '@/lib/api/client';
 
 export const metadata: Metadata = {
   title: 'Movers',
-  description: 'Who climbed and who slipped on the IGshorts people charts since the last snapshot.',
+  description: 'Who climbed and who slipped on the IGshorts people charts since last chart.',
 };
 
 function MoverRow({ entry }: { entry: ChartEntry }) {
@@ -35,7 +36,8 @@ function MoverRow({ entry }: { entry: ChartEntry }) {
         <div className="text-sm font-semibold tabular-nums">
           <FollowerCount count={entry.follower_count} />
         </div>
-        <RankDeltaChip delta={entry.rank_delta} />
+        <FollowerDelta previousCount={entry.previous_follower_count} delta={entry.follower_delta} />
+        <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
       </div>
     </Link>
   );
@@ -44,11 +46,11 @@ function MoverRow({ entry }: { entry: ChartEntry }) {
 function EmptyMovers({ label }: { label: string }) {
   return (
     <div className="py-12 px-4 text-center border border-[var(--line)] bg-[var(--surface)]">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]">
-        Debut snapshot
+      <p className="inline-block border border-[var(--ink)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em]">
+        Debut
       </p>
       <p className="text-xs text-[var(--ink-muted)] mt-2 max-w-sm mx-auto">
-        {label} appear after the next ranking run. A first import has no last week to compare.
+        {label} appear after the next ranking run. There is no previous chart to compare yet.
       </p>
     </div>
   );
@@ -91,7 +93,7 @@ export default async function MoversPage({
         <div className="mb-8">
           <h1 className="chart-title text-5xl sm:text-7xl text-[var(--ink)]">Movers</h1>
           <p className="text-sm text-[var(--ink-muted)] mt-3 max-w-2xl leading-relaxed">
-            Largest rank changes versus the previous verified snapshot.
+            Largest rank changes since last chart. A first snapshot has no previous run to compare.
           </p>
 
           <div className="inline-flex mt-6 border border-[var(--ink)]">

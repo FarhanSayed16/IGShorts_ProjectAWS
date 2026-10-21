@@ -88,7 +88,10 @@ export class ChartsService {
       entity_type: entry.profile.entityType as ChartEntry['entity_type'],
       follower_count: bigintToNumber(entry.metricValue),
       previous_follower_count: bigintToNumber(entry.previousMetricValue),
-      follower_delta: Number(entry.metricDelta),
+      follower_delta:
+        entry.previousMetricValue === null || entry.previousMetricValue === undefined
+          ? null
+          : Number(entry.metricDelta),
       observed_at: (snapshot?.observedAt || entry.createdAt).toISOString(),
       source: snapshot?.source?.code || DATA_SOURCES.SEED_XLSX,
     };

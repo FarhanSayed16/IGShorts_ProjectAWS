@@ -1,9 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
-import { Minus, ArrowUp, ArrowDown } from 'lucide-react';
 import { ChartEntry } from '@igshorts/shared';
 import { Avatar } from './avatar';
 import { FollowerCount } from './follower-count';
+import { FollowerDelta } from './follower-delta';
+import { RankDeltaChip } from './rank-delta-chip';
 import { RankNumber } from './rank-number';
 
 interface BillboardListProps {
@@ -12,31 +13,9 @@ interface BillboardListProps {
   caption?: string;
 }
 
-function Move({ delta }: { delta: number }) {
-  if (delta > 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[var(--up)] text-xs font-bold">
-        <ArrowUp className="w-3 h-3" />
-        {delta}
-      </span>
-    );
-  }
-  if (delta < 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[var(--down)] text-xs font-bold">
-        <ArrowDown className="w-3 h-3" />
-        {Math.abs(delta)}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center text-[var(--ink-faint)]">
-      <Minus className="w-3.5 h-3.5" />
-    </span>
-  );
-}
-
 function FeaturedRow({ entry }: { entry: ChartEntry }) {
+  const hasHistory = entry.previous_rank != null;
+
   return (
     <article className="bg-[var(--surface)] border border-[var(--line)] p-4 sm:p-6">
       <div className="flex items-stretch gap-0">
@@ -46,9 +25,16 @@ function FeaturedRow({ entry }: { entry: ChartEntry }) {
         </Link>
         <div className="flex-1 min-w-0 pl-4 sm:pl-6 flex flex-col justify-center">
           <Link href={`/profiles/${entry.username}`} className="group">
-            <h2 className="font-display text-3xl sm:text-[44px] text-[var(--ink)] leading-[0.95] group-hover:underline">
-              {entry.display_name}
-            </h2>
+            <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+              <h2 className="font-display text-3xl sm:text-[44px] text-[var(--ink)] leading-[0.95] group-hover:underline">
+                {entry.display_name}
+              </h2>
+              {!hasHistory && (
+                <span className="mt-1.5 sm:mt-2">
+                  <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-sm text-[var(--ink-muted)]">@{entry.username}</p>
           </Link>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
@@ -59,31 +45,32 @@ function FeaturedRow({ entry }: { entry: ChartEntry }) {
               <div className="text-2xl sm:text-3xl font-semibold tabular-nums">
                 <FollowerCount count={entry.follower_count} />
               </div>
+              <FollowerDelta
+                previousCount={entry.previous_follower_count}
+                delta={entry.follower_delta}
+              />
             </div>
-            {entry.previous_rank != null || entry.rank_delta !== 0 ? (
+            {hasHistory ? (
               <dl className="grid grid-cols-3 gap-4 text-right text-[11px] uppercase tracking-wider text-[var(--ink-muted)]">
                 <div>
                   <dt>Last</dt>
-                  <dd className="text-[var(--ink)] font-bold tabular-nums">
-                    {entry.previous_rank ?? '—'}
-                  </dd>
+                  <dd className="text-[var(--ink)] font-bold tabular-nums">{entry.previous_rank}</dd>
                 </div>
                 <div>
                   <dt>Move</dt>
-                  <dd>
-                    <Move delta={entry.rank_delta} />
+                  <dd className="normal-case tracking-normal">
+                    <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
                   </dd>
+                  <dt className="mt-0.5 text-[9px] font-normal tracking-[0.12em] text-[var(--ink-faint)]">
+                    Since last chart
+                  </dt>
                 </div>
                 <div>
                   <dt>Peak</dt>
                   <dd className="text-[var(--ink)] font-bold tabular-nums">{entry.rank}</dd>
                 </div>
               </dl>
-            ) : (
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-faint)]">
-                Debut snapshot
-              </p>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -110,16 +97,17 @@ function ChartRow({ entry }: { entry: ChartEntry }) {
           </Link>
           <p className="text-xs text-[var(--ink-muted)] truncate">@{entry.username}</p>
         </div>
-        <div className="hidden sm:block w-16 text-right">
-          <Move delta={entry.rank_delta} />
+        <div className="w-[4.5rem] sm:w-24 text-right shrink-0">
+          <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
         </div>
         <div className="text-right shrink-0">
           <div className="text-base sm:text-lg font-semibold tabular-nums">
             <FollowerCount count={entry.follower_count} />
           </div>
-          <div className="hidden md:block text-[10px] uppercase tracking-wider text-[var(--ink-faint)]">
-            {entry.category || 'Person'}
-          </div>
+          <FollowerDelta
+            previousCount={entry.previous_follower_count}
+            delta={entry.follower_delta}
+          />
         </div>
       </div>
     </article>

@@ -40,6 +40,22 @@ export function formatRankDelta(delta: number): {
   return { text: '—', direction: 'flat' };
 }
 
+export type RankMoveKind = 'debut' | 'up' | 'down' | 'flat';
+
+/** previous_rank is the source of truth. rank_delta 0 with no previous is Debut, not “no change”. */
+export function rankMoveKind(previousRank: number | null | undefined, delta: number): RankMoveKind {
+  if (previousRank == null) return 'debut';
+  if (delta > 0) return 'up';
+  if (delta < 0) return 'down';
+  return 'flat';
+}
+
+export function formatSignedFollowers(delta: number): string {
+  if (delta === 0) return '0';
+  const abs = formatFollowers(Math.abs(delta));
+  return delta > 0 ? `+${abs}` : `−${abs}`;
+}
+
 export function formatRelativeTime(dateString: string): string {
   try {
     const date = new Date(dateString);

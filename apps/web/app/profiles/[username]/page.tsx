@@ -154,10 +154,12 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                 <div className="text-3xl font-mono font-bold text-[var(--neutral-900)] dark:text-white mb-2">
                   <FollowerCount count={latestFollowerCount} />
                 </div>
-                {latestRankEntry && latestRankEntry.rankDelta !== 0 && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--neutral-500)]">
-                    <span>Rank delta:</span>
-                    <RankDeltaChip delta={latestRankEntry.rankDelta} size="sm" />
+                {latestRankEntry && (
+                  <div className="mt-2">
+                    <RankDeltaChip
+                      previousRank={latestRankEntry.previousRank}
+                      delta={latestRankEntry.rankDelta}
+                    />
                   </div>
                 )}
               </div>
@@ -187,8 +189,9 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                     Competition Rank #{latestRankEntry.rank}
                   </span>
                   <span className="text-xs text-[var(--neutral-500)]">
-                    Previous:{' '}
-                    {latestRankEntry.previousRank ? `#${latestRankEntry.previousRank}` : 'Unranked'}
+                    {latestRankEntry.previousRank != null
+                      ? `Previous: #${latestRankEntry.previousRank}`
+                      : 'Debut — no previous chart'}
                   </span>
                 </div>
               </div>

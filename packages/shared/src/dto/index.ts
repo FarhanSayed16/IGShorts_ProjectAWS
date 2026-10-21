@@ -22,7 +22,8 @@ export interface ChartEntry {
   entity_type: EntityType;
   follower_count: number | null;
   previous_follower_count: number | null;
-  follower_delta: number;
+  /** Null when there is no previous count. Never treat missing as zero. */
+  follower_delta: number | null;
   observed_at: string; // ISO date string
   source: DataSourceCode | string;
 }
