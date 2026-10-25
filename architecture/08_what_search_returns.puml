@@ -1,0 +1,43 @@
+@startuml IGshorts_What_Search_Returns
+title IGshorts — What a search returns
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 14
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 12
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.4
+skinparam rectangleBorderColor #94A3B8
+skinparam rectangleFontColor #1F2937
+
+caption Nothing here is a live follower count or a worldwide rank.
+
+together {
+  rectangle "Already saved\nname or handle" as In1
+  rectangle "Exact @handle\nwe have never saved" as In2
+  rectangle "Partial name\nor nickname" as In3
+  rectangle "Personal account\nor joined yesterday" as In4
+}
+
+together {
+  rectangle "Saved profile.\nChart place if already famous.\nGroup only at 10 thousand or more." as Out1
+  rectangle "Name, handle, bio, photo\nonly if a proven source accepts it.\nUnder 10 thousand: not grouped." as Out2
+  rectangle "No result from\nall of Instagram." as Out3
+  rectangle "Could not verify.\nNo guessed number." as Out4
+}
+
+In1 -right-> Out1
+In2 -right-> Out2
+In3 -right-> Out3
+In4 -right-> Out4
+
+In1 -[hidden]down- In2
+In2 -[hidden]down- In3
+In3 -[hidden]down- In4
+Out1 -[hidden]down- Out2
+Out2 -[hidden]down- Out3
+Out3 -[hidden]down- Out4
+
+@enduml

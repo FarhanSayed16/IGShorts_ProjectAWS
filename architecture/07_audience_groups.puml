@@ -1,0 +1,68 @@
+@startuml IGshorts_Audience_Groups
+title IGshorts — Where a local creator stands
+
+skinparam backgroundColor #F7F9FC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 10
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.4
+skinparam packageBackgroundColor #FFFFFF
+skinparam packageBorderColor #CBD5E1
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam rectangleFontSize 13
+skinparam noteBackgroundColor #ECFDF5
+skinparam noteBorderColor #10B981
+skinparam noteFontColor #065F46
+
+caption Followers only. No engagement rate. No worldwide rank. No live follower total.
+
+package "What the page shows" {
+  rectangle "**Major**\n10 million and above" as Major #1E3A8A;line:white
+  rectangle "**Public**\n1 million to under 10 million" as Public #1D4ED8
+  rectangle "**Established**\n100 thousand to under 1 million" as Established #3B82F6
+  rectangle "**Community**\n10 thousand to under 100 thousand" as Community #93C5FD
+  rectangle "**Not grouped yet**\nunder 10 thousand, or no reliable count" as None #E2E8F0
+}
+
+Major -[hidden]down- Public
+Public -[hidden]down- Established
+Established -[hidden]down- Community
+Community -[hidden]down- None
+
+note right of Established
+  First reading uses the group
+  that contains the count.
+  105 thousand = Established.
+  100 thousand and 101 thousand
+  are the same group.
+end note
+
+package "How a search works" {
+  rectangle "Visitor enters an exact handle" as Search
+  rectangle "Already saved?" as Saved
+  rectangle "Show the group and a state\nRecently checked\nUpdate overdue\nNot measured yet\nCould not verify" as Show
+  rectangle "Approved source can read it?" as Source
+  rectangle "Clear message\nNo guess. No zero." as Miss
+  rectangle "Track this creator\nonly after a real count,\nor if they ask" as Track
+  rectangle "Weekly refresh of tracked accounts\nLabel moves only after a clear step\ninto the next group" as Week
+}
+
+Search -down-> Saved
+Saved -down-> Show : yes
+Saved -down-> Source : no
+Source -down-> Show : yes, keep the count private
+Source -down-> Miss : no
+Show -down-> Track
+Track -down-> Week
+
+note bottom of Week
+  India and Global charts stay as they are.
+  This lookup sits beside them.
+  A failed check keeps the last good count.
+end note
+
+@enduml
