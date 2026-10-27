@@ -109,10 +109,10 @@ const Donut: React.FC<{ rows: GroupMixRow[]; total: number; highlight?: string |
         y={center - 4}
         textAnchor="middle"
         fill="var(--ink)"
-        fontSize="34"
+        fontSize={String(total).length > 4 ? 22 : String(total).length > 3 ? 28 : 34}
         fontFamily="var(--font-display), Impact, sans-serif"
       >
-        {total}
+        {total.toLocaleString('en-US')}
       </text>
       <text
         x={center}

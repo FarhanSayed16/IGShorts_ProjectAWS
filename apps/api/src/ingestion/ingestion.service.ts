@@ -5,6 +5,8 @@ import { DatabaseService } from '../database/database.service.js';
 import { MetricsService } from '../metrics/metrics.service.js';
 import { AdapterRegistry } from './adapters/adapter.registry.js';
 import { ManualSeedAdapter, SeedRowParsed } from './adapters/manual-seed.adapter.js';
+import { mergeOpenDatasets, readFastSocial } from './creator-index/import-open-datasets.js';
+import { saveFastSocialProfiles } from './creator-index/save-fastsocial.js';
 
 export interface SeedImportReport {
   status: 'success' | 'failed';
@@ -360,5 +362,24 @@ export class IngestionService {
       failedHandles: failed,
       skippedHandles: skipped,
     };
+  }
+
+  /**
+   * Stores the FastSocial public chart as extra saved profiles.
+   * Does not add India or Global chart scopes and does not rebuild rankings.
+   */
+  async importFastSocialCsv(csvText: string) {
+    const parsed = readFastSocial(csvText);
+    const merged = mergeOpenDatasets([
+      {
+        ...parsed,
+        source: 'FastSocial Top Charts',
+        note: 'Published integer counts. CC BY 4.0.',
+        url: 'https://github.com/FastSocialCo/instagram-top-accounts',
+        license: parsed.records[0]?.sourceLicense,
+      },
+    ]);
+    const report = await saveFastSocialProfiles(this.db as never, merged.profiles);
+    return { report, manifest: merged.manifest, skipped: parsed.skipped.length };
   }
 }

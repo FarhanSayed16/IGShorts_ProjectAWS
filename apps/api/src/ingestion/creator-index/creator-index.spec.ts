@@ -99,6 +99,7 @@ describe('FastSocial rows', () => {
     expect(row.observedDate).toBe('2026-10-21');
     expect(row.verifiedStatus).toBe('unknown');
     expect(row.sourceLicense).toContain('CC BY 4.0');
+    expect(row.entityType).toBe('person');
     expect(row.qualityStatus).toContain('not an all-Instagram rank');
   });
 

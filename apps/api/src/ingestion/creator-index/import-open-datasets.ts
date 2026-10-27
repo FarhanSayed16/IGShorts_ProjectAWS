@@ -19,6 +19,9 @@ export interface IndexedProfile {
   sourceUrl: string;
   sourceLicense: string;
   qualityStatus: string;
+  entityType: string;
+  category: string;
+  country: string;
   allSources: string;
   allSourceUrls: string;
   sourceRecordsMerged: number;
@@ -71,6 +74,7 @@ interface RawRecord {
   sourceUrl: string;
   sourceLicense: string;
   qualityStatus: string;
+  entityType: string;
 }
 
 const LIMITATIONS = [
@@ -131,6 +135,13 @@ function profileUrl(username: string): string {
   return `https://www.instagram.com/${username}/`;
 }
 
+export function entityTypeFromSource(raw: string | undefined): string {
+  const value = (raw || '').trim().toLowerCase();
+  if (!value || value === 'person') return 'person';
+  if (value === 'org' || value === 'organization' || value === 'brand') return 'brand';
+  return 'other';
+}
+
 function millionsToCount(raw: string): number | null {
   const text = raw.trim().replace(/,/g, '');
   if (!text) return null;
@@ -173,6 +184,7 @@ export function readSeedList(csvText: string, sourceName: string): { records: Ra
       sourceUrl,
       sourceLicense: 'Check the source terms before public reuse. These figures are rounded research seeds.',
       qualityStatus: 'provisional IGshorts seed; rounded count, not a live reading',
+      entityType: 'person',
     });
   }
   return { records, skipped };
@@ -203,6 +215,7 @@ export function readFastSocial(csvText: string): { records: RawRecord[]; skipped
       sourceUrl: FASTSOCIAL_REPO_URL,
       sourceLicense: FASTSOCIAL_LICENSE,
       qualityStatus: 'published dataset; the source rank is not an all-Instagram rank',
+      entityType: entityTypeFromSource(row.type),
     });
   }
   return { records, skipped };
@@ -234,6 +247,9 @@ function prefer(rows: RawRecord[]): IndexedProfile {
     sourceUrl: chosen.sourceUrl,
     sourceLicense: chosen.sourceLicense,
     qualityStatus: chosen.qualityStatus,
+    entityType: chosen.entityType || 'person',
+    category: chosen.category,
+    country: chosen.country,
     allSources: sources.join('; '),
     allSourceUrls: urls.join('; '),
     sourceRecordsMerged: rows.length,

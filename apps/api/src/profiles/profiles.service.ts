@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@igshorts/db';
 import { ChartKey } from '@igshorts/shared';
-import { LATEST_NON_NULL_FOLLOWERS } from '../common/db/snapshot-query.js';
+import { LATEST_NON_NULL_FOLLOWERS, preferredFollowerSnapshot } from '../common/db/snapshot-query.js';
 import { DatabaseService } from '../database/database.service.js';
 
 function bigintToNumber(value: bigint | number | null | undefined): number | null {
@@ -80,7 +81,7 @@ export class ProfilesService {
     if (listedOnly && (!profile.isListed || !profile.isActive)) {
       return null;
     }
-    const latest = profile.metricSnapshots[0];
+    const latest = preferredFollowerSnapshot(profile.metricSnapshots);
     const latestSuccessRanks = (profile.rankingEntries || []).filter(
       (entry) => entry.run?.status === 'success',
     );
@@ -163,48 +164,64 @@ export class ProfilesService {
   }) {
     const { limit = 50, offset = 0, category, entityType, scope, q } = params;
 
-    const where: Record<string, unknown> = {
-      isListed: true,
-      isActive: true,
-    };
-
-    if (category) {
-      where.category = category;
-    }
-
-    if (entityType) {
-      where.entityType = entityType;
-    }
-
+    const filters = [
+      Prisma.sql`p.is_listed = TRUE`,
+      Prisma.sql`p.is_active = TRUE`,
+    ];
+    if (category) filters.push(Prisma.sql`p.category = ${category}`);
+    if (entityType) filters.push(Prisma.sql`p.entity_type = ${entityType}`);
     if (scope) {
-      where.scopes = {
-        some: { scope },
-      };
+      filters.push(
+        Prisma.sql`EXISTS (SELECT 1 FROM profile_scopes sc WHERE sc.profile_id = p.id AND sc.scope = ${scope})`,
+      );
     }
-
     if (q) {
-      where.OR = [
-        { igUsername: { contains: q, mode: 'insensitive' } },
-        { displayName: { contains: q, mode: 'insensitive' } },
-      ];
+      const like = `%${q.replace(/[%_\\]/g, '\\$&')}%`;
+      filters.push(
+        Prisma.sql`(p.ig_username ILIKE ${like} ESCAPE '\\' OR p.display_name ILIKE ${like} ESCAPE '\\')`,
+      );
     }
-
-    const [profiles, total] = await Promise.all([
-      this.db.creatorProfile.findMany({
-        where,
-        take: limit,
-        skip: offset,
-        orderBy: { igUsername: 'asc' },
-        include: {
-          scopes: true,
-          metricSnapshots: LATEST_NON_NULL_FOLLOWERS,
-        },
-      }),
-      this.db.creatorProfile.count({ where }),
+    const whereSql = Prisma.join(filters, ' AND ');
+    const [idRows, countRows] = await Promise.all([
+      this.db.$queryRaw<Array<{ id: string }>>`
+        SELECT p.id
+        FROM creator_profiles p
+        LEFT JOIN LATERAL (
+          SELECT s.metric_value
+          FROM metric_snapshots s
+          INNER JOIN data_sources d ON d.id = s.source_id
+          WHERE s.profile_id = p.id
+            AND s.metric_name = 'follower_count'
+            AND s.metric_value IS NOT NULL
+          ORDER BY CASE WHEN d.code = 'fastsocial' THEN 0 ELSE 1 END, s.observed_at DESC
+          LIMIT 1
+        ) lat ON TRUE
+        WHERE ${whereSql}
+        ORDER BY lat.metric_value DESC NULLS LAST, p.ig_username ASC
+        LIMIT ${limit} OFFSET ${offset}
+      `,
+      this.db.$queryRaw<Array<{ total: bigint }>>`
+        SELECT COUNT(*)::bigint AS total
+        FROM creator_profiles p
+        WHERE ${whereSql}
+      `,
     ]);
+    const ids = idRows.map((row) => row.id);
+    const profiles = ids.length
+      ? await this.db.creatorProfile.findMany({
+          where: { id: { in: ids } },
+          include: {
+            scopes: true,
+            metricSnapshots: LATEST_NON_NULL_FOLLOWERS,
+          },
+        })
+      : [];
+    const byId = new Map(profiles.map((profile) => [profile.id, profile]));
+    const ordered = ids.map((id) => byId.get(id)).filter((profile) => profile != null);
+    const total = Number(countRows[0]?.total ?? 0);
 
     return {
-      data: profiles.map((p) => this.toPublicDto(p, false)),
+      data: ordered.map((p) => this.toPublicDto(p, false)),
       meta: {
         total,
         limit,

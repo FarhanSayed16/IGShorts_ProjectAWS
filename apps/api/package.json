@@ -7,6 +7,7 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "seed:import": "node dist/scripts/import-seed.js",
+    "index:import": "node dist/scripts/import-open-index.js",
     "seed:audit": "node dist/scripts/audit-seed.js",
     "enrich:portraits": "node dist/scripts/enrich-portraits.js",
     "job:pipeline": "node dist/scripts/run-pipeline.js",

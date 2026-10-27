@@ -12,20 +12,37 @@ import { fetchProfiles, ProfileDetail } from '@/lib/api/client';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Watchlist',
+  title: 'Saved profiles',
   description:
-    'Every person on the IGshorts watchlist. Ranked names have a verified follower snapshot; others stay listed and unranked.',
+    'Public profiles saved from FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists.',
 };
+
+function pageHref(page: number, q: string, category: string) {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (category) params.set('category', category);
+  if (page > 1) params.set('page', String(page));
+  const query = params.toString();
+  return query ? `/profiles?${query}` : '/profiles';
+}
+
+function sourceLabel(source: string | null) {
+  if (source === 'fastsocial') return 'FastSocial integer';
+  if (source === 'seed_xlsx') return 'Rounded seed';
+  return null;
+}
 
 export default async function ProfilesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string; category?: string; scope?: string }>;
+  searchParams?: Promise<{ q?: string; category?: string; scope?: string; page?: string }>;
 }) {
   const resolvedParams = await searchParams;
   const q = resolvedParams?.q || '';
   const category = resolvedParams?.category || '';
   const scope = resolvedParams?.scope || '';
+  const requestedPage = Math.max(1, Number(resolvedParams?.page) || 1);
+  const limit = 48;
 
   let profiles: (ProfileDetail & { latestFollowerCount: number | null })[] = [];
   let total = 0;
@@ -33,8 +50,8 @@ export default async function ProfilesPage({
 
   try {
     const res = await fetchProfiles({
-      limit: 100,
-      offset: 0,
+      limit,
+      offset: (requestedPage - 1) * limit,
       q: q || undefined,
       category: category || undefined,
       scope: scope || undefined,
@@ -44,6 +61,11 @@ export default async function ProfilesPage({
   } catch {
     hasApiError = true;
   }
+
+  const pageCount = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(requestedPage, pageCount);
+  const rangeStart = total === 0 ? 0 : (requestedPage - 1) * limit + 1;
+  const rangeEnd = (requestedPage - 1) * limit + profiles.length;
 
   const CATEGORIES = [
     { label: 'All', value: '' },
@@ -65,11 +87,17 @@ export default async function ProfilesPage({
         )}
 
         <div className="mb-8">
-          <h1 className="chart-title text-5xl sm:text-7xl text-[var(--ink)]">Watchlist</h1>
+          <h1 className="chart-title text-5xl sm:text-7xl text-[var(--ink)]">Saved profiles</h1>
           <p className="text-sm text-[var(--ink-muted)] mt-3 max-w-2xl leading-relaxed">
-            Every name we track{total ? ` — ${total} on the list` : ''}. Missing follower counts stay
-            blank and unranked. Brands stay listed here; people charts stay people-only.
+            {total ? `${total.toLocaleString('en-US')} saved profiles` : 'Saved profiles'}. Counts come
+            from FastSocial Top Charts, CC BY 4.0, and the IGshorts seed lists. India 100 and Global 100
+            stay separate curated rankings.
           </p>
+          {total > 0 && (
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[var(--ink-faint)]">
+              Showing {rangeStart.toLocaleString('en-US')}–{rangeEnd.toLocaleString('en-US')}
+            </p>
+          )}
         </div>
 
         <form method="GET" action="/profiles" className="relative max-w-md mb-6">
@@ -128,8 +156,9 @@ export default async function ProfilesPage({
                   <p className="text-xs text-[var(--ink-muted)] truncate">@{profile.igUsername}</p>
                 </div>
                 <div className="hidden sm:block text-[10px] uppercase tracking-wider text-[var(--ink-faint)] text-right">
-                  {profile.category || 'Person'}
+                  {profile.category || profile.entityType || 'Profile'}
                   {profile.countryRegion ? ` · ${profile.countryRegion}` : ''}
+                  {sourceLabel(profile.source) ? ` · ${sourceLabel(profile.source)}` : ''}
                 </div>
                 <div className="text-right shrink-0">
                   {profile.latestFollowerCount !== null ? (
@@ -148,6 +177,28 @@ export default async function ProfilesPage({
         ) : (
           <div className="py-16 text-center text-sm text-[var(--ink-muted)] border border-[var(--line)] bg-[var(--surface)]">
             No names match that search.
+          </div>
+        )}
+
+        {pageCount > 1 && (
+          <div className="mt-6 flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[0.14em]">
+            {page > 1 ? (
+              <Link href={pageHref(page - 1, q, category)} className="hover:underline">
+                Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="text-[var(--ink-faint)]">
+              Page {page} of {pageCount}
+            </span>
+            {page < pageCount ? (
+              <Link href={pageHref(page + 1, q, category)} className="hover:underline">
+                Next
+              </Link>
+            ) : (
+              <span />
+            )}
           </div>
         )}
       </main>

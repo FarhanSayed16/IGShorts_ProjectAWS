@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { preferredFollowerSnapshot } from '../common/db/snapshot-query.js';
 import { DatabaseService } from '../database/database.service.js';
 
 const MEMBER_TOKEN_TTL = '30d';
@@ -131,20 +132,24 @@ export class MembersService {
             metricSnapshots: {
               where: { metricValue: { not: null } },
               orderBy: { observedAt: 'desc' },
-              take: 1,
+              take: 8,
+              include: { source: true },
             },
           },
         },
       },
     });
     return {
-      tracks: tracks.map((track) => ({
-        username: track.profile.igUsername,
-        displayName: track.profile.displayName,
-        followerCount: bigintToNumber(track.profile.metricSnapshots[0]?.metricValue),
-        observedAt: track.profile.metricSnapshots[0]?.observedAt?.toISOString() ?? null,
-        trackedAt: track.createdAt.toISOString(),
-      })),
+      tracks: tracks.map((track) => {
+        const latest = preferredFollowerSnapshot(track.profile.metricSnapshots);
+        return {
+          username: track.profile.igUsername,
+          displayName: track.profile.displayName,
+          followerCount: bigintToNumber(latest?.metricValue),
+          observedAt: latest?.observedAt?.toISOString() ?? null,
+          trackedAt: track.createdAt.toISOString(),
+        };
+      }),
     };
   }
 
@@ -204,7 +209,7 @@ export class MembersService {
     if (!profile || !profile.isListed || !profile.isActive) {
       throw new NotFoundException('Profile not found');
     }
-    const latest = profile.metricSnapshots.find((row) => row.metricValue !== null) ?? null;
+    const latest = preferredFollowerSnapshot(profile.metricSnapshots) ?? null;
     return {
       username: profile.igUsername,
       displayName: profile.displayName,

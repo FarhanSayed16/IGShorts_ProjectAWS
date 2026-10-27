@@ -88,7 +88,11 @@ export default async function HomePage() {
         )}
 
         {savedMix && (
-          <GroupMix mix={savedMix} title="Audience groups in the saved list" />
+          <GroupMix
+            mix={savedMix}
+            title="Audience groups in the saved list"
+            context="Counts are the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
+          />
         )}
 
         <section className="mb-16">

@@ -137,7 +137,7 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
           <GroupMix
             mix={mix}
             title="Saved list split"
-            context="Names on this chart are already Major. The ring counts every saved profile, including people who are not on the chart."
+            context="Names on this chart stay on their own ranking. The ring counts the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
           />
         )}
 

@@ -161,7 +161,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
             mix={savedMix}
             title="This profile in the saved list"
             highlight={audienceGroup ?? (latestFollowerCount == null ? 'not_measured' : 'ungrouped')}
-            context="The green mark is this person's group. The ring counts every saved profile."
+            context="The green mark is this person's group. The ring counts the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
           />
         )}
         <MemberReport username={profile.username} />
@@ -176,8 +176,15 @@ export default async function ProfileDetailPage({ params }: PageProps) {
             {latestFollowerCount !== null ? (
               <div>
                 <div className="text-3xl font-display text-[var(--ink)] mb-2">
-                  {latestFollowerCount == null ? 'Not measured yet' : groupLabel(audienceGroup)}
+                  {groupLabel(audienceGroup)}
                 </div>
+                <p className="text-xs text-[var(--ink-muted)]">
+                  {profile.source === 'fastsocial'
+                    ? 'Published integer from FastSocial Top Charts, CC BY 4.0.'
+                    : profile.source === 'seed_xlsx'
+                      ? 'Rounded research estimate from the IGshorts seed list.'
+                      : 'Stored count from the saved profile.'}
+                </p>
                 {latestRankEntry && (
                   <div className="mt-2">
                     <RankDeltaChip

@@ -15,6 +15,7 @@ import { DatabaseService } from '../database/database.service.js';
 
 const SOURCE_LABELS: Record<string, string> = {
   seed_xlsx: 'Seed list',
+  fastsocial: 'FastSocial Top Charts',
   meta_graph: 'Meta Graph',
   editorial: 'Editorial',
   vendor: 'Licensed vendor',
@@ -218,7 +219,16 @@ export class ChartsService {
               include: {
                 profile: {
                   include: {
-                    metricSnapshots: LATEST_NON_NULL_FOLLOWERS,
+                    metricSnapshots: {
+                      where: {
+                        metricName: 'follower_count',
+                        metricValue: { not: null },
+                        observedAt: { lte: runDate },
+                      },
+                      orderBy: { observedAt: 'desc' },
+                      take: 1,
+                      include: { source: true },
+                    },
                   },
                 },
               },
@@ -387,20 +397,26 @@ export class ChartsService {
         counts = entries.map((entry) => bigintToNumber(entry.metricValue));
       }
     } else {
-      const profiles = await this.db.creatorProfile.findMany({
-        where: { isListed: true, isActive: true },
-        select: {
-          metricSnapshots: {
-            where: { metricName: 'follower_count', metricValue: { not: null } },
-            orderBy: { observedAt: 'desc' },
-            take: 1,
-            select: { metricValue: true, observedAt: true },
-          },
-        },
-      });
-      counts = profiles.map((profile) => bigintToNumber(profile.metricSnapshots[0]?.metricValue));
-      const newest = profiles
-        .map((profile) => profile.metricSnapshots[0]?.observedAt)
+      const rows = await this.db.$queryRaw<
+        Array<{ metric_value: bigint | null; observed_at: Date | null }>
+      >`
+        SELECT lat.metric_value, lat.observed_at
+        FROM creator_profiles p
+        LEFT JOIN LATERAL (
+          SELECT s.metric_value, s.observed_at
+          FROM metric_snapshots s
+          INNER JOIN data_sources d ON d.id = s.source_id
+          WHERE s.profile_id = p.id
+            AND s.metric_name = 'follower_count'
+            AND s.metric_value IS NOT NULL
+          ORDER BY CASE WHEN d.code = 'fastsocial' THEN 0 ELSE 1 END, s.observed_at DESC
+          LIMIT 1
+        ) lat ON TRUE
+        WHERE p.is_listed = TRUE AND p.is_active = TRUE
+      `;
+      counts = rows.map((row) => bigintToNumber(row.metric_value));
+      const newest = rows
+        .map((row) => row.observed_at)
         .filter((value): value is Date => value instanceof Date)
         .sort((a, b) => b.getTime() - a.getTime())[0];
       if (newest) asOf = newest.toISOString();
