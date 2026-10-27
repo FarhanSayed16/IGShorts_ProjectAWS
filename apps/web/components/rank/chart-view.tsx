@@ -117,7 +117,13 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
       {meta?.is_stale && (
         <div className="border-b border-[var(--warn)] bg-[var(--warn-bg)] px-4 py-2 text-center text-xs font-semibold text-[var(--warn)] flex items-center justify-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
-          Last refreshed {meta.freshness_hours} hours ago.
+          Counts last checked{' '}
+          {new Date(meta.as_of).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+          .
         </div>
       )}
 

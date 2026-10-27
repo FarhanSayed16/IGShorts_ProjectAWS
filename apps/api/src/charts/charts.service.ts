@@ -10,8 +10,10 @@ import {
   isChartKey,
   ProfileHistoryResponse,
 } from '@igshorts/shared';
-import { LATEST_NON_NULL_FOLLOWERS } from '../common/db/snapshot-query.js';
+import { LATEST_NON_NULL_FOLLOWERS, preferredFollowerSnapshot } from '../common/db/snapshot-query.js';
 import { DatabaseService } from '../database/database.service.js';
+
+const COUNT_FRESH_MS = 14 * 24 * 60 * 60 * 1000;
 
 const SOURCE_LABELS: Record<string, string> = {
   seed_xlsx: 'Seed list',
@@ -61,7 +63,7 @@ export class ChartsService {
     previousMetricValue: bigint | null;
     metricDelta: bigint;
     createdAt: Date;
-    profile: {
+      profile: {
       displayName: string;
       igUsername: string;
       avatarUrl: string | null;
@@ -70,12 +72,13 @@ export class ChartsService {
       countryRegion: string | null;
       entityType: string;
       metricSnapshots?: Array<{
+        metricValue: bigint | null;
         observedAt: Date;
         source?: { code: string } | null;
       }>;
     };
   }): ChartEntry {
-    const snapshot = entry.profile.metricSnapshots?.[0];
+    const snapshot = preferredFollowerSnapshot(entry.profile.metricSnapshots || []);
     return {
       rank: entry.rank,
       previous_rank: entry.previousRank,
@@ -87,7 +90,7 @@ export class ChartsService {
       category: entry.profile.category,
       country_region: entry.profile.countryRegion,
       entity_type: entry.profile.entityType as ChartEntry['entity_type'],
-      follower_count: bigintToNumber(entry.metricValue),
+      follower_count: snapshot ? bigintToNumber(snapshot.metricValue) : bigintToNumber(entry.metricValue),
       previous_follower_count: bigintToNumber(entry.previousMetricValue),
       follower_delta:
         entry.previousMetricValue === null || entry.previousMetricValue === undefined
@@ -172,9 +175,14 @@ export class ChartsService {
 
     const formattedEntries: ChartEntry[] = entries.map((entry) => this.formatEntry(entry));
 
+    const current = await this.describeCurrentCounts(
+      latestRun.id,
+      latestRun.finishedAt || latestRun.startedAt,
+    );
+
     return {
       chartKey: validKey,
-      as_of: latestRun.finishedAt?.toISOString() || latestRun.startedAt.toISOString(),
+      as_of: current.asOf.toISOString(),
       entries: formattedEntries,
       meta: {
         total,
@@ -207,33 +215,9 @@ export class ChartsService {
     });
 
     const now = Date.now();
-    const runDate = latestRun?.finishedAt || latestRun?.startedAt || new Date();
-    const freshnessHours = Math.max(0, Math.round((now - runDate.getTime()) / (1000 * 60 * 60)));
-
-    const sourceCode =
-      latestRun === null
-        ? DATA_SOURCES.SEED_XLSX
-        : (
-            await this.db.rankingEntry.findFirst({
-              where: { runId: latestRun.id },
-              include: {
-                profile: {
-                  include: {
-                    metricSnapshots: {
-                      where: {
-                        metricName: 'follower_count',
-                        metricValue: { not: null },
-                        observedAt: { lte: runDate },
-                      },
-                      orderBy: { observedAt: 'desc' },
-                      take: 1,
-                      include: { source: true },
-                    },
-                  },
-                },
-              },
-            })
-          )?.profile.metricSnapshots[0]?.source?.code || DATA_SOURCES.SEED_XLSX;
+    const fallbackDate = latestRun?.finishedAt || latestRun?.startedAt || new Date();
+    const current = await this.describeCurrentCounts(latestRun?.id, fallbackDate);
+    const freshnessHours = Math.max(0, Math.round((now - current.asOf.getTime()) / (1000 * 60 * 60)));
 
     return {
       chart_key: validKey,
@@ -242,13 +226,43 @@ export class ChartsService {
         ? 'Famous Indian Instagram personalities ranked by public follower count'
         : 'Famous global Instagram personalities ranked by public follower count',
       algorithm_version: 'followers_v1',
-      as_of: runDate.toISOString(),
+      as_of: current.asOf.toISOString(),
       total_profiles: totalProfilesInScope,
       ranked_profiles: latestRun?.profileCount || 0,
-      source_label: SOURCE_LABELS[sourceCode] || sourceCode,
+      source_label: SOURCE_LABELS[current.sourceCode] || current.sourceCode,
       freshness_hours: freshnessHours,
-      is_stale: !latestRun || freshnessHours > 36,
+      is_stale: !latestRun || now - current.asOf.getTime() > COUNT_FRESH_MS,
     };
+  }
+
+  private async describeCurrentCounts(runId: string | undefined, fallback: Date) {
+    if (!runId) return { asOf: fallback, sourceCode: DATA_SOURCES.SEED_XLSX };
+    const rows = await this.db.$queryRaw<Array<{ observed_at: Date; code: string }>>`
+      SELECT lat.observed_at, d.code
+      FROM ranking_entries e
+      JOIN LATERAL (
+        SELECT s.observed_at, s.source_id
+        FROM metric_snapshots s
+        INNER JOIN data_sources src ON src.id = s.source_id
+        WHERE s.profile_id = e.profile_id
+          AND s.metric_name = 'follower_count'
+          AND s.metric_value IS NOT NULL
+        ORDER BY CASE WHEN src.code = 'fastsocial' THEN 0 ELSE 1 END, s.observed_at DESC
+        LIMIT 1
+      ) lat ON TRUE
+      INNER JOIN data_sources d ON d.id = lat.source_id
+      WHERE e.run_id = ${runId}
+    `;
+    if (rows.length === 0) return { asOf: fallback, sourceCode: DATA_SOURCES.SEED_XLSX };
+    let asOf = new Date(rows[0].observed_at);
+    const tally = new Map<string, number>();
+    for (const row of rows) {
+      const observed = new Date(row.observed_at);
+      if (observed > asOf) asOf = observed;
+      tally.set(row.code, (tally.get(row.code) || 0) + 1);
+    }
+    const sourceCode = [...tally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || DATA_SOURCES.SEED_XLSX;
+    return { asOf, sourceCode };
   }
 
   async getChartMovers(chartKey: ChartKey | string): Promise<ChartMovers> {
@@ -304,9 +318,14 @@ export class ChartsService {
       }),
     ]);
 
+    const current = await this.describeCurrentCounts(
+      latestRun.id,
+      latestRun.finishedAt || latestRun.startedAt,
+    );
+
     return {
       chart_key: validKey,
-      as_of: latestRun.finishedAt?.toISOString() || latestRun.startedAt.toISOString(),
+      as_of: current.asOf.toISOString(),
       gainers: gainersEntries.map((entry) => this.formatEntry(entry)),
       losers: losersEntries.map((entry) => this.formatEntry(entry)),
     };
