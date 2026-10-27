@@ -32,6 +32,37 @@ export class WikipediaEnrichmentService {
 
   constructor(private readonly db: DatabaseService) {}
 
+  async enrichWithoutPublishedCount(): Promise<EnrichmentReport> {
+    const rows = await this.db.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id
+      FROM creator_profiles p
+      LEFT JOIN LATERAL (
+        SELECT s.metric_value
+        FROM metric_snapshots s
+        WHERE s.profile_id = p.id
+          AND s.metric_name = 'follower_count'
+          AND s.metric_value IS NOT NULL
+        LIMIT 1
+      ) lat ON TRUE
+      WHERE p.is_listed = TRUE
+        AND p.is_active = TRUE
+        AND lat.metric_value IS NULL
+      ORDER BY p.display_name ASC
+    `;
+    const profiles = rows.length
+      ? await this.db.creatorProfile.findMany({
+          where: { id: { in: rows.map((row) => row.id) } },
+        })
+      : [];
+    const byId = new Map(profiles.map((profile) => [profile.id, profile]));
+    const ordered = rows.map((row) => byId.get(row.id)).filter((profile) => profile != null);
+    await this.clearMismatchedLeads(ordered);
+    const refreshed = ordered.length
+      ? await this.db.creatorProfile.findMany({ where: { id: { in: ordered.map((profile) => profile.id) } } })
+      : [];
+    return this.enrichProfiles(refreshed);
+  }
+
   async enrichListedPeople(limit?: number): Promise<EnrichmentReport> {
     const profiles = await this.db.creatorProfile.findMany({
       where: {
@@ -56,6 +87,19 @@ export class WikipediaEnrichmentService {
       return av > bv ? -1 : 1;
     });
 
+    return this.enrichProfiles(profiles);
+  }
+
+  private async enrichProfiles(
+    profiles: Array<{
+      id: string;
+      igUsername: string;
+      displayName: string;
+      category: string | null;
+      avatarUrl: string | null;
+      shortBio: string | null;
+    }>,
+  ): Promise<EnrichmentReport> {
     const report: EnrichmentReport = {
       scanned: profiles.length,
       portraits: 0,
@@ -141,7 +185,7 @@ export class WikipediaEnrichmentService {
   }
 
   private fromSummary(summary: WikiSummary): { image: string | null; extract: string | null } {
-    const raw = summary.thumbnail?.source || summary.originalimage?.source || null;
+    const raw = summary.originalimage?.source || summary.thumbnail?.source || null;
     const clean = raw ? raw.split('?')[0] : null;
     const image = clean;
     return {
@@ -150,12 +194,44 @@ export class WikipediaEnrichmentService {
     };
   }
 
-  private isUsableSummary(summary: WikiSummary, displayName: string, username: string): boolean {
+  private isUsableSummary(summary: WikiSummary, displayName: string, _username: string): boolean {
     if (!summary || summary.type === 'disambiguation') return false;
     const image = summary.thumbnail?.source || summary.originalimage?.source || null;
     const extract = summary.extract?.trim() || null;
     if (!image && !extract) return false;
-    return this.namesAlign(displayName, summary.title || '', username);
+    if (extract && !this.leadMentions(displayName, extract)) return false;
+    return this.namesAlign(displayName, summary.title || '');
+  }
+
+  private leadMentions(displayName: string, extract: string): boolean {
+    const lead = extract.slice(0, 180).toLowerCase();
+    const tokens = displayName
+      .toLowerCase()
+      .split(/[\s.'’-]+/)
+      .filter((token) => token.length > 2);
+    if (tokens.length === 0) return lead.includes(displayName.toLowerCase());
+    return tokens.some((token) => lead.includes(token));
+  }
+
+  private async clearMismatchedLeads(
+    profiles: Array<{
+      id: string;
+      displayName: string;
+      shortBio: string | null;
+      avatarSource: string | null;
+    }>,
+  ) {
+    for (const profile of profiles) {
+      if (!profile.shortBio || this.leadMentions(profile.displayName, profile.shortBio)) continue;
+      await this.db.creatorProfile.update({
+        where: { id: profile.id },
+        data: {
+          shortBio: null,
+          ...(profile.avatarSource === 'wikipedia' ? { avatarUrl: null, avatarSource: null } : {}),
+        },
+      });
+      this.logger.warn(`Cleared a mismatched Wikipedia page for ${profile.displayName}`);
+    }
   }
 
   private buildQueries(displayName: string, category: string | null, username: string): string[] {
@@ -170,8 +246,8 @@ export class WikipediaEnrichmentService {
     return [...unique].filter(Boolean);
   }
 
-  private namesAlign(displayName: string, wikiTitle: string, username: string): boolean {
-    const hay = `${wikiTitle} ${username}`.toLowerCase();
+  private namesAlign(displayName: string, wikiTitle: string): boolean {
+    const hay = wikiTitle.toLowerCase();
     const tokens = displayName
       .toLowerCase()
       .split(/[\s.'’-]+/)

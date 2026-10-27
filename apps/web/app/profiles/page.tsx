@@ -17,13 +17,17 @@ export const metadata: Metadata = {
     'Public profiles saved from FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists.',
 };
 
-function pageHref(page: number, q: string, category: string) {
+function pageHref(
+  page: number,
+  query: { q?: string; category?: string; measured?: 'yes' | 'no' },
+) {
   const params = new URLSearchParams();
-  if (q) params.set('q', q);
-  if (category) params.set('category', category);
+  if (query.q) params.set('q', query.q);
+  if (query.category) params.set('category', query.category);
+  if (query.measured === 'no') params.set('measured', 'no');
   if (page > 1) params.set('page', String(page));
-  const query = params.toString();
-  return query ? `/profiles?${query}` : '/profiles';
+  const text = params.toString();
+  return text ? `/profiles?${text}` : '/profiles';
 }
 
 function sourceLabel(source: string | null) {
@@ -49,11 +53,15 @@ function ProfilePager({
   pageCount,
   q,
   category,
+  measured,
+  placement,
 }: {
   page: number;
   pageCount: number;
   q: string;
   category: string;
+  measured: 'yes' | 'no';
+  placement: 'top' | 'bottom';
 }) {
   const numbers = pageNumbers(page, pageCount);
   const idle =
@@ -69,14 +77,14 @@ function ProfilePager({
     >
       <div className="flex flex-wrap items-center gap-1">
         {page > 1 ? (
-          <Link href={pageHref(1, q, category)} className={idle}>
+          <Link href={pageHref(1, { q, category, measured })} className={idle}>
             First
           </Link>
         ) : (
           <span className={disabled}>First</span>
         )}
         {page > 1 ? (
-          <Link href={pageHref(page - 1, q, category)} className={idle}>
+          <Link href={pageHref(page - 1, { q, category, measured })} className={idle}>
             Prev
           </Link>
         ) : (
@@ -90,7 +98,7 @@ function ProfilePager({
           ) : (
             <Link
               key={item}
-              href={pageHref(item, q, category)}
+              href={pageHref(item, { q, category, measured })}
               aria-current={item === page ? 'page' : undefined}
               className={item === page ? current : idle}
             >
@@ -99,14 +107,14 @@ function ProfilePager({
           ),
         )}
         {page < pageCount ? (
-          <Link href={pageHref(page + 1, q, category)} className={idle}>
+          <Link href={pageHref(page + 1, { q, category, measured })} className={idle}>
             Next
           </Link>
         ) : (
           <span className={disabled}>Next</span>
         )}
         {page < pageCount ? (
-          <Link href={pageHref(pageCount, q, category)} className={idle}>
+          <Link href={pageHref(pageCount, { q, category, measured })} className={idle}>
             Last
           </Link>
         ) : (
@@ -116,11 +124,12 @@ function ProfilePager({
       <form method="GET" action="/profiles" className="flex items-center gap-2">
         {q ? <input type="hidden" name="q" value={q} /> : null}
         {category ? <input type="hidden" name="category" value={category} /> : null}
-        <label htmlFor={`page-jump-${page}`} className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+        {measured === 'no' ? <input type="hidden" name="measured" value="no" /> : null}
+        <label htmlFor={`page-jump-${placement}`} className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
           Go to
         </label>
         <input
-          id={`page-jump-${page}`}
+          id={`page-jump-${placement}`}
           name="page"
           type="number"
           min={1}
@@ -139,17 +148,20 @@ function ProfilePager({
 export default async function ProfilesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string; category?: string; scope?: string; page?: string }>;
+  searchParams?: Promise<{ q?: string; category?: string; scope?: string; page?: string; measured?: string }>;
 }) {
   const resolvedParams = await searchParams;
   const q = resolvedParams?.q || '';
   const category = resolvedParams?.category || '';
   const scope = resolvedParams?.scope || '';
+  const measured = resolvedParams?.measured === 'no' ? 'no' : 'yes';
   const requestedPage = Math.max(1, Number(resolvedParams?.page) || 1);
   const limit = 25;
 
   let profiles: (ProfileDetail & { latestFollowerCount: number | null })[] = [];
   let total = 0;
+  let measuredTotal = 0;
+  let unmeasuredTotal = 0;
   let hasApiError = false;
 
   try {
@@ -159,9 +171,12 @@ export default async function ProfilesPage({
       q: q || undefined,
       category: category || undefined,
       scope: scope || undefined,
+      measured,
     });
     profiles = res.data;
     total = res.meta.total;
+    measuredTotal = res.meta.measured ?? 0;
+    unmeasuredTotal = res.meta.unmeasured ?? 0;
   } catch {
     hasApiError = true;
   }
@@ -193,9 +208,11 @@ export default async function ProfilesPage({
         <div className="mb-8">
           <h1 className="chart-title text-5xl sm:text-7xl text-[var(--ink)]">Saved profiles</h1>
           <p className="text-sm text-[var(--ink-muted)] mt-3 max-w-2xl leading-relaxed">
-            {total ? `${total.toLocaleString('en-US')} saved profiles` : 'Saved profiles'}. Counts come
-            from FastSocial Top Charts, CC BY 4.0, and the IGshorts seed lists. India 100 and Global 100
-            stay separate curated rankings.
+            {measuredTotal.toLocaleString('en-US')} profiles have a published follower count from FastSocial
+            Top Charts, CC BY 4.0, or a rounded figure on the IGshorts seed lists.
+            {unmeasuredTotal > 0
+              ? ` ${unmeasuredTotal.toLocaleString('en-US')} seed names were saved with the count left blank, and FastSocial does not include those handles.`
+              : ''}
           </p>
           {total > 0 && (
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[var(--ink-faint)]">
@@ -207,6 +224,7 @@ export default async function ProfilesPage({
         <form method="GET" action="/profiles" className="relative max-w-md mb-6">
           <Search className="w-4 h-4 text-[var(--ink-faint)] absolute left-3 top-1/2 -translate-y-1/2" />
           {category ? <input type="hidden" name="category" value={category} /> : null}
+          {measured === 'no' ? <input type="hidden" name="measured" value="no" /> : null}
           <input
             type="text"
             name="q"
@@ -216,12 +234,33 @@ export default async function ProfilesPage({
           />
         </form>
 
+        <div className="flex flex-wrap items-center gap-0 mb-6 border border-[var(--ink)] w-fit">
+          <Link
+            href={pageHref(1, { q, category, measured: 'yes' })}
+            className={`px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] ${
+              measured === 'yes' ? 'bg-[var(--ink)] text-[var(--surface)]' : 'text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--surface)]'
+            }`}
+          >
+            With a count{measuredTotal ? ` · ${measuredTotal.toLocaleString('en-US')}` : ''}
+          </Link>
+          <Link
+            href={pageHref(1, { q, category, measured: 'no' })}
+            className={`px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] ${
+              measured === 'no' ? 'bg-[var(--ink)] text-[var(--surface)]' : 'text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--surface)]'
+            }`}
+          >
+            Count not published{unmeasuredTotal ? ` · ${unmeasuredTotal.toLocaleString('en-US')}` : ''}
+          </Link>
+        </div>
+
         <div className="flex items-center gap-0 overflow-x-auto mb-6 border border-[var(--ink)] w-fit">
           {CATEGORIES.map((cat) => {
             const isSelected = category === cat.value;
-            const href = cat.value
-              ? `/profiles?category=${cat.value}${q ? `&q=${encodeURIComponent(q)}` : ''}`
-              : `/profiles${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+            const href = pageHref(1, {
+              q,
+              category: cat.value,
+              measured,
+            });
 
             return (
               <Link
@@ -239,70 +278,58 @@ export default async function ProfilesPage({
           })}
         </div>
 
-        {profiles.length > 0 ? (
-          <div className="space-y-2">
-            {profiles.map((profile) => (
-              <Link
-                key={profile.igUsername}
-                href={`/profiles/${profile.igUsername}`}
-                className="flex items-center gap-3 sm:gap-5 bg-[var(--surface)] border border-[var(--line)] px-3 sm:px-5 py-3 hover:border-[var(--ink)] transition-colors"
-              >
-                <Avatar
-                  src={profile.avatarUrl}
-                  name={profile.displayName}
-                  size="md"
-                  className="shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold text-[15px] sm:text-lg text-[var(--ink)] truncate">
-                    {profile.displayName}
-                  </h2>
-                  <p className="text-xs text-[var(--ink-muted)] truncate">@{profile.igUsername}</p>
-                </div>
-                <div className="hidden sm:block text-[10px] uppercase tracking-wider text-[var(--ink-faint)] text-right">
-                  {profile.category || profile.entityType || 'Profile'}
-                  {profile.countryRegion ? ` · ${profile.countryRegion}` : ''}
-                  {sourceLabel(profile.source) ? ` · ${sourceLabel(profile.source)}` : ''}
-                </div>
-                <div className="text-right shrink-0">
-                  {profile.latestFollowerCount !== null ? (
-                    <div className="text-base sm:text-lg font-semibold tabular-nums">
-                      <FollowerCount count={profile.latestFollowerCount} />
-                    </div>
-                  ) : (
-                    <span className="text-[11px] uppercase tracking-wider text-[var(--ink-faint)]">
-                      Unranked
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
+        {pageCount > 1 && (
+          <div className="mb-4">
+            <ProfilePager page={page} pageCount={pageCount} q={q} category={category} measured={measured} placement="top" />
           </div>
+        )}
+
+        {profiles.length > 0 ? (
+          <ol className="border border-[var(--line)] bg-[var(--surface)]" start={rangeStart}>
+            {profiles.map((profile, index) => (
+              <li key={profile.igUsername} className="border-b border-[var(--line)] last:border-b-0">
+                <Link
+                  href={`/profiles/${profile.igUsername}`}
+                  className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--canvas)]"
+                >
+                  <span className="w-10 shrink-0 text-right text-xs tabular-nums text-[var(--ink-faint)]">
+                    {rangeStart + index}
+                  </span>
+                  <Avatar src={profile.avatarUrl} name={profile.displayName} size="sm" className="shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-[15px] font-semibold text-[var(--ink)]">{profile.displayName}</h2>
+                    <p className="truncate text-xs text-[var(--ink-muted)]">@{profile.igUsername}</p>
+                  </div>
+                  <div className="hidden max-w-[240px] text-right text-[10px] uppercase tracking-wider text-[var(--ink-faint)] sm:block">
+                    <p className="truncate">{profile.category || profile.entityType || 'Profile'}</p>
+                    <p className="truncate">
+                      {[profile.countryRegion, sourceLabel(profile.source)].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <div className="w-16 shrink-0 text-right">
+                    {profile.latestFollowerCount !== null ? (
+                      <div className="text-base font-semibold tabular-nums">
+                        <FollowerCount count={profile.latestFollowerCount} />
+                      </div>
+                    ) : (
+                      <span className="text-[11px] uppercase tracking-wider text-[var(--ink-faint)]">Not published</span>
+                    )}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ol>
         ) : (
-          <div className="py-16 text-center text-sm text-[var(--ink-muted)] border border-[var(--line)] bg-[var(--surface)]">
-            No names match that search.
+          <div className="border border-[var(--line)] bg-[var(--surface)] py-16 text-center text-sm text-[var(--ink-muted)]">
+            {measured === 'yes'
+              ? 'No profile with a published count matches that search.'
+              : 'No blank-count profile matches that search.'}
           </div>
         )}
 
         {pageCount > 1 && (
-          <div className="mt-6 flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[0.14em]">
-            {page > 1 ? (
-              <Link href={pageHref(page - 1, q, category)} className="hover:underline">
-                Previous
-              </Link>
-            ) : (
-              <span />
-            )}
-            <span className="text-[var(--ink-faint)]">
-              Page {page} of {pageCount}
-            </span>
-            {page < pageCount ? (
-              <Link href={pageHref(page + 1, q, category)} className="hover:underline">
-                Next
-              </Link>
-            ) : (
-              <span />
-            )}
+          <div className="mt-4">
+            <ProfilePager page={page} pageCount={pageCount} q={q} category={category} measured={measured} placement="bottom" />
           </div>
         )}
       </main>

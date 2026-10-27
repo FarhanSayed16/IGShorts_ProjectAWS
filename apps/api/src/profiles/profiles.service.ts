@@ -161,8 +161,9 @@ export class ProfilesService {
     entityType?: string;
     scope?: string;
     q?: string;
+    measured?: 'yes' | 'no';
   }) {
-    const { limit = 50, offset = 0, category, entityType, scope, q } = params;
+    const { limit = 50, offset = 0, category, entityType, scope, q, measured } = params;
 
     const filters = [
       Prisma.sql`p.is_listed = TRUE`,
@@ -182,27 +183,40 @@ export class ProfilesService {
       );
     }
     const whereSql = Prisma.join(filters, ' AND ');
+    const countFilter =
+      measured === 'yes'
+        ? Prisma.sql`lat.metric_value IS NOT NULL`
+        : measured === 'no'
+          ? Prisma.sql`lat.metric_value IS NULL`
+          : Prisma.sql`TRUE`;
+    const latestCount = Prisma.sql`
+      LEFT JOIN LATERAL (
+        SELECT s.metric_value
+        FROM metric_snapshots s
+        INNER JOIN data_sources d ON d.id = s.source_id
+        WHERE s.profile_id = p.id
+          AND s.metric_name = 'follower_count'
+          AND s.metric_value IS NOT NULL
+        ORDER BY CASE WHEN d.code = 'fastsocial' THEN 0 ELSE 1 END, s.observed_at DESC
+        LIMIT 1
+      ) lat ON TRUE
+    `;
     const [idRows, countRows] = await Promise.all([
       this.db.$queryRaw<Array<{ id: string }>>`
         SELECT p.id
         FROM creator_profiles p
-        LEFT JOIN LATERAL (
-          SELECT s.metric_value
-          FROM metric_snapshots s
-          INNER JOIN data_sources d ON d.id = s.source_id
-          WHERE s.profile_id = p.id
-            AND s.metric_name = 'follower_count'
-            AND s.metric_value IS NOT NULL
-          ORDER BY CASE WHEN d.code = 'fastsocial' THEN 0 ELSE 1 END, s.observed_at DESC
-          LIMIT 1
-        ) lat ON TRUE
-        WHERE ${whereSql}
+        ${latestCount}
+        WHERE ${whereSql} AND ${countFilter}
         ORDER BY lat.metric_value DESC NULLS LAST, p.ig_username ASC
         LIMIT ${limit} OFFSET ${offset}
       `,
-      this.db.$queryRaw<Array<{ total: bigint }>>`
-        SELECT COUNT(*)::bigint AS total
+      this.db.$queryRaw<Array<{ total: bigint; measured: bigint; unmeasured: bigint }>>`
+        SELECT
+          COUNT(*) FILTER (WHERE ${countFilter})::bigint AS total,
+          COUNT(*) FILTER (WHERE lat.metric_value IS NOT NULL)::bigint AS measured,
+          COUNT(*) FILTER (WHERE lat.metric_value IS NULL)::bigint AS unmeasured
         FROM creator_profiles p
+        ${latestCount}
         WHERE ${whereSql}
       `,
     ]);
@@ -219,6 +233,8 @@ export class ProfilesService {
     const byId = new Map(profiles.map((profile) => [profile.id, profile]));
     const ordered = ids.map((id) => byId.get(id)).filter((profile) => profile != null);
     const total = Number(countRows[0]?.total ?? 0);
+    const measuredCount = Number(countRows[0]?.measured ?? 0);
+    const unmeasuredCount = Number(countRows[0]?.unmeasured ?? 0);
 
     return {
       data: ordered.map((p) => this.toPublicDto(p, false)),
@@ -227,6 +243,8 @@ export class ProfilesService {
         limit,
         offset,
         has_more: offset + profiles.length < total,
+        measured: measuredCount,
+        unmeasured: unmeasuredCount,
       },
     };
   }

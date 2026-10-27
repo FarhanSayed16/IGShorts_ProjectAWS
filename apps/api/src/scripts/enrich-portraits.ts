@@ -8,7 +8,9 @@ async function run() {
   });
   try {
     const enrichment = app.get(WikipediaEnrichmentService);
-    const report = await enrichment.enrichListedPeople();
+    const report = process.argv.includes('--missing')
+      ? await enrichment.enrichWithoutPublishedCount()
+      : await enrichment.enrichListedPeople();
     console.log(JSON.stringify(report, null, 2));
   } finally {
     await app.close();

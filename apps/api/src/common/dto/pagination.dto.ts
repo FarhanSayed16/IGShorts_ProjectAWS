@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class PaginationQueryDto {
   @IsOptional()
@@ -30,6 +30,10 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsString()
   scope?: string;
+
+  @IsOptional()
+  @IsIn(['yes', 'no'])
+  measured?: 'yes' | 'no';
 
   @IsOptional()
   @IsString()

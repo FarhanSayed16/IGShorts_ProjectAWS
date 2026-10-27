@@ -179,6 +179,8 @@ export interface ProfilesListResponse {
     limit: number;
     offset: number;
     has_more: boolean;
+    measured?: number;
+    unmeasured?: number;
   };
 }
 
@@ -192,6 +194,7 @@ export async function fetchProfiles(params?: {
   entityType?: string;
   scope?: string;
   q?: string;
+  measured?: 'yes' | 'no';
 }): Promise<ProfilesListResponse> {
   const searchParams = new URLSearchParams();
   if (params?.limit !== undefined) searchParams.set('limit', String(params.limit));
@@ -200,6 +203,7 @@ export async function fetchProfiles(params?: {
   if (params?.entityType) searchParams.set('entityType', params.entityType);
   if (params?.scope) searchParams.set('scope', params.scope);
   if (params?.q) searchParams.set('q', params.q);
+  if (params?.measured) searchParams.set('measured', params.measured);
 
   const query = searchParams.toString();
   return request<ProfilesListResponse>(`${API_PATHS.profiles}${query ? `?${query}` : ''}`, {

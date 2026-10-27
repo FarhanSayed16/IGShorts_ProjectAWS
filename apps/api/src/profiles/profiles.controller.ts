@@ -19,6 +19,7 @@ export class ProfilesController {
       entityType: query.entityType,
       scope: query.scope,
       q: query.q,
+      measured: query.measured,
     });
   }
 
