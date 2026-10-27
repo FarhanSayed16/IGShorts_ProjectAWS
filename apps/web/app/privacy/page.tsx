@@ -36,9 +36,19 @@ export default function PrivacyPage() {
             </p>
           </section>
           <section>
+            <h2 className="chart-title text-2xl text-[var(--ink)] mb-3">Email accounts</h2>
+            <p>
+              An optional email and password let you see a stored follower count, track a saved
+              profile, and keep that history. The audience group stays visible without an account.
+              The email does not prove you own an Instagram handle. We do not ask for an Instagram
+              password. You can delete the account from the account page, which removes the email
+              and the tracks tied to it.
+            </p>
+          </section>
+          <section>
             <h2 className="chart-title text-2xl text-[var(--ink)] mb-3">Cookies</h2>
             <p>
-              No third-party tracking cookies. Client storage is for preferences such as theme.
+              No third-party tracking cookies. Client storage is for preferences such as theme and, if you sign in, the account session.
             </p>
           </section>
           <section>

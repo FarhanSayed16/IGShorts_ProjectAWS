@@ -2,15 +2,18 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { ExternalLink, ArrowLeft, Info, Clock } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Info } from 'lucide-react';
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { Avatar } from '@/components/rank/avatar';
-import { FollowerCount } from '@/components/rank/follower-count';
+import { GroupLadder } from '@/components/rank/group-ladder';
+import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
+import { MemberReport } from '@/components/account/member-report';
 import { RankDeltaChip } from '@/components/rank/rank-delta-chip';
 import { RankNumber } from '@/components/rank/rank-number';
-import { HistoryChart } from '@/components/rank/history-chart';
+import { freshnessState, groupForCount, groupLabel, placeAudienceGroup } from '@/lib/format/audience-group';
 import {
+  fetchAudienceMix,
   fetchChartEntries,
   fetchProfile,
   fetchProfileHistory,
@@ -51,13 +54,17 @@ export default async function ProfileDetailPage({ params }: PageProps) {
   let historyData: { observed_at: string; follower_count: number | null; rank: number | null }[] =
     [];
 
+  let savedMix: GroupMixData | null = null;
+
   try {
-    const [profRes, histRes] = await Promise.all([
+    const [profRes, histRes, mixRes] = await Promise.all([
       fetchProfile(normalized),
       fetchProfileHistory(normalized),
+      fetchAudienceMix().catch(() => null),
     ]);
     profile = profRes;
     historyData = histRes.data || [];
+    savedMix = mixRes;
   } catch {
     notFound();
   }
@@ -67,6 +74,12 @@ export default async function ProfileDetailPage({ params }: PageProps) {
   }
 
   const latestFollowerCount = profile.latestFollowerCount;
+  const measuredCounts = historyData
+    .map((point) => point.follower_count)
+    .filter((count): count is number => count != null);
+  const previousCount = measuredCounts.length >= 2 ? measuredCounts[measuredCounts.length - 2] : null;
+  const audienceGroup = placeAudienceGroup(latestFollowerCount, previousCount);
+  const freshness = freshnessState(latestFollowerCount, profile.observedAt);
   const latestRankEntry = profile.rankingEntries?.[0];
   const isUnranked = latestFollowerCount === null || !latestRankEntry;
   const instagramHref = profile.profileUrl || `https://instagram.com/${profile.igUsername}`;
@@ -142,17 +155,28 @@ export default async function ProfileDetailPage({ params }: PageProps) {
           </div>
         </div>
 
+        <GroupLadder group={audienceGroup} freshness={freshness} count={latestFollowerCount} />
+        {savedMix && (
+          <GroupMix
+            mix={savedMix}
+            title="This profile in the saved list"
+            highlight={audienceGroup ?? (latestFollowerCount == null ? 'not_measured' : 'ungrouped')}
+            context="The green mark is this person's group. The ring counts every saved profile."
+          />
+        )}
+        <MemberReport username={profile.username} />
+
         {/* 3-Column Metrics Grid (§12.5) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1: Follower Count */}
           <div className="bg-[var(--surface)] border border-[var(--line)] p-6 shadow-sm">
             <span className="block text-xs font-bold uppercase tracking-wider text-[var(--neutral-400)] mb-2">
-              Public Follower Count
+              Audience group
             </span>
             {latestFollowerCount !== null ? (
               <div>
-                <div className="text-3xl font-mono font-bold text-[var(--neutral-900)] dark:text-white mb-2">
-                  <FollowerCount count={latestFollowerCount} />
+                <div className="text-3xl font-display text-[var(--ink)] mb-2">
+                  {latestFollowerCount == null ? 'Not measured yet' : groupLabel(audienceGroup)}
                 </div>
                 {latestRankEntry && (
                   <div className="mt-2">
@@ -191,7 +215,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                   <span className="text-xs text-[var(--neutral-500)]">
                     {latestRankEntry.previousRank != null
                       ? `Previous: #${latestRankEntry.previousRank}`
-                      : 'Debut — no previous chart'}
+                      : 'Debut — one ranking so far. No previous place.'}
                   </span>
                 </div>
               </div>
@@ -223,12 +247,10 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                   {profile.source || 'seed_xlsx'}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[var(--neutral-500)]">Last Observation</span>
-                <span className="font-mono text-[var(--neutral-700)] dark:text-[var(--neutral-200)]">
-                  {profile.observedAt
-                    ? new Date(profile.observedAt).toLocaleDateString()
-                    : 'Baseline'}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[var(--neutral-500)]">Check date</span>
+                <span className="text-[var(--neutral-700)] dark:text-[var(--neutral-200)]">
+                  In the account panel
                 </span>
               </div>
             </div>
@@ -262,68 +284,14 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                     <span className="font-display font-extrabold text-xs">#{row.rank}</span>
                     <span>{row.display_name}</span>
                   </Link>
-                  <span className="font-mono text-xs text-[var(--neutral-600)] dark:text-[var(--neutral-400)]">
-                    {row.follower_count != null ? row.follower_count.toLocaleString() : '—'}
+                  <span className="text-xs uppercase tracking-wider text-[var(--ink-muted)]">
+                    {groupLabel(groupForCount(row.follower_count))}
                   </span>
                 </li>
               ))}
             </ul>
           </div>
         )}
-
-        {/* Follower History & Snapshots Card (§12.5) */}
-        <div className="bg-[var(--surface)] border border-[var(--line)] p-6 sm:p-8 shadow-sm mb-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="chart-title text-2xl text-[var(--ink)]">History</h2>
-            <span className="text-xs text-[var(--ink-faint)] font-mono">
-              {historyData.length} snapshot(s)
-            </span>
-          </div>
-
-          {historyData.length > 0 ? (
-            <div className="overflow-x-auto">
-              <HistoryChart data={historyData} />
-              <table className="w-full text-left text-xs mt-6">
-                <thead>
-                  <tr className="border-b-2 border-[var(--neutral-200)] dark:border-[var(--neutral-700)] text-[var(--neutral-500)] uppercase font-bold text-[11px] tracking-wider">
-                    <th className="py-3 font-semibold">Observed Date</th>
-                    <th className="py-3 font-semibold">Follower Count</th>
-                    <th className="py-3 font-semibold">Rank</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--neutral-200)]/60 dark:divide-[var(--neutral-800)]">
-                  {historyData.map((pt, idx) => (
-                    <tr
-                      key={`${pt.observed_at}-${idx}`}
-                      className="hover:bg-[var(--neutral-50)] dark:hover:bg-[var(--neutral-800)]/60"
-                    >
-                      <td className="py-3 font-mono text-[var(--neutral-700)] dark:text-[var(--neutral-300)]">
-                        {new Date(pt.observed_at).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 font-mono font-bold text-[var(--neutral-900)] dark:text-white">
-                        {pt.follower_count != null ? pt.follower_count.toLocaleString() : '—'}
-                      </td>
-                      <td className="py-3 font-mono text-[var(--neutral-700)] dark:text-[var(--neutral-300)]">
-                        {pt.rank ? `#${pt.rank}` : 'Unranked'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-8 rounded-xl bg-[var(--neutral-50)] dark:bg-[var(--neutral-800)]/40 border border-dashed border-[var(--neutral-200)] dark:border-[var(--neutral-700)] text-center">
-              <Clock className="w-8 h-8 text-[var(--neutral-400)] mx-auto mb-2 opacity-80" />
-              <p className="text-xs font-bold text-[var(--neutral-800)] dark:text-white">
-                No historical snapshots yet
-              </p>
-              <p className="text-xs text-[var(--neutral-500)] max-w-md mx-auto mt-1">
-                Accounts with missing counts stay null. Historical trajectory plots after multiple
-                observation runs.
-              </p>
-            </div>
-          )}
-        </div>
 
         {/* Related Leaderboards Strip */}
         <div className="flex flex-wrap items-center justify-between gap-4 py-5 border-t border-[var(--line)] text-xs text-[var(--ink-muted)]">

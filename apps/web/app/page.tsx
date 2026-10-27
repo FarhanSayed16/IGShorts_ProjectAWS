@@ -5,7 +5,8 @@ import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { BillboardList } from '@/components/rank/billboard-list';
 import { ErrorBanner } from '@/components/feedback/error-banner';
-import { fetchChartEntries, fetchChartMeta } from '@/lib/api/client';
+import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
+import { fetchAudienceMix, fetchChartEntries, fetchChartMeta } from '@/lib/api/client';
 import copy from '@/messages/en.json';
 import type { Metadata } from 'next';
 
@@ -57,17 +58,20 @@ export default async function HomePage() {
   let globalEntries: ChartEntry[] = [];
   let indiaEntries: ChartEntry[] = [];
   let globalMeta: ChartMeta | null = null;
+  let savedMix: GroupMixData | null = null;
   let hasApiError = false;
 
   try {
-    const [globalRes, indiaRes, metaRes] = await Promise.all([
+    const [globalRes, indiaRes, metaRes, mixRes] = await Promise.all([
       fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 10, offset: 0 }),
       fetchChartEntries(CHART_KEYS.INDIA_PERSONS, { limit: 5, offset: 0 }),
       fetchChartMeta(CHART_KEYS.GLOBAL_PERSONS),
+      fetchAudienceMix().catch(() => null),
     ]);
     globalEntries = globalRes.entries;
     indiaEntries = indiaRes.entries;
     globalMeta = metaRes;
+    savedMix = mixRes;
   } catch {
     hasApiError = true;
   }
@@ -81,6 +85,10 @@ export default async function HomePage() {
           <div className="mb-8">
             <ErrorBanner message={copy.states.error_banner} />
           </div>
+        )}
+
+        {savedMix && (
+          <GroupMix mix={savedMix} title="Audience groups in the saved list" />
         )}
 
         <section className="mb-16">
