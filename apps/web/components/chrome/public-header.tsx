@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Search } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
+import { useMemberSession } from '@/lib/use-member-session';
 
 const TOP_LINKS = [
   { label: 'Charts', href: '/charts/global' },
@@ -23,6 +24,7 @@ const CHART_LINKS = [
 export const PublicHeader: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { email, ready, signOut } = useMemberSession();
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -77,6 +79,33 @@ export const PublicHeader: React.FC = () => {
                 Search
               </span>
             </button>
+            {!ready ? (
+              <span className="inline-block w-16" aria-hidden="true" />
+            ) : email ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <Link
+                  href="/account"
+                  className="max-w-[9rem] sm:max-w-[14rem] truncate px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-[var(--header-ink)] hover:opacity-70"
+                  title={email}
+                >
+                  {email}
+                </Link>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/account"
+                className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70"
+              >
+                Sign in
+              </Link>
+            )}
             <ThemeToggle />
           </div>
         </div>
@@ -130,6 +159,29 @@ export const PublicHeader: React.FC = () => {
                   {link.label}
                 </Link>
               ))}
+              {ready && email ? (
+                <div className="pt-4">
+                  <p className="text-sm font-semibold break-all">{email}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      signOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="mt-3 text-sm font-semibold uppercase tracking-wider"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2.5 text-sm font-semibold border-b border-[var(--line)]"
+                >
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         </div>

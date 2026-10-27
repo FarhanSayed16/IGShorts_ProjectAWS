@@ -16,7 +16,7 @@ export const RankDeltaChip: React.FC<RankDeltaChipProps> = ({ previousRank, delt
     return (
       <span
         className="inline-block border border-[var(--ink)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--ink)] leading-none"
-        title="Debut — no previous chart to compare"
+        title="Debut — one ranking so far, no previous place"
       >
         Debut
       </span>

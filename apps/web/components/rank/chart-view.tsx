@@ -7,10 +7,11 @@ import { Search, X, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-reac
 import { ChartEntry, ChartMeta } from '@igshorts/shared';
 import { StatusRibbon } from '@/components/chrome/status-ribbon';
 import { BillboardList } from '@/components/rank/billboard-list';
+import { GroupMix } from '@/components/rank/group-mix';
 import { TableSkeleton } from '@/components/feedback/table-skeleton';
 import { ErrorBanner } from '@/components/feedback/error-banner';
 import { EmptyState } from '@/components/feedback/empty-state';
-import { fetchChartEntries, fetchChartMeta, ChartEntriesResponse } from '@/lib/api/client';
+import { fetchAudienceMix, fetchChartEntries, fetchChartMeta, ChartEntriesResponse } from '@/lib/api/client';
 import copy from '@/messages/en.json';
 
 const CATEGORIES = [
@@ -35,6 +36,12 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
   const [page, setPage] = useState(1);
   const [, startTransition] = useTransition();
   const PAGE_SIZE = 50;
+
+  const { data: mix } = useQuery({
+    queryKey: ['audience-mix', 'saved'],
+    queryFn: () => fetchAudienceMix(),
+    staleTime: 15 * 1000,
+  });
 
   const { data: meta } = useQuery({
     queryKey: ['chart-meta', chartKey],
@@ -125,6 +132,14 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
             <span className="text-[var(--ink-muted)]">followers_v1</span>
           </div>
         </div>
+
+        {mix && (
+          <GroupMix
+            mix={mix}
+            title="Saved list split"
+            context="Names on this chart are already Major. The ring counts every saved profile, including people who are not on the chart."
+          />
+        )}
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="relative flex-1 max-w-md">

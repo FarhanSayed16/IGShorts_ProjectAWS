@@ -125,6 +125,11 @@ export async function fetchChartMeta(chartKey: ChartKey | string): Promise<Chart
 /**
  * Fetch top movers (gainers and decliners) for a chart
  */
+export async function fetchAudienceMix(chartKey?: string): Promise<import('@/components/rank/group-mix').GroupMixData> {
+  const query = chartKey ? `?chartKey=${encodeURIComponent(chartKey)}` : '';
+  return request(`/analytics/groups${query}`, { cache: 'no-store' });
+}
+
 export async function fetchChartMovers(chartKey: ChartKey | string): Promise<ChartMovers> {
   return request<ChartMovers>(API_PATHS.chartMovers(chartKey), { cache: 'no-store' });
 }
