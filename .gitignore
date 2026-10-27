@@ -49,3 +49,6 @@ Thumbs.db
 
 # Docker
 .docker/
+
+# Generated open-data bootstrap. Re-download FastSocial locally; do not commit the snapshot.
+IGshorts_Cursor_Handoff/igshorts_bootstrap/

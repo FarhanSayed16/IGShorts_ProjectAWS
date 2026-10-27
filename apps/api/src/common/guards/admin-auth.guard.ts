@@ -40,6 +40,9 @@ export class AdminAuthGuard implements CanActivate {
     if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7).trim();
       const payload = this.authService.verifyToken(token);
+      if (payload.role === 'member') {
+        throw new UnauthorizedException('Admin authorization required');
+      }
       request.adminUser = {
         id: payload.sub,
         email: payload.email,

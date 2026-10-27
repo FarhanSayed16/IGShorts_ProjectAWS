@@ -6,6 +6,7 @@ import { HealthModule } from './health/health.module.js';
 
 // Working & Domain Modules
 import { AuthModule } from './auth/auth.module.js';
+import { MembersModule } from './members/members.module.js';
 import { ProfilesModule } from './profiles/profiles.module.js';
 import { MetricsModule } from './metrics/metrics.module.js';
 import { IngestionModule } from './ingestion/ingestion.module.js';
@@ -31,6 +32,7 @@ import { RegionsModule } from './regions/regions.module.js';
     DatabaseModule,
     HealthModule,
     AuthModule,
+    MembersModule,
     ProfilesModule,
     MetricsModule,
     IngestionModule,

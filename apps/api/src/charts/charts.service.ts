@@ -347,4 +347,97 @@ export class ChartsService {
       data,
     };
   }
+
+  async getAudienceMix(chartKey?: string) {
+    const bands = [
+      { id: 'major', label: 'Major', range: '10 million and above', min: 10_000_000 },
+      { id: 'public', label: 'Public', range: '1 million to under 10 million', min: 1_000_000 },
+      { id: 'established', label: 'Established', range: '100 thousand to under 1 million', min: 100_000 },
+      { id: 'community', label: 'Community', range: '10 thousand to under 100 thousand', min: 10_000 },
+    ];
+
+    const place = (count: number | null) => {
+      if (count == null) return 'not_measured';
+      if (count < 10_000) return 'ungrouped';
+      if (count < 100_000) return 'community';
+      if (count < 1_000_000) return 'established';
+      if (count < 10_000_000) return 'public';
+      return 'major';
+    };
+
+    let counts: Array<number | null> = [];
+    let asOf = new Date().toISOString();
+    let scope: 'chart' | 'saved' = 'saved';
+    let resolvedKey: string | null = null;
+
+    if (chartKey) {
+      const validKey = this.assertChartKey(chartKey);
+      resolvedKey = validKey;
+      scope = 'chart';
+      const latestRun = await this.db.rankingRun.findFirst({
+        where: { chartKey: validKey, status: 'success' },
+        orderBy: { finishedAt: 'desc' },
+      });
+      if (latestRun) {
+        asOf = latestRun.finishedAt?.toISOString() || latestRun.startedAt.toISOString();
+        const entries = await this.db.rankingEntry.findMany({
+          where: { runId: latestRun.id },
+          select: { metricValue: true },
+        });
+        counts = entries.map((entry) => bigintToNumber(entry.metricValue));
+      }
+    } else {
+      const profiles = await this.db.creatorProfile.findMany({
+        where: { isListed: true, isActive: true },
+        select: {
+          metricSnapshots: {
+            where: { metricName: 'follower_count', metricValue: { not: null } },
+            orderBy: { observedAt: 'desc' },
+            take: 1,
+            select: { metricValue: true, observedAt: true },
+          },
+        },
+      });
+      counts = profiles.map((profile) => bigintToNumber(profile.metricSnapshots[0]?.metricValue));
+      const newest = profiles
+        .map((profile) => profile.metricSnapshots[0]?.observedAt)
+        .filter((value): value is Date => value instanceof Date)
+        .sort((a, b) => b.getTime() - a.getTime())[0];
+      if (newest) asOf = newest.toISOString();
+    }
+
+    const tally = new Map<string, number>();
+    for (const count of counts) {
+      const id = place(count);
+      tally.set(id, (tally.get(id) || 0) + 1);
+    }
+    const groups: { id: string; label: string; range: string; count: number }[] = bands.map((band) => ({
+      id: band.id,
+      label: band.label,
+      range: band.range,
+      count: tally.get(band.id) || 0,
+    }));
+    groups.push(
+      {
+        id: 'ungrouped',
+        label: 'Not grouped yet',
+        range: 'Known count under 10 thousand',
+        count: tally.get('ungrouped') || 0,
+      },
+      {
+        id: 'not_measured',
+        label: 'Not measured yet',
+        range: 'No usable count',
+        count: tally.get('not_measured') || 0,
+      },
+    );
+
+    return {
+      scope,
+      chartKey: resolvedKey,
+      asOf,
+      total: counts.length,
+      groups,
+    };
+  }
 }
