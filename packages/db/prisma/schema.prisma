@@ -48,6 +48,7 @@ model CreatorProfile {
   scopes            ProfileScope[]
   metricSnapshots   MetricSnapshot[]
   rankingEntries    RankingEntry[]
+  tracks            ProfileTrack[]
 
   @@index([entityType])
   @@index([isListed, isActive])
@@ -148,6 +149,32 @@ model AuditLog {
 
   @@index([action, createdAt(sort: Desc)])
   @@map("audit_logs")
+}
+
+model Member {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tracks       ProfileTrack[]
+
+  @@map("members")
+}
+
+model ProfileTrack {
+  id        String   @id @default(cuid())
+  memberId  String   @map("member_id")
+  profileId String   @map("profile_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  member    Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  profile   CreatorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, profileId])
+  @@index([memberId])
+  @@map("profile_tracks")
 }
 
 model JobRun {

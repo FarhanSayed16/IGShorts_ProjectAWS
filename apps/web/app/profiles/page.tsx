@@ -32,6 +32,110 @@ function sourceLabel(source: string | null) {
   return null;
 }
 
+function pageNumbers(current: number, total: number): Array<number | 'gap'> {
+  const wanted = new Set<number>([1, total, current - 2, current - 1, current, current + 1, current + 2]);
+  const pages = [...wanted].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+  const out: Array<number | 'gap'> = [];
+  for (const n of pages) {
+    const prev = out[out.length - 1];
+    if (typeof prev === 'number' && n - prev > 1) out.push('gap');
+    out.push(n);
+  }
+  return out;
+}
+
+function ProfilePager({
+  page,
+  pageCount,
+  q,
+  category,
+}: {
+  page: number;
+  pageCount: number;
+  q: string;
+  category: string;
+}) {
+  const numbers = pageNumbers(page, pageCount);
+  const idle =
+    'inline-flex h-9 min-w-9 items-center justify-center border border-[var(--line)] bg-[var(--surface)] px-2 text-[11px] font-bold uppercase tracking-[0.12em] hover:border-[var(--ink)]';
+  const current =
+    'inline-flex h-9 min-w-9 items-center justify-center border border-[var(--ink)] bg-[var(--ink)] px-2 text-[11px] font-bold text-[var(--surface)]';
+  const disabled = `${idle} pointer-events-none opacity-40`;
+
+  return (
+    <nav
+      aria-label="Profile pages"
+      className="flex flex-col gap-3 border border-[var(--line)] bg-[var(--surface)] px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex flex-wrap items-center gap-1">
+        {page > 1 ? (
+          <Link href={pageHref(1, q, category)} className={idle}>
+            First
+          </Link>
+        ) : (
+          <span className={disabled}>First</span>
+        )}
+        {page > 1 ? (
+          <Link href={pageHref(page - 1, q, category)} className={idle}>
+            Prev
+          </Link>
+        ) : (
+          <span className={disabled}>Prev</span>
+        )}
+        {numbers.map((item, index) =>
+          item === 'gap' ? (
+            <span key={`gap-${index}`} className="px-1 text-[var(--ink-faint)]">
+              …
+            </span>
+          ) : (
+            <Link
+              key={item}
+              href={pageHref(item, q, category)}
+              aria-current={item === page ? 'page' : undefined}
+              className={item === page ? current : idle}
+            >
+              {item}
+            </Link>
+          ),
+        )}
+        {page < pageCount ? (
+          <Link href={pageHref(page + 1, q, category)} className={idle}>
+            Next
+          </Link>
+        ) : (
+          <span className={disabled}>Next</span>
+        )}
+        {page < pageCount ? (
+          <Link href={pageHref(pageCount, q, category)} className={idle}>
+            Last
+          </Link>
+        ) : (
+          <span className={disabled}>Last</span>
+        )}
+      </div>
+      <form method="GET" action="/profiles" className="flex items-center gap-2">
+        {q ? <input type="hidden" name="q" value={q} /> : null}
+        {category ? <input type="hidden" name="category" value={category} /> : null}
+        <label htmlFor={`page-jump-${page}`} className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+          Go to
+        </label>
+        <input
+          id={`page-jump-${page}`}
+          name="page"
+          type="number"
+          min={1}
+          max={pageCount}
+          defaultValue={page}
+          className="h-9 w-20 border border-[var(--line)] bg-[var(--canvas)] px-2 text-sm tabular-nums"
+        />
+        <button type="submit" className="btn-secondary !py-2 !px-3">
+          Go
+        </button>
+      </form>
+    </nav>
+  );
+}
+
 export default async function ProfilesPage({
   searchParams,
 }: {
@@ -42,7 +146,7 @@ export default async function ProfilesPage({
   const category = resolvedParams?.category || '';
   const scope = resolvedParams?.scope || '';
   const requestedPage = Math.max(1, Number(resolvedParams?.page) || 1);
-  const limit = 48;
+  const limit = 25;
 
   let profiles: (ProfileDetail & { latestFollowerCount: number | null })[] = [];
   let total = 0;

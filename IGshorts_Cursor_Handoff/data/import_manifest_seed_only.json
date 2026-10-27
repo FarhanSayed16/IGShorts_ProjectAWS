@@ -1,0 +1,40 @@
+{
+  "created_at_utc": "2026-10-27T09:41:19+00:00",
+  "output_csv": "igshorts_profiles_normalized.csv",
+  "input_records_total": 399,
+  "unique_profiles": 331,
+  "duplicates_merged": 68,
+  "existing_igshorts_seed_records_loaded": 399,
+  "audience_group_counts": {
+    "Major": 147,
+    "Not measured yet": 184
+  },
+  "source_summary": [
+    {
+      "source": "IGshorts_India_200_Seed_List.csv",
+      "loaded_records": 199,
+      "note": "Legacy IGshorts research list; follower figures are rounded estimates and need revalidation."
+    },
+    {
+      "source": "IGshorts_Global_200_Seed_List.csv",
+      "loaded_records": 200,
+      "note": "Legacy IGshorts research list; follower figures are rounded estimates and need revalidation."
+    }
+  ],
+  "important_limitations": [
+    "This is a seed index, not a complete index of Instagram users.",
+    "FastSocial contains a tracked set of public accounts; attribute it as required by CC BY 4.0.",
+    "Legacy IGshorts seed counts are rounded estimates and need revalidation before public display.",
+    "Verification is unknown unless a source supplies a validated current field.",
+    "Country/region fields may not mean residence or audience location.",
+    "The script does not scrape Instagram or claim access to private/ordinary consumer accounts."
+  ],
+  "audience_group_rules": {
+    "Not measured yet": "no usable follower count",
+    "Not grouped yet": "known count below 10,000",
+    "Community": "10,000 to under 100,000",
+    "Established": "100,000 to under 1,000,000",
+    "Public": "1,000,000 to under 10,000,000",
+    "Major": "10,000,000 and above"
+  }
+}
