@@ -1,0 +1,95 @@
+@startuml IGshorts_Instagram_Data_Flow
+title IGshorts — Instagram Data Flow
+
+skinparam backgroundColor #F8FAFC
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1F2937
+skinparam roundCorner 16
+skinparam ArrowColor #475569
+skinparam ArrowThickness 1.6
+skinparam ArrowFontColor #1E293B
+skinparam ArrowFontSize 12
+skinparam ArrowFontStyle bold
+skinparam packageStyle rectangle
+skinparam packageBorderThickness 2
+skinparam packageFontColor #0F172A
+skinparam packageFontStyle bold
+skinparam packageFontSize 14
+skinparam rectangleBorderThickness 1.5
+skinparam rectangleFontColor #1E293B
+skinparam databaseBorderColor #C2410C
+skinparam databaseFontColor #1E293B
+skinparam noteBackgroundColor #FFFBEB
+skinparam noteBorderColor #D97706
+skinparam noteFontColor #78350F
+skinparam noteFontSize 12
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #CBD5E1
+skinparam Padding 10
+skinparam nodesep 30
+skinparam ranksep 28
+
+top to bottom direction
+
+package "1  ·  VISITOR" as Step1 #FEF3C7 {
+  rectangle "**Search**\n----\nVisitor types an exact handle on IGshorts\nExample: @creatorname" as Search #FDE68A
+}
+
+package "2  ·  IGSHORTS BACKEND" as Step2 #DBEAFE {
+  rectangle "**Check the saved database first**\n----\nThe server receives the username\nand looks it up before any outside call" as Check #BFDBFE
+}
+
+package "3  ·  META DEVELOPER APP" as Step3 #EDE9FE {
+  rectangle "**The bridge to Meta**\n----\nRegisters IGshorts so Meta recognizes the software\nApp ID identifies the application\nApp Secret authenticates the server\nAccess token is the temporary key for each request" as App #DDD6FE
+}
+
+package "4  ·  INSTAGRAM / META API" as Step4 #DCFCE7 {
+  rectangle "**Business Discovery**\n----\nOne request, one exact username\nEligible public Business or Creator account\nName, bio, profile photo, follower count" as API #BBF7D0
+}
+
+package "5  ·  IGSHORTS DATABASE" as Step5 #FFEDD5 {
+  database "**Stored reading**\n----\nProfile, source, and check time\nA failed check never becomes zero" as DB #FED7AA
+}
+
+package "6  ·  IGSHORTS PROCESSING" as Step6 #ECFDF5 {
+  rectangle "**Audience group**\n----\nComputed from the stored follower count\nUnder 10 thousand stays ungrouped" as Group #A7F3D0
+}
+
+package "7  ·  RESULT" as Step7 #E0F2FE {
+  rectangle "**Shown to the visitor**\n----\nCreator profile, audience group,\nand the figures we actually hold" as Result #BAE6FD
+}
+
+Search -down-> Check : exact @handle
+
+Check -down-> DB : saved reading is still current
+Check -down-> App : missing, or due for a check
+
+App -down-> API : authorized request
+API -down-> DB : usable profile is saved
+
+DB -down-> Group
+Group -down-> Result
+
+note bottom of API
+  **What this access is**
+  Permission to ask about one eligible account.
+  Personal and private accounts come back empty.
+  It is not a copy of Instagram's user database,
+  and it does not build a worldwide ranking by itself.
+end note
+
+legend right
+  |= Piece |= Purpose |
+  | Meta Developer App | Registers IGshorts with Meta |
+  | App ID | Identifies our application |
+  | App Secret | Authenticates the backend |
+  | Access token | Allows one authorized request. Renew about every 60 days |
+  | Instagram API | Returns one eligible public professional account |
+  | IGshorts database | Stores the reading, then the audience group is calculated |
+endlegend
+
+caption Meta is one permitted source. A current saved profile is shown without a new API call.
+
+@enduml
