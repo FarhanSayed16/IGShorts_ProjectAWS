@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   reactStrictMode: true,
   transpilePackages: ['@igshorts/shared'],
   // Docker/ECS needs standalone. Vercel sets VERCEL=1 and uses its own output.

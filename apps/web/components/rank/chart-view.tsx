@@ -98,7 +98,7 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
         '@type': 'ListItem',
         position: entry.rank || idx + 1,
         name: entry.display_name || entry.username,
-        url: `${typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''}/profiles/${entry.username}`,
+        url: `/profiles/${entry.username}`,
       })),
     };
   }, [entries, pageTitle, pageSubtitle, total]);
@@ -108,6 +108,7 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
       {jsonLd && (
         <script
           type="application/ld+json"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
