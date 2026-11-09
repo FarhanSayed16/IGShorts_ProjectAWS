@@ -47,52 +47,62 @@ Unlike generic social analytics tools that attempt unreliable web scraping or in
 
 IGshorts features a fully synchronized, reversible theme engine engineered for modern sports and entertainment media. The interface adapts between an institutional **Deep Graphite Navy** (`#0B0F19`) and a clean **Editorial High-Contrast Light** theme with zero layout shift or hydration flicker.
 
+All screenshots below are captured directly from the **running system with live database telemetry**:
+
 ---
 
-### 1. Observatory Home & Command Center
+### 1. Observatory Home & Audience Analytics
 
-> The flagship landing dashboard featuring real-time data freshness telemetry, twin Top 10 leaderboards, and instant discovery CTAs.
+> Real-time command center showing the 12,107 saved creator index, interactive audience classification distribution, and the Global 100 headline entry.
 
 | 🌙 Dark Mode (Graphite Observatory) | ☀️ Light Mode (High-Contrast Editorial) |
 |:---:|:---:|
 | [![Home Dark Mode](assets/home-dark.png)](assets/home-dark.png) | [![Home Light Mode](assets/home-light.png)](assets/home-light.png) |
-| *Deep graphite `#0B0F19` canvas, stark white headlines, electric sky accents* | *Clean high-contrast daytime mode for sunlight readability* |
+| *Audience tiers (Major, Public, Established, Community) with live count breakdown in dark mode* | *Crisp daytime view with tabular lining figures and interactive audience distribution* |
 
 ---
 
 ### 2. Global Top Personalities Leaderboard
 
-> Interactive competition rankings featuring search with debounce, category filter pills, rank delta indicators, and algorithm telemetry.
+> Live competition rankings featuring verified portraits, real follower telemetry, category filters (Actors, Sports, Music, Creators, Fashion), search with debounce, and status ribbons.
 
-| 🌙 Dark Mode (Leaderboard) | ☀️ Light Mode (Leaderboard) |
+| 🌙 Dark Mode (Global Leaderboard) | ☀️ Light Mode (Global Leaderboard) |
 |:---:|:---:|
 | [![Global Charts Dark](assets/charts-global-dark.png)](assets/charts-global-dark.png) | [![Global Charts Light](assets/charts-global-light.png)](assets/charts-global-light.png) |
-| *Dark slate row washes with emerald and crimson velocity indicators* | *High-visibility editorial table styling with crisp slate borders* |
+| *#1 Cristiano Ronaldo (679.8M), #2 Lionel Messi (517.7M) in dark graphite with emerald accents* | *High-visibility editorial table with crisp slate borders and verified Wikipedia portraits* |
 
 ---
 
-### 3. Weekly Movers & Momentum Velocity Ticker
+### 3. India Top Personalities Leaderboard
 
-> Weekly momentum tracking engine calculating position drift ($\pm \Delta$) between consecutive snapshot rebuild cycles.
+> Dedicated regional watchlist tracking India's preeminent cultural figures, cinema icons, and sports legends ranked strictly by verified public follower count.
+
+| 🌙 Dark Mode (India Leaderboard) | ☀️ Light Mode (India Leaderboard) |
+|:---:|:---:|
+| [![India Charts Dark](assets/charts-india-dark.png)](assets/charts-india-dark.png) | [![India Charts Light](assets/charts-india-light.png)](assets/charts-india-light.png) |
+| *#1 Virat Kohli (271.1M), #2 Narendra Modi (106.7M) with regional filter tags and algorithm metadata* | *Clean high-contrast daytime table rendering verified follower metrics and debut status* |
+
+---
+
+### 4. Weekly Movers & Momentum Velocity Ticker
+
+> Velocity tracking engine highlighting rank trajectory between consecutive scheduled snapshots with honest baseline state indicators.
 
 | 🌙 Dark Mode (Weekly Movers) | ☀️ Light Mode (Weekly Movers) |
 |:---:|:---:|
 | [![Movers Dark Mode](assets/movers-dark.png)](assets/movers-dark.png) | [![Movers Light Mode](assets/movers-light.png)](assets/movers-light.png) |
-| *Contrasting green and rose accent borders with baseline tracking* | *Crisp daytime cards with emerald and red climber/decliner headers* |
+| *Baseline tracking cards with dual scope tabs (Global / India) in graphite navy* | *Clean daytime layout with gainers/decliners cards and verified ranking disclaimer* |
 
 ---
 
-### 4. Discovery Leaderboards Index
+### 5. Discovery Leaderboards Index
 
-> Curated watchlist directory organizing tracked scopes across Global Top Persons, India Top Persons, and upcoming Roadmap v2 expansions.
+> Curated watchlist directory organizing tracked scopes across Global 100, India 100, and upcoming Roadmap v2 expansions.
 
-<div align="center">
-
-[![Discovery Charts Index](assets/charts-index-dark.png)](assets/charts-index-dark.png)
-
-*Curated discovery index cards with active status pills and algorithm version tags*
-
-</div>
+| 🌙 Dark Mode (Charts Index) | ☀️ Light Mode (Charts Index) |
+|:---:|:---:|
+| [![Charts Index Dark](assets/charts-index-dark.png)](assets/charts-index-dark.png) | [![Charts Index Light](assets/charts-index-light.png)](assets/charts-index-light.png) |
+| *Curated discovery index cards with live board indicators in dark mode* | *Clean editorial card index with quick-entry links to Global and India leaderboards* |
 
 ---
 
