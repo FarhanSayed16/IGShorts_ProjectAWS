@@ -8,6 +8,8 @@ import { ThemeToggle } from './theme-toggle';
 import { useMemberSession } from '@/lib/use-member-session';
 
 const TOP_LINKS = [
+  { label: 'Trending', href: '/trending' },
+  { label: 'Music', href: '/music' },
   { label: 'Charts', href: '/charts/global' },
   { label: 'Profiles', href: '/profiles' },
   { label: 'Methodology', href: '/methodology' },
@@ -21,13 +23,30 @@ const CHART_LINKS = [
   { label: 'Watchlist', href: '/profiles' },
 ];
 
+function isTopLinkActive(pathname: string, href: string) {
+  if (href === '/trending') {
+    return pathname === '/trending' || pathname.startsWith('/trending/');
+  }
+  if (href === '/music') {
+    return pathname === '/music' || pathname.startsWith('/music/');
+  }
+  if (href === '/charts/global') {
+    return pathname.startsWith('/charts') || pathname.startsWith('/movers');
+  }
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export const PublicHeader: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { email, ready, signOut } = useMemberSession();
+  const showChartSubnav = pathname.startsWith('/charts') || pathname.startsWith('/movers');
 
-  const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+  const isChartLinkActive = (href: string) => {
+    if (href === '/charts/global') {
+      return pathname === '/charts' || pathname.startsWith('/charts/global');
+    }
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -56,7 +75,7 @@ export const PublicHeader: React.FC = () => {
                   key={link.href}
                   href={link.href}
                   className={
-                    isActive(link.href)
+                    isTopLinkActive(pathname, link.href)
                       ? 'text-[var(--header-ink)]'
                       : 'text-[var(--ink-muted)] hover:text-[var(--header-ink)]'
                   }
@@ -111,32 +130,28 @@ export const PublicHeader: React.FC = () => {
         </div>
       </div>
 
-      <nav
-        aria-label="Charts"
-        className="bg-[var(--subnav)] text-[var(--subnav-ink)]"
-      >
-        <div className="px-5 sm:px-8 lg:px-10 h-10 flex items-center gap-7 overflow-x-auto">
-          {CHART_LINKS.map((link) => {
-            const active =
-              link.href === '/charts/global'
-                ? pathname === '/' || pathname.startsWith('/charts/global')
-                : isActive(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] py-2 border-b-2 ${
-                  active
-                    ? 'border-[var(--subnav-active)] text-white'
-                    : 'border-transparent text-white/70 hover:text-white'
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      {showChartSubnav && (
+        <nav aria-label="Charts" className="bg-[var(--subnav)] text-[var(--subnav-ink)]">
+          <div className="px-5 sm:px-8 lg:px-10 h-10 flex items-center gap-7 overflow-x-auto">
+            {CHART_LINKS.map((link) => {
+              const active = isChartLinkActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] py-2 border-b-2 ${
+                    active
+                      ? 'border-[var(--subnav-active)] text-white'
+                      : 'border-transparent text-white/70 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
@@ -149,7 +164,7 @@ export const PublicHeader: React.FC = () => {
               </button>
             </div>
             <div className="space-y-1">
-              {[...TOP_LINKS, ...CHART_LINKS].map((link) => (
+              {[...TOP_LINKS, ...(showChartSubnav ? CHART_LINKS : [])].map((link) => (
                 <Link
                   key={`${link.label}-${link.href}`}
                   href={link.href}
