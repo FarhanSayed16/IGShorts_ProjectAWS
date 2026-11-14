@@ -19,6 +19,7 @@ import {
   toggleWatchlistListed,
   updateWatchlistProfile,
   createWatchlistProfile,
+  recordEditorialMetric,
 } from '@/lib/api/admin-client';
 import { ConfirmDialog } from '@/components/chrome/confirm-dialog';
 import { Avatar } from '@/components/rank/avatar';
@@ -32,6 +33,8 @@ export default function AdminWatchlistPage() {
   const [activeScope, setActiveScope] = useState('');
   const [activeListedFilter, setActiveListedFilter] = useState<string>('all');
   const [toastMessage, setToastMessage] = useState('');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
   const [pendingHide, setPendingHide] = useState<{
     id: string;
     username: string;
@@ -56,6 +59,8 @@ export default function AdminWatchlistPage() {
   const [editCountry, setEditCountry] = useState('');
   const [editEntityType, setEditEntityType] = useState('person');
   const [editScopes, setEditScopes] = useState<string[]>(['global']);
+  const [editorialCount, setEditorialCount] = useState('');
+  const [editorialNote, setEditorialNote] = useState('');
 
   const loadProfiles = async () => {
     setIsLoading(true);
@@ -63,8 +68,8 @@ export default function AdminWatchlistPage() {
       const isListed = activeListedFilter === 'all' ? undefined : activeListedFilter === 'listed';
 
       const res = await getAdminWatchlist({
-        limit: 100,
-        offset: 0,
+        limit: pageSize,
+        offset: page * pageSize,
         q: searchQuery || undefined,
         scope: activeScope || undefined,
         isListed,
@@ -72,7 +77,8 @@ export default function AdminWatchlistPage() {
       setProfiles(res.data);
       setTotal(res.meta.total);
     } catch {
-      // Fallback
+      setProfiles([]);
+      setTotal(0);
     } finally {
       setIsLoading(false);
     }
@@ -80,12 +86,18 @@ export default function AdminWatchlistPage() {
 
   useEffect(() => {
     loadProfiles();
-  }, [activeScope, activeListedFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on filters/page
+  }, [activeScope, activeListedFilter, page, pageSize]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setPage(0);
     loadProfiles();
   };
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canPrev = page > 0;
+  const canNext = (page + 1) * pageSize < total;
 
   const handleToggleListed = async (profile: any) => {
     const newStatus = !profile.isListed;
@@ -135,7 +147,35 @@ export default function AdminWatchlistPage() {
     setEditCountry(profile.countryRegion || '');
     setEditEntityType(profile.entityType || 'person');
     setEditScopes(profile.scopes?.length ? profile.scopes : ['global']);
+    setEditorialCount(
+      profile.latestFollowerCount != null ? String(profile.latestFollowerCount) : '',
+    );
+    setEditorialNote('');
     setIsEditOpen(true);
+  };
+
+  const handleEditorialMetric = async () => {
+    if (!selectedProfile) return;
+    const followerCount = Number(editorialCount);
+    if (!Number.isFinite(followerCount) || followerCount < 0) {
+      setToastMessage('Enter a valid follower count for editorial metric.');
+      return;
+    }
+    if (!editorialNote.trim()) {
+      setToastMessage('Editorial metric requires a note.');
+      return;
+    }
+    try {
+      await recordEditorialMetric(selectedProfile.id, {
+        followerCount,
+        note: editorialNote.trim(),
+      });
+      setToastMessage(`Recorded editorial metric for @${selectedProfile.igUsername}.`);
+      setEditorialNote('');
+      loadProfiles();
+    } catch (err: unknown) {
+      setToastMessage(err instanceof Error ? err.message : 'Editorial metric failed.');
+    }
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -238,30 +278,39 @@ export default function AdminWatchlistPage() {
           {/* Scope Filter */}
           <div className="inline-flex rounded-xl bg-[var(--brand-deep)] p-1 border border-[var(--brand-slate)]">
             <button
-              onClick={() => setActiveScope('')}
+              onClick={() => {
+                setActiveScope('');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeScope === ''
-                  ? 'bg-[var(--brand-slate)] text-[var(--brand-accent)] shadow-sm'
+                  ? 'bg-[var(--brand-slate)] text-[#00d26a] shadow-sm'
                   : 'text-[var(--neutral-400)] hover:text-white'
               }`}
             >
               All Scopes
             </button>
             <button
-              onClick={() => setActiveScope('global')}
+              onClick={() => {
+                setActiveScope('global');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeScope === 'global'
-                  ? 'bg-[var(--brand-slate)] text-[var(--brand-accent)] shadow-sm'
+                  ? 'bg-[var(--brand-slate)] text-[#00d26a] shadow-sm'
                   : 'text-[var(--neutral-400)] hover:text-white'
               }`}
             >
               Global
             </button>
             <button
-              onClick={() => setActiveScope('india')}
+              onClick={() => {
+                setActiveScope('india');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeScope === 'india'
-                  ? 'bg-[var(--brand-slate)] text-[var(--brand-accent)] shadow-sm'
+                  ? 'bg-[var(--brand-slate)] text-[#00d26a] shadow-sm'
                   : 'text-[var(--neutral-400)] hover:text-white'
               }`}
             >
@@ -272,17 +321,23 @@ export default function AdminWatchlistPage() {
           {/* Listed / Hidden Filter */}
           <div className="inline-flex rounded-xl bg-[var(--brand-deep)] p-1 border border-[var(--brand-slate)]">
             <button
-              onClick={() => setActiveListedFilter('all')}
+              onClick={() => {
+                setActiveListedFilter('all');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeListedFilter === 'all'
-                  ? 'bg-[var(--brand-slate)] text-[var(--brand-accent)] shadow-sm'
+                  ? 'bg-[var(--brand-slate)] text-[#00d26a] shadow-sm'
                   : 'text-[var(--neutral-400)] hover:text-white'
               }`}
             >
               All ({total})
             </button>
             <button
-              onClick={() => setActiveListedFilter('listed')}
+              onClick={() => {
+                setActiveListedFilter('listed');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeListedFilter === 'listed'
                   ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm'
@@ -292,7 +347,10 @@ export default function AdminWatchlistPage() {
               Listed
             </button>
             <button
-              onClick={() => setActiveListedFilter('hidden')}
+              onClick={() => {
+                setActiveListedFilter('hidden');
+                setPage(0);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                 activeListedFilter === 'hidden'
                   ? 'bg-rose-950/80 text-rose-400 border border-rose-800/60 shadow-sm'
@@ -302,6 +360,53 @@ export default function AdminWatchlistPage() {
               Hidden
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="text-[var(--neutral-400)] font-mono">
+          {total === 0
+            ? 'No profiles'
+            : `Showing ${page * pageSize + 1}–${Math.min((page + 1) * pageSize, total)} of ${total}`}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 text-[var(--neutral-400)]">
+            <span>Page size</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(0);
+              }}
+              className="px-2 py-1.5 rounded-lg bg-[var(--brand-deep)] border border-[var(--brand-slate)] text-white cursor-pointer"
+            >
+              {[10, 25, 50, 100].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={!canPrev || isLoading}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            className="px-3 py-1.5 rounded-lg bg-[var(--brand-slate)] text-white disabled:opacity-40 cursor-pointer"
+          >
+            Prev
+          </button>
+          <span className="font-mono text-[var(--neutral-300)] px-1">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={!canNext || isLoading}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 rounded-lg bg-[var(--brand-slate)] text-white disabled:opacity-40 cursor-pointer"
+          >
+            Next
+          </button>
         </div>
       </div>
 
@@ -611,6 +716,36 @@ export default function AdminWatchlistPage() {
                 </div>
               </div>
 
+              <div className="pt-3 border-t border-[var(--brand-slate)] space-y-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--neutral-400)]">
+                  Editorial metric override
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Follower count"
+                    value={editorialCount}
+                    onChange={(e) => setEditorialCount(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-[var(--brand-deep)] border border-[var(--brand-slate)] text-white font-mono focus:border-[#00d26a] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Note (required)"
+                    value={editorialNote}
+                    onChange={(e) => setEditorialNote(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-[var(--brand-deep)] border border-[var(--brand-slate)] text-white focus:border-[#00d26a] focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleEditorialMetric()}
+                  className="w-full py-2 rounded-xl border border-[#00d26a]/50 text-[#00d26a] text-xs font-bold uppercase tracking-wider hover:bg-[#00d26a]/10 cursor-pointer"
+                >
+                  Record editorial metric
+                </button>
+              </div>
+
               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[var(--brand-slate)]">
                 <button
                   type="button"
@@ -621,7 +756,7 @@ export default function AdminWatchlistPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[var(--brand-accent)] hover:opacity-95 text-[var(--brand-deep)] font-display font-bold text-xs uppercase tracking-wider shadow-sm cursor-pointer transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#00d26a] hover:opacity-95 text-black font-display font-bold text-xs uppercase tracking-wider shadow-sm cursor-pointer transition-all"
                 >
                   Save Changes
                 </button>
