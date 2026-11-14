@@ -4,7 +4,13 @@ import {
   ChartKey,
   ChartMeta,
   ChartMovers,
+  DailyPulseDay,
+  MusicTrackCard,
   ProfileHistoryResponse,
+  TrendCard,
+  TrendCategoryCount,
+  TrendSort,
+  VisitDiff,
 } from '@igshorts/shared';
 
 function resolveApiBaseUrl(): string {
@@ -216,6 +222,82 @@ export async function fetchProfiles(params?: {
  */
 export async function fetchProfile(username: string): Promise<ProfileDetail> {
   return request<ProfileDetail>(API_PATHS.profile(username), {
+    cache: 'no-store',
+  });
+}
+
+export interface TrendsListResponse {
+  data: TrendCard[];
+  meta: { total: number; limit: number; offset: number; has_more: boolean };
+}
+
+export interface MusicListResponse {
+  data: MusicTrackCard[];
+  meta: { total: number; limit: number; offset: number; has_more: boolean };
+}
+
+export async function fetchTrends(params?: {
+  category?: string;
+  region?: string;
+  sort?: TrendSort;
+  limit?: number;
+  offset?: number;
+}): Promise<TrendsListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.category) searchParams.set('category', params.category);
+  if (params?.region) searchParams.set('region', params.region);
+  if (params?.sort) searchParams.set('sort', params.sort);
+  if (params?.limit !== undefined) searchParams.set('limit', String(params.limit));
+  if (params?.offset !== undefined) searchParams.set('offset', String(params.offset));
+  const query = searchParams.toString();
+  return request<TrendsListResponse>(`${API_PATHS.trends}${query ? `?${query}` : ''}`, {
+    cache: 'no-store',
+  });
+}
+
+export async function fetchFeaturedTrend(): Promise<TrendCard | null> {
+  return request<TrendCard | null>(API_PATHS.trendsFeatured, { cache: 'no-store' });
+}
+
+export async function fetchTrendsTicker(limit = 10): Promise<TrendCard[]> {
+  return request<TrendCard[]>(`${API_PATHS.trendsTicker}?limit=${limit}`, { cache: 'no-store' });
+}
+
+export async function fetchTrendCategories(): Promise<TrendCategoryCount[]> {
+  return request<TrendCategoryCount[]>(API_PATHS.trendsCategories, { cache: 'no-store' });
+}
+
+export async function fetchMusicTracks(params?: {
+  collection?: string;
+  region?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<MusicListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.collection) searchParams.set('collection', params.collection);
+  if (params?.region) searchParams.set('region', params.region);
+  if (params?.limit !== undefined) searchParams.set('limit', String(params.limit));
+  if (params?.offset !== undefined) searchParams.set('offset', String(params.offset));
+  const query = searchParams.toString();
+  return request<MusicListResponse>(`${API_PATHS.musicTracks}${query ? `?${query}` : ''}`, {
+    cache: 'no-store',
+  });
+}
+
+export async function fetchMusicTicker(limit = 8): Promise<MusicTrackCard[]> {
+  return request<MusicTrackCard[]>(`${API_PATHS.musicTicker}?limit=${limit}`, { cache: 'no-store' });
+}
+
+export async function fetchFeaturedMusic(): Promise<MusicTrackCard | null> {
+  return request<MusicTrackCard | null>(API_PATHS.musicFeatured, { cache: 'no-store' });
+}
+
+export async function fetchPulseToday(): Promise<DailyPulseDay> {
+  return request<DailyPulseDay>(API_PATHS.pulseToday, { cache: 'no-store' });
+}
+
+export async function fetchVisitDiff(since: string): Promise<VisitDiff> {
+  return request<VisitDiff>(`${API_PATHS.visitDiff}?since=${encodeURIComponent(since)}`, {
     cache: 'no-store',
   });
 }

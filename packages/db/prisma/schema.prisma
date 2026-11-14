@@ -49,6 +49,7 @@ model CreatorProfile {
   metricSnapshots   MetricSnapshot[]
   rankingEntries    RankingEntry[]
   tracks            ProfileTrack[]
+  pulseItems        DailyPulseItem[]
 
   @@index([entityType])
   @@index([isListed, isActive])
@@ -152,15 +153,92 @@ model AuditLog {
 }
 
 model Member {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  lastVisitedAt DateTime? @map("last_visited_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  tracks       ProfileTrack[]
+  tracks        ProfileTrack[]
 
   @@map("members")
+}
+
+model TrendTopic {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  category        String
+  region          String    @default("both")
+  summary         String?   @db.Text
+  imageUrl        String?   @map("image_url")
+  sourceUrl       String?   @map("source_url")
+  sourceName      String?   @map("source_name")
+  sourceLabel     String    @default("editorial") @map("source_label")
+  popularityScore Float?    @map("popularity_score")
+  velocityScore   Float?    @map("velocity_score")
+  status          String    @default("new")
+  isFeatured      Boolean   @default(false) @map("is_featured")
+  publishedAt     DateTime? @map("published_at")
+  observedAt      DateTime  @default(now()) @map("observed_at")
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  pulseItems      DailyPulseItem[]
+
+  @@index([category, region, status])
+  @@index([isFeatured])
+  @@index([observedAt(sort: Desc)])
+  @@map("trend_topics")
+}
+
+model MusicTrack {
+  id                String    @id @default(cuid())
+  title             String
+  artist            String
+  artworkUrl        String?   @map("artwork_url")
+  spotifyUrl        String?   @map("spotify_url")
+  youtubeUrl        String?   @map("youtube_url")
+  region            String    @default("both")
+  popularityScore   Float?    @map("popularity_score")
+  collections       String[]
+  creatorUsageCount Int?      @map("creator_usage_count")
+  sourceLabel       String    @default("editorial") @map("source_label")
+  releaseDate       DateTime? @map("release_date")
+  observedAt        DateTime  @default(now()) @map("observed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  pulseItems        DailyPulseItem[]
+
+  @@index([region])
+  @@index([observedAt(sort: Desc)])
+  @@map("music_tracks")
+}
+
+model DailyPulseItem {
+  id           String    @id @default(cuid())
+  pulseDate    DateTime  @map("pulse_date") @db.Date
+  kind         String
+  title        String
+  summary      String?   @db.Text
+  imageUrl     String?   @map("image_url")
+  linkUrl      String?   @map("link_url")
+  trendTopicId String?   @map("trend_topic_id")
+  musicTrackId String?   @map("music_track_id")
+  profileId    String?   @map("profile_id")
+  sourceLabel  String    @default("editorial") @map("source_label")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  trendTopic   TrendTopic?     @relation(fields: [trendTopicId], references: [id], onDelete: SetNull)
+  musicTrack   MusicTrack?     @relation(fields: [musicTrackId], references: [id], onDelete: SetNull)
+  profile      CreatorProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+
+  @@unique([pulseDate, kind])
+  @@index([pulseDate(sort: Desc)])
+  @@map("daily_pulse_items")
 }
 
 model ProfileTrack {
