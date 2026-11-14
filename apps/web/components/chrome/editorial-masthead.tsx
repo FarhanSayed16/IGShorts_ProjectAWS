@@ -22,15 +22,18 @@ export function EditorialMasthead({
     <section className="mb-8 border-b border-[var(--line)] pb-6 pt-2">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ink-muted)] mb-2">
-            <span className="text-[var(--accent)]">● Live Observatory</span>
+          <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-mono font-medium tracking-wider text-[var(--ink-muted)] mb-2.5">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-[var(--accent-soft)] text-[var(--accent)] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-live-radar" />
+              LIVE OBSERVATORY
+            </span>
             <span>·</span>
-            <span>Edition {formattedDate}</span>
+            <span className="uppercase">Edition {formattedDate}</span>
             <span>·</span>
-            <span>Standard Competition Ranking (1224)</span>
+            <span className="uppercase">Standard Competition Ranking (1224)</span>
           </div>
-          <h1 className="chart-title text-4xl sm:text-6xl lg:text-7xl leading-[0.92] text-[var(--ink)]">
-            Public People Charts <span className="text-[var(--accent)]">&</span> Cultural Momentum
+          <h1 className="chart-title text-4xl sm:text-6xl lg:text-7xl leading-[0.94] tracking-tight text-[var(--ink)]">
+            Public People Charts <span className="font-serif italic font-normal text-[var(--accent)] px-0.5">&</span> Cultural Momentum
           </h1>
           <p className="mt-3 text-sm sm:text-base text-[var(--ink-muted)] max-w-3xl leading-relaxed">
             Curated watchlist ranking public Instagram figures by verified follower metrics — not impressions, not algorithmic guesses. Paired with daily discovery across trending tracks, technology updates, and creator culture.

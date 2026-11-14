@@ -8,7 +8,8 @@ import { ErrorBanner } from '@/components/feedback/error-banner';
 import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
 import { EditorialMasthead } from '@/components/chrome/editorial-masthead';
 import { TrendingTicker } from '@/components/discovery/trending-ticker';
-import { FeaturedTrend } from '@/components/discovery/featured-trend';
+import { LiveMediaCarousel } from '@/components/discovery/live-media-carousel';
+import { FollowerPyramid } from '@/components/rank/follower-pyramid';
 import { CategoryGrid } from '@/components/discovery/category-grid';
 import { NowTrending } from '@/components/discovery/now-trending';
 import { CreatorShowdown } from '@/components/discovery/creator-showdown';
@@ -100,18 +101,20 @@ export default async function HomePage() {
   if (!featured) {
     featured = {
       id: 'editorial-featured-trend',
-      category: 'music',
       title: 'The Viral Resurgence of Lo-Fi Ambient Soundtracks',
+      slug: 'the-viral-resurgence-of-lo-fi-ambient-soundtracks',
+      category: 'music',
+      region: 'global',
       summary:
         'Creators across travel, tech, and storytelling reels are pivoting toward 80s analog synthesizer textures and calm tempos to maximize average watch duration and algorithm distribution.',
       imageUrl:
         'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80',
-      sourceLabel: 'editorial',
       sourceUrl: '/trending/music',
+      sourceName: 'Editorial Staff',
+      sourceLabel: 'editorial',
       status: 'popular',
-      region: 'global',
-      volumeScore: 98,
-      firstObservedAt: new Date().toISOString(),
+      publishedAt: new Date().toISOString(),
+      observedAt: new Date().toISOString(),
     };
   }
 
@@ -125,8 +128,12 @@ export default async function HomePage() {
           'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
         spotifyUrl: 'https://open.spotify.com/search/Midnight%20Echoes',
         youtubeUrl: 'https://www.youtube.com/results?search_query=Midnight+Echoes',
+        region: 'global',
+        collections: ['on_repeat'],
+        popularityScore: 95,
         creatorUsageCount: 41200,
         sourceLabel: 'editorial',
+        observedAt: new Date().toISOString(),
       },
       {
         id: 'track-2',
@@ -136,8 +143,12 @@ export default async function HomePage() {
           'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
         spotifyUrl: 'https://open.spotify.com/search/Neon%20Horizon',
         youtubeUrl: 'https://www.youtube.com/results?search_query=Neon+Horizon',
+        region: 'global',
+        collections: ['on_repeat'],
+        popularityScore: 88,
         creatorUsageCount: 28900,
         sourceLabel: 'editorial',
+        observedAt: new Date().toISOString(),
       },
       {
         id: 'track-3',
@@ -147,8 +158,12 @@ export default async function HomePage() {
           'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
         spotifyUrl: 'https://open.spotify.com/search/Golden%20Hour%20Groove',
         youtubeUrl: 'https://www.youtube.com/results?search_query=Golden+Hour+Groove',
+        region: 'global',
+        collections: ['on_repeat'],
+        popularityScore: 82,
         creatorUsageCount: 19400,
         sourceLabel: 'editorial',
+        observedAt: new Date().toISOString(),
       },
       {
         id: 'track-4',
@@ -158,8 +173,12 @@ export default async function HomePage() {
           'https://images.unsplash.com/photo-1487180144351-b8472da7d491?auto=format&fit=crop&w=600&q=80',
         spotifyUrl: 'https://open.spotify.com/search/Coffee%20and%20Vinyl',
         youtubeUrl: 'https://www.youtube.com/results?search_query=Coffee+and+Vinyl',
+        region: 'global',
+        collections: ['on_repeat'],
+        popularityScore: 78,
         creatorUsageCount: 15800,
         sourceLabel: 'editorial',
+        observedAt: new Date().toISOString(),
       },
     ];
   }
@@ -239,7 +258,7 @@ export default async function HomePage() {
         profile_url: 'https://instagram.com/cristiano',
         category: 'Sports',
         country_region: 'Portugal',
-        entity_type: 'individual',
+        entity_type: 'person',
         follower_count: 679800000,
         previous_follower_count: 678000000,
         follower_delta: 1800000,
@@ -257,7 +276,7 @@ export default async function HomePage() {
         profile_url: 'https://instagram.com/leomessi',
         category: 'Sports',
         country_region: 'Argentina',
-        entity_type: 'individual',
+        entity_type: 'person',
         follower_count: 517700000,
         previous_follower_count: 516000000,
         follower_delta: 1700000,
@@ -275,7 +294,7 @@ export default async function HomePage() {
         profile_url: 'https://instagram.com/selenagomez',
         category: 'Music',
         country_region: 'United States',
-        entity_type: 'individual',
+        entity_type: 'person',
         follower_count: 423500000,
         previous_follower_count: 422000000,
         follower_delta: 1500000,
@@ -302,7 +321,7 @@ export default async function HomePage() {
           asOf={globalMeta?.as_of}
         />
 
-        <FeaturedTrend trend={featured} />
+        <LiveMediaCarousel initialTrend={featured} />
         <CategoryGrid />
         <NowTrending />
         <CreatorShowdown
@@ -360,6 +379,7 @@ export default async function HomePage() {
             <h3 className="chart-title text-2xl mb-4">India top 5</h3>
             <BillboardList entries={indiaEntries} featured={false} caption="India top 5" />
           </div>
+          <FollowerPyramid className="mb-10" />
           {savedMix && (
             <GroupMix
               mix={savedMix}

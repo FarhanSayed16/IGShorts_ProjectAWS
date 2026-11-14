@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { CHART_KEYS } from '@igshorts/shared';
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
+import { FollowerPyramid } from '@/components/rank/follower-pyramid';
 import { fetchChartMeta } from '@/lib/api/client';
 
 export const metadata: Metadata = {
@@ -86,6 +87,8 @@ export default async function ChartsIndexPage() {
             </p>
           </Link>
         </div>
+
+        <FollowerPyramid className="mb-12" />
 
         <p className="text-sm text-[var(--ink-muted)]">
           Brands, clubs, and scoring v2 are cataloged, not published on the people boards.{' '}
