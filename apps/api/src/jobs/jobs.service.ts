@@ -52,8 +52,19 @@ export class JobsService {
       return;
     }
     this.logger.log('Cron-triggered discovery refresh starting');
-    await this.discovery.runDiscoveryRefresh();
-    await this.discovery.runPulseAssembly();
+    try {
+      await this.runDiscoveryJobs();
+    } catch (err) {
+      this.logger.error(
+        `Discovery cron failed: ${err instanceof Error ? err.message : 'unknown error'}`,
+      );
+    }
+  }
+
+  async runDiscoveryJobs() {
+    const refresh = await this.discovery.runDiscoveryRefresh();
+    const pulse = await this.discovery.runPulseAssembly();
+    return { refresh, pulse };
   }
 
   async checkStaleStatus(): Promise<{

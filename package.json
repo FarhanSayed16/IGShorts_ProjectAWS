@@ -28,7 +28,9 @@
     "db:migrate": "pnpm --filter @igshorts/db migrate",
     "seed:import": "pnpm --filter @igshorts/api seed:import",
     "seed:audit": "pnpm --filter @igshorts/api seed:audit",
+    "seed:discovery": "pnpm --filter @igshorts/api seed:discovery",
     "job:pipeline": "pnpm --filter @igshorts/api job:pipeline",
+    "job:discovery": "pnpm --filter @igshorts/api job:discovery",
     "clean": "pnpm --recursive run clean"
   },
   "devDependencies": {

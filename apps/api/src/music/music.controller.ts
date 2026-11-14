@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { MusicService } from './music.service.js';
+import { parseQueryInt } from '../common/utils/parse-query-int.js';
 
 @Controller('music')
 export class MusicController {
@@ -15,14 +16,14 @@ export class MusicController {
     return this.music.listTracks({
       collection,
       region,
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
+      limit: parseQueryInt(limit, 24),
+      offset: parseQueryInt(offset, 0),
     });
   }
 
   @Get('ticker')
   ticker(@Query('limit') limit?: string) {
-    return this.music.ticker(limit ? Number(limit) : 8);
+    return this.music.ticker(parseQueryInt(limit, 8));
   }
 
   @Get('featured')

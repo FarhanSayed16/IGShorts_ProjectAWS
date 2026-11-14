@@ -11,6 +11,7 @@
     "seed:audit": "node dist/scripts/audit-seed.js",
     "enrich:portraits": "node dist/scripts/enrich-portraits.js",
     "job:pipeline": "node dist/scripts/run-pipeline.js",
+    "job:discovery": "node dist/scripts/run-discovery.js",
     "seed:discovery": "node dist/scripts/seed-discovery.js",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",

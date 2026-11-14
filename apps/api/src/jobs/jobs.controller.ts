@@ -29,4 +29,20 @@ export class JobsController {
     }
     return this.jobsService.runDailyPipeline();
   }
+
+  @Post('admin/jobs/discovery')
+  @UseGuards(AdminAuthGuard, RolesGuard)
+  @Roles(ADMIN_ROLES.ADMIN)
+  runDiscoveryFromAdmin() {
+    return this.jobsService.runDiscoveryJobs();
+  }
+
+  @Post('internal/jobs/discovery')
+  runDiscoveryFromScheduler(@Headers('x-jobs-secret') jobsSecret?: string) {
+    const expected = this.config.get<string>('app.jobsSecret') || '';
+    if (!expected || !jobsSecret || !safeEqual(jobsSecret, expected)) {
+      throw new UnauthorizedException('Invalid jobs secret');
+    }
+    return this.jobsService.runDiscoveryJobs();
+  }
 }
