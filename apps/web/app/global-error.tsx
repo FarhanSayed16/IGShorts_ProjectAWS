@@ -1,21 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Inter, Oswald } from 'next/font/google';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const oswald = Oswald({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-display',
-  display: 'swap',
-});
-
+/**
+ * Crash boundary must not import next/font/google — that fetch can fail the
+ * whole production build (Next.js #99114). System fonts are enough here.
+ */
 export default function GlobalError({
   error,
   reset,
@@ -24,7 +14,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${oswald.variable}`}>
+    <html lang="en">
       <body
         style={{
           margin: 0,
@@ -34,14 +24,14 @@ export default function GlobalError({
           justifyContent: 'center',
           background: '#0a0a0a',
           color: '#f5f5f5',
-          fontFamily: 'var(--font-inter), system-ui, sans-serif',
+          fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
           padding: '24px',
         }}
       >
         <div style={{ maxWidth: 420, textAlign: 'center' }}>
           <p
             style={{
-              fontFamily: 'var(--font-display), Impact, sans-serif',
+              fontFamily: 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif',
               fontSize: 64,
               fontWeight: 700,
               color: '#00d26a',
@@ -53,7 +43,7 @@ export default function GlobalError({
           </p>
           <h1
             style={{
-              fontFamily: 'var(--font-display), Impact, sans-serif',
+              fontFamily: 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif',
               fontSize: 28,
               textTransform: 'uppercase',
               margin: '12px 0',

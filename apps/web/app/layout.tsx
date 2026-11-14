@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Oswald, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import { ReactQueryProvider } from '@/lib/api/query-provider';
 import { ThemeProvider } from '@/lib/theme/theme-provider';
 import { CommandPalette } from '@/components/chrome/command-palette';
@@ -10,22 +10,25 @@ import { RouteEventBeacon } from '@/components/analytics/route-event-beacon';
 import { SessionExpiredProvider } from '@/components/feedback/session-expired-provider';
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
+// Self-hosted fonts avoid next/font/google build flakes when Google returns
+// extensionless /l/font?kit= URLs (Next.js #99114).
+const inter = localFont({
+  src: './fonts/inter-latin-wght-normal.woff2',
+  weight: '100 900',
   variable: '--font-inter',
   display: 'swap',
 });
 
-const oswald = Oswald({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
+const oswald = localFont({
+  src: './fonts/oswald-latin-wght-normal.woff2',
+  weight: '200 700',
   variable: '--font-display',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
+const jetbrainsMono = localFont({
+  src: './fonts/jetbrains-mono-latin-wght-normal.woff2',
+  weight: '100 800',
   variable: '--font-mono',
   display: 'swap',
 });
