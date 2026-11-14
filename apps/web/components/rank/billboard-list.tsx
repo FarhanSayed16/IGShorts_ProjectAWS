@@ -25,17 +25,17 @@ function FeaturedRow({ entry }: { entry: ChartEntry }) {
         </Link>
         <div className="flex-1 min-w-0 pl-4 sm:pl-6 flex flex-col justify-center">
           <Link href={`/profiles/${entry.username}`} className="group">
-            <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-              <h2 className="font-display text-3xl sm:text-[44px] text-[var(--ink)] leading-[0.95] group-hover:underline">
+            <div className="flex flex-wrap items-start gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-2">
+              <h2 className="font-display text-2xl sm:text-[44px] text-[var(--ink)] leading-[0.95] group-hover:underline">
                 {entry.display_name}
               </h2>
               {!hasHistory && (
-                <span className="mt-1.5 sm:mt-2">
+                <span className="mt-1 sm:mt-2">
                   <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
                 </span>
               )}
             </div>
-            <p className="mt-1 text-sm text-[var(--ink-muted)]">@{entry.username}</p>
+            <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-[var(--ink-muted)]">@{entry.username}</p>
           </Link>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -80,9 +80,9 @@ function FeaturedRow({ entry }: { entry: ChartEntry }) {
 
 function ChartRow({ entry }: { entry: ChartEntry }) {
   return (
-    <article className="bg-[var(--surface)] border border-[var(--line)] px-3 sm:px-5 py-3 hover:border-[var(--ink)] transition-colors">
-      <div className="flex items-center gap-3 sm:gap-5">
-        <div className="w-10 sm:w-12 text-center shrink-0">
+    <article className="bg-[var(--surface)] border border-[var(--line)] px-3 sm:px-5 py-2.5 sm:py-3 hover:border-[var(--ink)] transition-colors">
+      <div className="flex items-center gap-2.5 sm:gap-5">
+        <div className="w-8 sm:w-12 text-center shrink-0">
           <RankNumber rank={entry.rank} size="md" />
         </div>
         <Link href={`/profiles/${entry.username}`} className="shrink-0">
@@ -91,17 +91,22 @@ function ChartRow({ entry }: { entry: ChartEntry }) {
         <div className="flex-1 min-w-0">
           <Link
             href={`/profiles/${entry.username}`}
-            className="font-semibold text-[15px] sm:text-lg text-[var(--ink)] hover:underline truncate block"
+            className="font-semibold text-sm sm:text-lg text-[var(--ink)] hover:underline truncate block"
           >
             {entry.display_name}
           </Link>
-          <p className="text-xs text-[var(--ink-muted)] truncate">@{entry.username}</p>
+          <div className="flex items-center gap-2 text-xs text-[var(--ink-muted)]">
+            <span className="truncate">@{entry.username}</span>
+            <span className="sm:hidden flex-shrink-0">
+              <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
+            </span>
+          </div>
         </div>
-        <div className="w-[4.5rem] sm:w-24 text-right shrink-0">
+        <div className="hidden sm:block w-[4.5rem] sm:w-24 text-right shrink-0">
           <RankDeltaChip previousRank={entry.previous_rank} delta={entry.rank_delta} />
         </div>
         <div className="text-right shrink-0">
-          <div className="text-base sm:text-lg font-semibold tabular-nums">
+          <div className="text-sm sm:text-lg font-semibold tabular-nums">
             <FollowerCount count={entry.follower_count} />
           </div>
           <FollowerDelta

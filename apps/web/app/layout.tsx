@@ -69,11 +69,11 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="light"
-      className={`${inter.variable} ${oswald.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${oswald.variable} ${jetbrainsMono.variable} overflow-x-hidden`}
       suppressHydrationWarning
     >
       <body
-        className="min-h-screen flex flex-col antialiased bg-[var(--color-canvas)] text-[var(--color-ink)]"
+        className="min-h-screen flex flex-col antialiased bg-[var(--color-canvas)] text-[var(--color-ink)] overflow-x-hidden w-full max-w-full"
         suppressHydrationWarning
       >
         <script

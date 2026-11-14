@@ -100,15 +100,15 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
         </div>
 
         {/* Head-to-Head Split View */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pt-6">
           {/* Creator #1 (Left) */}
-          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--canvas)] border border-[var(--line)] hover-lift">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 bg-[var(--canvas)] border border-[var(--line)] hover-lift">
             <div className="flex items-center gap-3 min-w-0">
-              <span className="font-display text-3xl sm:text-4xl font-black text-[var(--accent)]">
+              <span className="font-display text-3xl sm:text-4xl font-black text-[var(--accent)] flex-shrink-0">
                 #1
               </span>
-              <Avatar src={c1.avatarUrl} name={c1.fullName} size="sm" rounded="full" />
-              <div className="min-w-0">
+              <Avatar src={c1.avatarUrl} name={c1.fullName} size="sm" rounded="full" className="flex-shrink-0" />
+              <div className="min-w-0 flex-1">
                 <Link
                   href={`/profiles/${c1.username}`}
                   className="font-display text-lg sm:text-xl font-bold uppercase text-[var(--ink)] hover:text-[var(--accent)] truncate block"
@@ -118,7 +118,7 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
                 <div className="font-mono text-xs text-[var(--ink-muted)]">
                   @{c1.username}
                 </div>
-                <div className="font-mono text-sm font-bold text-[var(--ink)] mt-1">
+                <div className="font-mono text-sm font-bold text-[var(--ink)] mt-0.5">
                   {(c1.followersCount / 1_000_000).toFixed(1)}M followers
                 </div>
               </div>
@@ -128,9 +128,9 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               type="button"
               onClick={() => cheer('c1')}
               aria-label={`Cheer ${c1.fullName}`}
-              className={`flex-shrink-0 px-3 py-2 font-mono text-xs font-bold uppercase border transition-all ${
+              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center transition-all ${
                 hasCheered === 'c1'
-                  ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-105'
+                  ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-[1.02]'
                   : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--line)] hover:border-[var(--ink)]'
               }`}
             >
@@ -139,13 +139,13 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
           </div>
 
           {/* Creator #2 (Right) */}
-          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--canvas)] border border-[var(--line)] hover-lift">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 bg-[var(--canvas)] border border-[var(--line)] hover-lift">
             <div className="flex items-center gap-3 min-w-0">
-              <span className="font-display text-3xl sm:text-4xl font-black text-[var(--ink-muted)]">
+              <span className="font-display text-3xl sm:text-4xl font-black text-[var(--ink-muted)] flex-shrink-0">
                 #2
               </span>
-              <Avatar src={c2.avatarUrl} name={c2.fullName} size="sm" rounded="full" />
-              <div className="min-w-0">
+              <Avatar src={c2.avatarUrl} name={c2.fullName} size="sm" rounded="full" className="flex-shrink-0" />
+              <div className="min-w-0 flex-1">
                 <Link
                   href={`/profiles/${c2.username}`}
                   className="font-display text-lg sm:text-xl font-bold uppercase text-[var(--ink)] hover:text-[var(--accent)] truncate block"
@@ -155,7 +155,7 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
                 <div className="font-mono text-xs text-[var(--ink-muted)]">
                   @{c2.username}
                 </div>
-                <div className="font-mono text-sm font-bold text-[var(--ink)] mt-1">
+                <div className="font-mono text-sm font-bold text-[var(--ink)] mt-0.5">
                   {(c2.followersCount / 1_000_000).toFixed(1)}M followers
                 </div>
               </div>
@@ -165,9 +165,9 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               type="button"
               onClick={() => cheer('c2')}
               aria-label={`Cheer ${c2.fullName}`}
-              className={`flex-shrink-0 px-3 py-2 font-mono text-xs font-bold uppercase border transition-all ${
+              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center transition-all ${
                 hasCheered === 'c2'
-                  ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-105'
+                  ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-[1.02]'
                   : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--line)] hover:border-[var(--ink)]'
               }`}
             >

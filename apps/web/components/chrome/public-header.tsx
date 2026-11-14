@@ -61,7 +61,7 @@ export const PublicHeader: React.FC = () => {
           <div className="flex items-center gap-6 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-1.5 text-[var(--header-ink)]"
+              className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--header-ink)] hover:opacity-75"
               aria-label="Open navigation"
             >
               <Menu className="w-5 h-5" />
@@ -89,7 +89,7 @@ export const PublicHeader: React.FC = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={openSearch}
-              className="flex items-center gap-2 px-2 py-1.5 text-[var(--header-ink)] hover:opacity-70"
+              className="flex items-center gap-2 p-2 min-h-[44px] min-w-[44px] justify-center text-[var(--header-ink)] hover:opacity-70"
               title="Search profiles (⌘K / Ctrl+K)"
               aria-label="Open search"
             >
@@ -159,7 +159,11 @@ export const PublicHeader: React.FC = () => {
           <div className="relative h-full w-72 bg-[var(--header)] text-[var(--header-ink)] border-r border-[var(--line)] p-5">
             <div className="flex items-center justify-between mb-8">
               <span className="chart-title text-2xl">IGSHORTS</span>
-              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close navigation"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--header-ink)] hover:opacity-75"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -169,7 +173,7 @@ export const PublicHeader: React.FC = () => {
                   key={`${link.label}-${link.href}`}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2.5 text-sm font-semibold border-b border-[var(--line)]"
+                  className="block py-3 min-h-[44px] flex items-center text-sm font-semibold border-b border-[var(--line)]"
                 >
                   {link.label}
                 </Link>

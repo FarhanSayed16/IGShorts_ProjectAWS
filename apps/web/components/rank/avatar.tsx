@@ -35,13 +35,13 @@ export const Avatar: React.FC<AvatarProps> = ({
       case 'sm':
         return { px: 48, text: 'text-xs', box: 'w-12 h-12' };
       case 'md':
-        return { px: 96, text: 'text-sm', box: 'w-[88px] h-[88px] sm:w-[96px] sm:h-[96px]' };
+        return { px: 96, text: 'text-xs sm:text-sm', box: 'w-12 h-12 sm:w-[88px] sm:h-[88px]' };
       case 'lg':
         return { px: 120, text: 'text-xl', box: 'w-[120px] h-[120px]' };
       case 'xl':
         return { px: 168, text: 'text-2xl', box: 'w-[168px] h-[168px]' };
       case 'hero':
-        return { px: 280, text: 'text-4xl', box: 'w-[168px] h-[168px] sm:w-[220px] sm:h-[220px]' };
+        return { px: 280, text: 'text-2xl sm:text-4xl', box: 'w-[112px] h-[112px] sm:w-[220px] sm:h-[220px]' };
     }
   };
 

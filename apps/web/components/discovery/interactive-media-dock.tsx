@@ -32,7 +32,7 @@ export function InteractiveMediaDock() {
   return (
     <aside
       aria-label="Audio Discovery Player"
-      className="fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 max-w-4xl mx-auto z-50 bg-[var(--surface)]/95 backdrop-blur-md border-2 border-[var(--ink)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] flex flex-col overflow-hidden transition-all animate-in fade-in slide-in-from-bottom-4 duration-200"
+      className="fixed bottom-2 left-2 right-2 sm:bottom-4 sm:left-6 sm:right-6 max-w-4xl mx-auto z-50 bg-[var(--surface)]/95 backdrop-blur-md border-2 border-[var(--ink)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] flex flex-col overflow-hidden transition-all animate-in fade-in slide-in-from-bottom-4 duration-200"
     >
       {/* Top Scrubber Progress Bar (Clickable/Seekable) */}
       <div
@@ -60,10 +60,10 @@ export function InteractiveMediaDock() {
       </div>
 
       {/* Main Dock Body */}
-      <div className="p-3 sm:p-4 flex items-center justify-between gap-3 sm:gap-6">
+      <div className="p-2.5 sm:p-4 flex items-center justify-between gap-2.5 sm:gap-6">
         {/* Left: Artwork + Track details */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative w-12 h-12 flex-shrink-0 bg-neutral-900 border border-[var(--line)] overflow-hidden rounded-sm">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 bg-neutral-900 border border-[var(--line)] overflow-hidden rounded-sm">
             {playingTrack.artwork_url ? (
               <DiscoveryMedia
                 imageUrl={playingTrack.artwork_url}
@@ -80,18 +80,18 @@ export function InteractiveMediaDock() {
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold tracking-wider text-[var(--accent)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-live-radar" />
-                LO-FI AUDIO GROOVE
+              <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono uppercase font-bold tracking-wider text-[var(--accent)] truncate">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-live-radar flex-shrink-0" />
+                LO-FI GROOVE
               </span>
-              <span className="font-mono text-[10px] text-[var(--ink-muted)] tabular-nums">
+              <span className="font-mono text-[9px] sm:text-[10px] text-[var(--ink-muted)] tabular-nums flex-shrink-0">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
-            <h4 className="font-display text-sm sm:text-base font-bold text-[var(--ink)] truncate uppercase">
+            <h4 className="font-display text-xs sm:text-base font-bold text-[var(--ink)] truncate uppercase">
               {playingTrack.title}
             </h4>
-            <p className="text-xs text-[var(--ink-muted)] truncate">
+            <p className="text-[11px] sm:text-xs text-[var(--ink-muted)] truncate">
               {playingTrack.artist}
             </p>
           </div>
@@ -115,13 +115,13 @@ export function InteractiveMediaDock() {
         </div>
 
         {/* Right: Controls, Volume Slider, Deep Links, and Dismiss */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* Play / Pause Toggle */}
           <button
             type="button"
             onClick={() => togglePlay()}
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-            className="p-2 sm:px-3 sm:py-2 bg-[var(--ink)] text-[var(--canvas)] text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-[var(--accent)] hover:text-black transition-colors rounded-sm"
+            className="min-h-[44px] min-w-[44px] px-3 py-2 bg-[var(--ink)] text-[var(--canvas)] text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-[var(--accent)] hover:text-black transition-colors rounded-sm"
           >
             {isPlaying ? (
               <>
@@ -194,7 +194,7 @@ export function InteractiveMediaDock() {
             type="button"
             onClick={stopTrack}
             aria-label="Close audio player"
-            className="p-1.5 text-[var(--ink-muted)] hover:text-[var(--ink)] border border-[var(--line)] hover:border-[var(--ink)] transition-colors rounded-sm"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-[var(--ink-muted)] hover:text-[var(--ink)] border border-[var(--line)] hover:border-[var(--ink)] transition-colors rounded-sm"
           >
             <svg className="w-4 h-4 stroke-current stroke-2" viewBox="0 0 24 24">
               <line x1="18" y1="6" x2="6" y2="18" />

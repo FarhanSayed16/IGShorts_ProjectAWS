@@ -21,7 +21,7 @@ export const RankNumber: React.FC<RankNumberProps> = ({ rank, size = 'md', featu
   if (isLead && size !== 'sm') {
     return (
       <span
-        className={`inline-flex items-center justify-center min-w-[52px] h-[72px] sm:min-w-[64px] sm:h-[88px] bg-[var(--accent)] text-[var(--accent-ink)] font-display ${size === 'hero' ? 'text-6xl sm:text-7xl min-w-[72px] sm:min-w-[88px] h-[168px] sm:h-[220px]' : 'text-4xl'} tabular-nums`}
+        className={`inline-flex items-center justify-center min-w-[48px] h-[64px] sm:min-w-[64px] sm:h-[88px] bg-[var(--accent)] text-[var(--accent-ink)] font-display ${size === 'hero' ? 'text-5xl sm:text-7xl min-w-[56px] sm:min-w-[88px] h-[112px] sm:h-[220px]' : 'text-3xl sm:text-4xl'} tabular-nums flex-shrink-0`}
       >
         {rank}
       </span>

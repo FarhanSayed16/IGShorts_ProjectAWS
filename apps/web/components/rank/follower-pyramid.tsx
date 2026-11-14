@@ -151,7 +151,7 @@ export function FollowerPyramid({
         </div>
 
         {/* Quick Creator Presets */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-4 pt-3 border-t border-[var(--line)]">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-4 pt-3 border-t border-[var(--line)]">
           <span className="text-[10px] font-mono uppercase text-[var(--ink-muted)] mr-1">
             Presets:
           </span>
@@ -161,7 +161,7 @@ export function FollowerPyramid({
               setFollowerCount(679800000);
               setSelectedTierId('apex');
             }}
-            className="px-2 py-0.5 text-[11px] font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)]"
+            className="min-h-[36px] px-2.5 py-1 text-xs font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)] inline-flex items-center"
           >
             Cristiano (679.8M)
           </button>
@@ -171,7 +171,7 @@ export function FollowerPyramid({
               setFollowerCount(8400000);
               setSelectedTierId('mega');
             }}
-            className="px-2 py-0.5 text-[11px] font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)]"
+            className="min-h-[36px] px-2.5 py-1 text-xs font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)] inline-flex items-center"
           >
             Mega Star (8.4M)
           </button>
@@ -181,7 +181,7 @@ export function FollowerPyramid({
               setFollowerCount(350000);
               setSelectedTierId('established');
             }}
-            className="px-2 py-0.5 text-[11px] font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)]"
+            className="min-h-[36px] px-2.5 py-1 text-xs font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)] inline-flex items-center"
           >
             Established (350K)
           </button>
@@ -191,7 +191,7 @@ export function FollowerPyramid({
               setFollowerCount(45000);
               setSelectedTierId('community');
             }}
-            className="px-2 py-0.5 text-[11px] font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)]"
+            className="min-h-[36px] px-2.5 py-1 text-xs font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)] inline-flex items-center"
           >
             Community (45K)
           </button>
@@ -201,7 +201,7 @@ export function FollowerPyramid({
               setFollowerCount(4500);
               setSelectedTierId('micro');
             }}
-            className="px-2 py-0.5 text-[11px] font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)]"
+            className="min-h-[36px] px-2.5 py-1 text-xs font-mono border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--ink)] text-[var(--ink)] inline-flex items-center"
           >
             Micro (4.5K)
           </button>

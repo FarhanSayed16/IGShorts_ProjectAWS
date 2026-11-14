@@ -5,6 +5,7 @@ import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { ChartView } from '@/components/rank/chart-view';
 import { fetchChartEntries, fetchChartMeta } from '@/lib/api/client';
+import { FALLBACK_GLOBAL_META, getFallbackChartResponse } from '@/lib/fallback-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,8 +40,8 @@ export default async function GlobalChartPage() {
     initialMeta = metaRes;
     initialEntries = entriesRes;
   } catch {
-    initialMeta = null;
-    initialEntries = null;
+    initialMeta = FALLBACK_GLOBAL_META;
+    initialEntries = getFallbackChartResponse('global');
   }
 
   return (

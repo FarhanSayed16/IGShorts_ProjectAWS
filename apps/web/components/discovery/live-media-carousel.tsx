@@ -196,7 +196,7 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                 type="button"
                 onClick={goToPrev}
                 aria-label="Previous slide"
-                className="w-6 h-6 flex items-center justify-center border border-[var(--line)] hover:border-[var(--ink)] text-xs text-[var(--ink)] bg-[var(--surface)]"
+                className="w-8 h-8 sm:w-6 sm:h-6 min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0 flex items-center justify-center border border-[var(--line)] hover:border-[var(--ink)] text-xs text-[var(--ink)] bg-[var(--surface)]"
               >
                 ←
               </button>
@@ -204,7 +204,7 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                 type="button"
                 onClick={goToNext}
                 aria-label="Next slide"
-                className="w-6 h-6 flex items-center justify-center border border-[var(--line)] hover:border-[var(--ink)] text-xs text-[var(--ink)] bg-[var(--surface)]"
+                className="w-8 h-8 sm:w-6 sm:h-6 min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0 flex items-center justify-center border border-[var(--line)] hover:border-[var(--ink)] text-xs text-[var(--ink)] bg-[var(--surface)]"
               >
                 →
               </button>
@@ -240,13 +240,13 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
             </div>
 
             {/* Inline Media Action Controls Overlay */}
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between z-10">
-              <div className="flex items-center gap-2">
+            <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-between gap-1.5 z-10">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={toggleVideoPlay}
                   aria-label={isPlaying ? 'Pause inline video' : 'Play inline video'}
-                  className="px-2.5 py-1.5 bg-black/80 text-white hover:bg-black text-[11px] font-mono font-bold uppercase tracking-wider border border-white/25 flex items-center gap-1.5 backdrop-blur-sm shadow-md"
+                  className="px-2.5 py-1.5 min-h-[36px] bg-black/80 text-white hover:bg-black text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider border border-white/25 flex items-center gap-1.5 backdrop-blur-sm shadow-md"
                 >
                   {isPlaying ? '⏸ Pause' : '▶ Play'}
                 </button>
@@ -255,10 +255,10 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                   type="button"
                   onClick={toggleMute}
                   aria-label={isMuted ? 'Unmute video audio' : 'Mute video audio'}
-                  className="p-1.5 bg-black/80 text-white hover:bg-black text-xs border border-white/25 backdrop-blur-sm shadow-md"
+                  className="px-2 py-1.5 min-h-[36px] bg-black/80 text-white hover:bg-black text-[10px] sm:text-xs border border-white/25 backdrop-blur-sm shadow-md flex items-center"
                   title={isMuted ? 'Unmute sound' : 'Mute sound'}
                 >
-                  {isMuted ? '🔇 Unmute' : '🔊 Sound On'}
+                  {isMuted ? '🔇 Unmute' : '🔊 Sound'}
                 </button>
               </div>
 
@@ -266,9 +266,9 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(true)}
-                className="px-3 py-1.5 bg-[var(--accent)] text-black font-mono text-[11px] font-bold uppercase tracking-wider shadow-lg hover:scale-105 transition-transform"
+                className="px-2.5 sm:px-3 py-1.5 min-h-[36px] bg-[var(--accent)] text-black font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg hover:scale-105 transition-transform flex items-center"
               >
-                Expand Story ↗
+                Expand ↗
               </button>
             </div>
           </div>

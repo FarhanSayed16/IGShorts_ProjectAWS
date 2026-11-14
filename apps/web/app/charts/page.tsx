@@ -6,6 +6,7 @@ import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { FollowerPyramid } from '@/components/rank/follower-pyramid';
 import { fetchChartMeta } from '@/lib/api/client';
+import { FALLBACK_GLOBAL_META, FALLBACK_INDIA_META } from '@/lib/fallback-data';
 
 export const metadata: Metadata = {
   title: 'Charts',
@@ -24,7 +25,8 @@ export default async function ChartsIndexPage() {
     globalMeta = gRes;
     indiaMeta = iRes;
   } catch {
-    // Graceful offline fallback
+    globalMeta = FALLBACK_GLOBAL_META;
+    indiaMeta = FALLBACK_INDIA_META;
   }
 
   const asOf = (iso?: string | null) =>
