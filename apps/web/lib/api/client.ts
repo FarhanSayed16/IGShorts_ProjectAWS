@@ -68,10 +68,12 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
       },
     });
 
+    const text = await res.text();
+
     if (!res.ok) {
       let errorMessage = `API request failed with status ${res.status}`;
       try {
-        const errorJson = await res.json();
+        const errorJson = text ? (JSON.parse(text) as { message?: string }) : null;
         if (errorJson?.message) {
           errorMessage = errorJson.message;
         }
@@ -81,7 +83,11 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
       throw new ApiClientError(errorMessage, res.status, false);
     }
 
-    return (await res.json()) as T;
+    // Nest/Fastify may return an empty body for `null` JSON responses.
+    if (!text.trim()) {
+      return null as T;
+    }
+    return JSON.parse(text) as T;
   } catch (err: unknown) {
     if (err instanceof ApiClientError) {
       throw err;

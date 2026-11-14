@@ -4,9 +4,25 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { VisitDiff } from '@igshorts/shared';
 import { fetchVisitDiff } from '@/lib/api/client';
-import { readMemberToken } from '@/lib/member-session';
+import { memberFetch, readMemberToken } from '@/lib/member-session';
 
 const STORAGE_KEY = 'igshorts-last-visit';
+
+function readLocalVisit(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalVisit(iso: string) {
+  try {
+    localStorage.setItem(STORAGE_KEY, iso);
+  } catch {
+    // Private mode / blocked storage — ignore.
+  }
+}
 
 export function SinceLastVisit() {
   const [mode, setMode] = useState<'loading' | 'welcome' | 'diff' | 'hidden'>('loading');
@@ -16,10 +32,28 @@ export function SinceLastVisit() {
     let cancelled = false;
 
     async function run() {
-      const previous = localStorage.getItem(STORAGE_KEY);
+      let previous = readLocalVisit();
+      const token = readMemberToken();
+
+      if (token) {
+        try {
+          const me = (await memberFetch('/members/me')) as {
+            user?: { lastVisitedAt?: string | null };
+          };
+          if (me.user?.lastVisitedAt) {
+            previous = me.user.lastVisitedAt;
+          }
+        } catch {
+          // Fall back to localStorage when member session is unavailable.
+        }
+      }
+
       if (!previous) {
         if (!cancelled) setMode('welcome');
-        localStorage.setItem(STORAGE_KEY, new Date().toISOString());
+        writeLocalVisit(new Date().toISOString());
+        if (token) {
+          memberFetch('/members/me/visit', { method: 'PATCH' }).catch(() => undefined);
+        }
         return;
       }
 
@@ -37,21 +71,16 @@ export function SinceLastVisit() {
       } catch {
         if (!cancelled) setMode('hidden');
       } finally {
-        localStorage.setItem(STORAGE_KEY, new Date().toISOString());
-        const token = readMemberToken();
+        writeLocalVisit(new Date().toISOString());
         if (token) {
-          fetch(`${process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || '/api/v1'}/members/me/visit`, {
-            method: 'PATCH',
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }).catch(() => undefined);
+          memberFetch('/members/me/visit', { method: 'PATCH' }).catch(() => undefined);
         }
       }
     }
 
-    run();
+    run().catch(() => {
+      if (!cancelled) setMode('hidden');
+    });
     return () => {
       cancelled = true;
     };
@@ -105,15 +134,15 @@ export function SinceLastVisit() {
               </li>
             )}
             {diff?.creatorMoves.slice(0, 4).map((move) => (
-              <li key={move.username}>
+              <li key={`${move.username}-${move.direction}-${move.delta}`}>
                 <Link href={`/profiles/${move.username}`} className="hover:underline">
                   {move.displayName} moved {move.direction} ({move.delta > 0 ? '+' : ''}
                   {move.delta})
                 </Link>
               </li>
             ))}
-            {diff?.significantStories.slice(0, 3).map((story) => (
-              <li key={story.title}>
+            {diff?.significantStories.slice(0, 3).map((story, index) => (
+              <li key={`${story.category}-${story.title}-${index}`}>
                 <Link href="/trending" className="hover:underline">
                   {story.title}
                 </Link>

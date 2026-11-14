@@ -90,7 +90,10 @@ export const API_PATHS = {
   adminSync: '/admin/ingestion/sync',
   adminRebuild: '/admin/ranking/rebuild',
   adminJobsRun: '/admin/jobs/run',
+  adminDiscoveryJobsRun: '/admin/jobs/discovery',
   internalDailyJob: '/internal/jobs/daily',
+  internalDiscoveryJob: '/internal/jobs/discovery',
+  memberMe: '/members/me',
 } as const;
 
 export const ADMIN_ROLES = {

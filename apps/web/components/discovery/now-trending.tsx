@@ -38,6 +38,7 @@ export function NowTrending() {
             <button
               key={r}
               type="button"
+              aria-pressed={region === r}
               onClick={() => setRegion(r)}
               className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] border ${
                 region === r
@@ -51,7 +52,7 @@ export function NowTrending() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-[var(--line)] pb-3" role="tablist">
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-[var(--line)] pb-3" role="tablist" aria-label="Sort">
         {SORTS.map((s) => (
           <button
             key={s.id}
@@ -70,17 +71,19 @@ export function NowTrending() {
         ))}
       </div>
 
-      {loading ? (
-        <p className="text-sm text-[var(--ink-muted)]">Loading trends…</p>
-      ) : items.length === 0 ? (
-        <p className="text-sm text-[var(--ink-muted)]">No trending topics right now. Check back soon.</p>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((trend) => (
-            <TrendCard key={trend.id} trend={trend} />
-          ))}
-        </div>
-      )}
+      <div aria-live="polite">
+        {loading ? (
+          <p className="text-sm text-[var(--ink-muted)]">Loading trends…</p>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-[var(--ink-muted)]">No trending topics right now. Check back soon.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((trend) => (
+              <TrendCard key={trend.id} trend={trend} />
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

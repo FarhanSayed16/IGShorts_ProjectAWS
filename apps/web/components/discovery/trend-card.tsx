@@ -39,11 +39,21 @@ export function TrendCard({ trend }: { trend: TrendCardDto }) {
           <span>
             {trend.sourceLabel === 'editorial' ? 'Editorial selection' : trend.sourceName || trend.sourceLabel}
           </span>
-          {trend.sourceUrl && (
-            <Link href={trend.sourceUrl} className="font-semibold text-[var(--ink)] hover:underline">
-              Open →
-            </Link>
-          )}
+          {trend.sourceUrl &&
+            (/^https?:\/\//i.test(trend.sourceUrl) ? (
+              <a
+                href={trend.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--ink)] hover:underline"
+              >
+                Open →
+              </a>
+            ) : (
+              <Link href={trend.sourceUrl} className="font-semibold text-[var(--ink)] hover:underline">
+                Open →
+              </Link>
+            ))}
         </div>
       </div>
     </article>
