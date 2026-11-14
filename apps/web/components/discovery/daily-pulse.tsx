@@ -6,6 +6,7 @@ import { Flame, Gem, Rocket, Play } from 'lucide-react';
 import { DailyPulseDay } from '@igshorts/shared';
 import { DiscoveryMedia } from './discovery-media';
 import { useAudioPlayer } from '@/lib/audio-player-context';
+import { canUsePreferenceStorage } from '@/lib/consent/consent-guard';
 
 const KIND_LABEL: Record<string, string> = {
   song: 'Song of the Day',
@@ -39,6 +40,7 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
 
   useEffect(() => {
     try {
+      if (!canUsePreferenceStorage()) return;
       const saved = localStorage.getItem('igshorts_pulse_reactions');
       if (saved) {
         setReactions((prev) => ({ ...prev, ...JSON.parse(saved) }));
@@ -62,7 +64,9 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
         },
       };
       try {
-        localStorage.setItem('igshorts_pulse_reactions', JSON.stringify(updated));
+        if (canUsePreferenceStorage()) {
+          localStorage.setItem('igshorts_pulse_reactions', JSON.stringify(updated));
+        }
       } catch {}
       return updated;
     });
@@ -191,7 +195,7 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                   {/* Interactive Micro-Reactions Bar */}
                   <div className="mt-auto pt-3 border-t border-[var(--line)]">
                     <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase mb-1.5">
-                      Your reactions (local):
+                      Your reactions · local only
                     </div>
                     <div className="flex items-center gap-1.5">
                       <button

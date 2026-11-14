@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Flame, Zap } from 'lucide-react';
 import { Avatar } from '@/components/rank/avatar';
+import { canUsePreferenceStorage } from '@/lib/consent/consent-guard';
 
 interface CreatorShowdownProps {
   creator1?: {
@@ -46,13 +47,14 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
   const leadDiff = Math.abs(c1.followersCount - c2.followersCount);
   const formattedLead = `${(leadDiff / 1_000_000).toFixed(1)}M`;
 
-  // Local interactive cheers with localStorage persistence
-  const [c1Cheers, setC1Cheers] = useState<number>(1428);
-  const [c2Cheers, setC2Cheers] = useState<number>(1382);
+  // Local interactive cheers only — never seed fake global totals
+  const [c1Cheers, setC1Cheers] = useState<number>(0);
+  const [c2Cheers, setC2Cheers] = useState<number>(0);
   const [hasCheered, setHasCheered] = useState<'c1' | 'c2' | null>(null);
 
   useEffect(() => {
     try {
+      if (!canUsePreferenceStorage()) return;
       const savedC1 = localStorage.getItem('igshorts_cheer_c1');
       const savedC2 = localStorage.getItem('igshorts_cheer_c2');
       if (savedC1) setC1Cheers(Number(savedC1));
@@ -68,14 +70,18 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
       setC1Cheers(next);
       setHasCheered('c1');
       try {
-        localStorage.setItem('igshorts_cheer_c1', String(next));
+        if (canUsePreferenceStorage()) {
+          localStorage.setItem('igshorts_cheer_c1', String(next));
+        }
       } catch {}
     } else {
       const next = c2Cheers + 1;
       setC2Cheers(next);
       setHasCheered('c2');
       try {
-        localStorage.setItem('igshorts_cheer_c2', String(next));
+        if (canUsePreferenceStorage()) {
+          localStorage.setItem('igshorts_cheer_c2', String(next));
+        }
       } catch {}
     }
     setTimeout(() => setHasCheered(null), 1000);
@@ -96,7 +102,7 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
             <span className="px-2 py-0.5 bg-[var(--accent)] text-black font-bold uppercase">
               Lead: +{formattedLead}
             </span>
-            <span className="text-[var(--ink-muted)]">Verified Billboard Census</span>
+            <span className="text-[var(--ink-muted)]">Verified Watchlist Snapshot</span>
           </div>
         </div>
 
@@ -136,7 +142,8 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               }`}
             >
               <Flame className={`w-4 h-4 ${hasCheered === 'c1' ? 'text-black fill-black' : 'text-amber-500 fill-amber-500/25'}`} />
-              <span>Cheer ({c1Cheers.toLocaleString()})</span>
+              <span>Cheer ({c1Cheers.toLocaleString('en-US')})</span>
+              <span className="text-[9px] font-normal normal-case opacity-80">(your cheer)</span>
             </button>
           </div>
 
@@ -174,7 +181,8 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               }`}
             >
               <Zap className={`w-4 h-4 ${hasCheered === 'c2' ? 'text-black fill-black' : 'text-emerald-500 fill-emerald-500/25'}`} />
-              <span>Cheer ({c2Cheers.toLocaleString()})</span>
+              <span>Cheer ({c2Cheers.toLocaleString('en-US')})</span>
+              <span className="text-[9px] font-normal normal-case opacity-80">(your cheer)</span>
             </button>
           </div>
         </div>
@@ -185,7 +193,7 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
             <span className="text-[var(--accent)]">
               {c1.fullName.split(' ')[0]} {c1Percent}%
             </span>
-            <span className="text-[var(--ink-muted)]">CROWD SHARE</span>
+            <span className="text-[var(--ink-muted)]">FOLLOWER SHARE</span>
             <span className="text-[var(--ink-muted)]">
               {c2Percent}% {c2.fullName.split(' ')[0]}
             </span>

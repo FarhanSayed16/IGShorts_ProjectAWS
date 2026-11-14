@@ -29,14 +29,14 @@ const CATEGORY_IMAGES: Partial<Record<TrendCategory, string>> = {
 export function CategoryGrid() {
   return (
     <section className="mb-14">
-      <div className="flex items-end justify-between gap-4 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <h2 className="chart-title text-3xl sm:text-4xl">Explore categories</h2>
           <p className="mt-2 text-sm text-[var(--ink-muted)]">
             Six discovery lanes — Music, News, Culture, Entertainment, Tech, Sports & Gaming.
           </p>
         </div>
-        <Link href="/trending" className="text-xs font-bold uppercase tracking-[0.16em] hover:underline shrink-0">
+        <Link href="/trending" className="text-xs font-bold uppercase tracking-[0.16em] hover:underline shrink-0 self-start sm:self-auto">
           All trending →
         </Link>
       </div>

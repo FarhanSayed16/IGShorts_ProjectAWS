@@ -1,7 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { CookiePreferencesModal } from '@/components/chrome/cookie-preferences-modal';
 
 export const PublicFooter: React.FC = () => {
+  const [cookieOpen, setCookieOpen] = useState(false);
+
   return (
     <footer className="mt-auto bg-[var(--footer)] text-[var(--footer-ink)]">
       <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-12">
@@ -63,8 +68,18 @@ export const PublicFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white">
+                <Link href="/help#faq" className="hover:text-white">
                   FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/help" className="hover:text-white">
+                  Help
+                </Link>
+              </li>
+              <li>
+                <Link href="/support" className="hover:text-white">
+                  Support
                 </Link>
               </li>
               <li>
@@ -76,6 +91,20 @@ export const PublicFooter: React.FC = () => {
                 <Link href="/terms" className="hover:text-white">
                   Terms
                 </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="hover:text-white">
+                  Cookies
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setCookieOpen(true)}
+                  className="hover:text-white text-left"
+                >
+                  Cookie preferences
+                </button>
               </li>
               <li>
                 <Link href="/admin" className="hover:text-white">
@@ -90,6 +119,7 @@ export const PublicFooter: React.FC = () => {
           <span>followers_v1 · public snapshots only</span>
         </div>
       </div>
+      <CookiePreferencesModal open={cookieOpen} onClose={() => setCookieOpen(false)} />
     </footer>
   );
 };

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Volume2, Volume1, VolumeX } from 'lucide-react';
 import { useAudioPlayer } from '@/lib/audio-player-context';
+import { playbackBadge } from '@/lib/music-playback-catalog';
 import { DiscoveryMedia } from './discovery-media';
 
 function formatTime(sec: number): string {
@@ -28,27 +29,32 @@ export function InteractiveMediaDock() {
 
   if (!playingTrack) return null;
 
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const isLiveRadio = playingTrack.mode === 'radio';
+  const isUnavailable = playingTrack.mode === 'unavailable';
+  const progressPercent =
+    isLiveRadio || duration <= 0 ? 100 : Math.min(100, (currentTime / duration) * 100);
+  const badge = playbackBadge(playingTrack.mode, playingTrack.source_note);
 
   return (
     <aside
       aria-label="Audio Discovery Player"
       className="fixed bottom-2 left-2 right-2 sm:bottom-4 sm:left-6 sm:right-6 max-w-4xl mx-auto z-50 bg-[var(--surface)]/95 backdrop-blur-md border-2 border-[var(--ink)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] flex flex-col overflow-hidden transition-all animate-in fade-in slide-in-from-bottom-4 duration-200"
     >
-      {/* Top Scrubber Progress Bar (Clickable/Seekable) */}
+      {/* Top Scrubber Progress Bar (Clickable/Seekable for on-demand streams) */}
       <div
-        className="relative w-full h-1.5 bg-[var(--line)] cursor-pointer group"
+        className={`relative w-full h-1.5 bg-[var(--line)] group ${isLiveRadio ? '' : 'cursor-pointer'}`}
         onClick={(e) => {
+          if (isLiveRadio || duration <= 0) return;
           const rect = e.currentTarget.getBoundingClientRect();
           const clickX = e.clientX - rect.left;
           const ratio = Math.max(0, Math.min(1, clickX / rect.width));
           seek(ratio * duration);
         }}
         role="slider"
-        aria-label="Track progress"
+        aria-label={isLiveRadio ? 'Live radio stream' : 'Track progress'}
         aria-valuenow={Math.round(currentTime)}
         aria-valuemin={0}
-        aria-valuemax={Math.round(duration)}
+        aria-valuemax={Math.round(duration || 0)}
       >
         <div
           className="h-full bg-[var(--accent)] transition-all duration-100 ease-linear"
@@ -83,17 +89,23 @@ export function InteractiveMediaDock() {
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono uppercase font-bold tracking-wider text-[var(--accent)] truncate">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-live-radar flex-shrink-0" />
-                LO-FI GROOVE
+                {badge}
               </span>
               <span className="font-mono text-[9px] sm:text-[10px] text-[var(--ink-muted)] tabular-nums flex-shrink-0">
-                {formatTime(currentTime)} / {formatTime(duration)}
+                {isLiveRadio
+                  ? isPlaying
+                    ? 'LIVE'
+                    : 'PAUSED'
+                  : `${formatTime(currentTime)} / ${formatTime(duration)}`}
               </span>
             </div>
             <h4 className="font-display text-xs sm:text-base font-bold text-[var(--ink)] truncate uppercase">
               {playingTrack.title}
             </h4>
             <p className="text-[11px] sm:text-xs text-[var(--ink-muted)] truncate">
-              {playingTrack.artist}
+              {isUnavailable
+                ? 'Stream unavailable — open Spotify or YouTube'
+                : playingTrack.artist}
             </p>
           </div>
         </div>
@@ -101,7 +113,7 @@ export function InteractiveMediaDock() {
         {/* Center: Live animated Soundwave Equalizer & Time */}
         <div
           className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[var(--canvas)] border border-[var(--line)] rounded-sm"
-          title={isPlaying ? 'Audio actively streaming' : 'Audio paused'}
+          title={isUnavailable ? 'Stream unavailable' : isPlaying ? 'Audio actively streaming' : 'Audio paused'}
         >
           <div className="flex items-center gap-1">
             <span className={`w-1 bg-[var(--accent)] rounded-full ${isPlaying ? 'animate-soundwave-1' : 'h-1.5'}`} />
@@ -111,7 +123,7 @@ export function InteractiveMediaDock() {
             <span className={`w-1 bg-[var(--accent)] rounded-full ${isPlaying ? 'animate-soundwave-5' : 'h-2'}`} />
           </div>
           <span className="font-mono text-[10px] font-bold text-[var(--ink)] uppercase">
-            {isPlaying ? 'ACTIVE GROOVE' : 'PAUSED'}
+            {isUnavailable ? 'UNAVAILABLE' : isPlaying ? (isLiveRadio ? 'ON AIR' : 'PLAYING') : 'PAUSED'}
           </span>
         </div>
 

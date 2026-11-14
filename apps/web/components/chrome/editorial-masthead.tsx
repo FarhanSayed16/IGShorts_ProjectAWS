@@ -46,7 +46,7 @@ export function EditorialMasthead({
               Tracked Watchlist
             </span>
             <span className="font-display text-2xl sm:text-3xl font-bold text-[var(--ink)] tabular-nums">
-              {totalProfiles.toLocaleString()}
+              {totalProfiles.toLocaleString('en-US')}
             </span>
           </div>
           <Link

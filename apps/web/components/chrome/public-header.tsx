@@ -77,7 +77,7 @@ export const PublicHeader: React.FC = () => {
                   className={
                     isTopLinkActive(pathname, link.href)
                       ? 'text-[var(--header-ink)]'
-                      : 'text-[var(--ink-muted)] hover:text-[var(--header-ink)]'
+                      : 'text-[var(--header-ink)]/72 hover:text-[var(--header-ink)]'
                   }
                 >
                   {link.label}
@@ -86,7 +86,7 @@ export const PublicHeader: React.FC = () => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
             <button
               onClick={openSearch}
               className="flex items-center gap-2 p-2 min-h-[44px] min-w-[44px] justify-center text-[var(--header-ink)] hover:opacity-70"
@@ -99,12 +99,12 @@ export const PublicHeader: React.FC = () => {
               </span>
             </button>
             {!ready ? (
-              <span className="inline-block w-16" aria-hidden="true" />
+              <span className="inline-block w-8 sm:w-16" aria-hidden="true" />
             ) : email ? (
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                 <Link
                   href="/account"
-                  className="max-w-[9rem] sm:max-w-[14rem] truncate px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-[var(--header-ink)] hover:opacity-70"
+                  className="max-w-[6.5rem] sm:max-w-[14rem] truncate px-1.5 sm:px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-[var(--header-ink)] hover:opacity-70"
                   title={email}
                 >
                   {email}
@@ -112,7 +112,7 @@ export const PublicHeader: React.FC = () => {
                 <button
                   type="button"
                   onClick={signOut}
-                  className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70"
+                  className="hidden sm:inline px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70"
                 >
                   Sign out
                 </button>
@@ -120,12 +120,12 @@ export const PublicHeader: React.FC = () => {
             ) : (
               <Link
                 href="/account"
-                className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70"
+                className="px-1.5 sm:px-2 py-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--header-ink)] hover:opacity-70 whitespace-nowrap"
               >
                 Sign in
               </Link>
             )}
-            <ThemeToggle />
+            <ThemeToggle className="min-h-[44px] min-w-[44px] flex items-center justify-center" />
           </div>
         </div>
       </div>
