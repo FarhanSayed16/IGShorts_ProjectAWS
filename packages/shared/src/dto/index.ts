@@ -6,6 +6,8 @@ import {
   ErrorCode,
 } from '../constants/index.js';
 
+export * from './discovery.js';
+
 /**
  * Public Chart Entry (Row in Leaderboard)
  */
