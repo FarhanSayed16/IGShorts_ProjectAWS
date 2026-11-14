@@ -46,9 +46,14 @@ export default function PrivacyPage() {
             </p>
           </section>
           <section>
-            <h2 className="chart-title text-2xl text-[var(--ink)] mb-3">Cookies</h2>
+            <h2 className="chart-title text-2xl text-[var(--ink)] mb-3">Cookies & local storage</h2>
             <p>
-              No third-party tracking cookies. Client storage is for preferences such as theme and, if you sign in, the account session.
+              No third-party tracking cookies. Essential storage keeps the site working (for example
+              theme and, if you sign in, the account session). Preference and analytics storage only
+              run when you opt in via the{' '}
+              <code className="font-mono text-[var(--ink)] text-xs">igshorts_cookie_consent</code>{' '}
+              flag in localStorage. Essential consent is always on; preferences and analytics default
+              off until you allow them.
             </p>
           </section>
           <section>

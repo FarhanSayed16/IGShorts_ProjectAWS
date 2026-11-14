@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { fetchProfiles } from '@/lib/api/client';
+import { trackEvent } from '@/lib/analytics/beacon';
 
 const SHORTCUTS = [
   { label: 'Trending', href: '/trending' },
@@ -40,7 +41,9 @@ export function CommandPalette() {
     }
     const handle = window.setTimeout(async () => {
       try {
-        const res = await fetchProfiles({ q: query.trim(), limit: 8, offset: 0 });
+        const q = query.trim();
+        trackEvent('search', { meta: { q } });
+        const res = await fetchProfiles({ q, limit: 8, offset: 0 });
         setHits(
           res.data.map((row) => ({ igUsername: row.igUsername, displayName: row.displayName })),
         );

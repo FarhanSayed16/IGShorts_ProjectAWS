@@ -78,8 +78,8 @@ export function MusicPageClient() {
       <main id="main-content" className="flex-1 max-w-[1120px] mx-auto w-full px-4 sm:px-6 py-10">
         <h1 className="chart-title text-5xl sm:text-7xl mb-3">Music</h1>
         <p className="text-sm text-[var(--ink-muted)] mb-8 max-w-2xl">
-          Discover trending tracks and open them on Spotify or YouTube. IGshorts does not stream audio
-          in-app.
+          Play licensed preview streams and live radio in-app. Full commercial tracks open on Spotify
+          or YouTube — we never rip or rehost those catalogs.
         </p>
 
         <div className="flex flex-wrap gap-2 mb-8 border-b border-[var(--line)] pb-3" role="tablist" aria-label="Music collections">
