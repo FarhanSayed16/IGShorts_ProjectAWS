@@ -16,6 +16,11 @@
   --footer: #111111;
   --footer-ink: #c8c8c8;
 
+  /* Always-dark chrome (tickers, marquees) — does not invert with theme */
+  --solid: #111111;
+  --on-solid: #f5f5f5;
+  --solid-line: #2e2e2e;
+
   --accent: #00d26a;
   --accent-ink: #111111;
   --accent-soft: #e8fff3;
@@ -130,8 +135,8 @@
   --canvas: #0f0f0f;
   --surface: #1a1a1a;
   --ink: #f4f4f4;
-  --ink-muted: #a8a8a8;
-  --ink-faint: #7a7a7a;
+  --ink-muted: #b8b8b8;
+  --ink-faint: #8a8a8a;
   --line: #2b2b2b;
   --line-strong: #f4f4f4;
 
@@ -142,6 +147,10 @@
   --subnav-active: #00e38c;
   --footer: #000000;
   --footer-ink: #a8a8a8;
+
+  --solid: #000000;
+  --on-solid: #f4f4f4;
+  --solid-line: #2b2b2b;
 
   --accent: #00e38c;
   --accent-ink: #111111;
