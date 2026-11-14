@@ -145,15 +145,32 @@ async function main() {
     },
   ];
 
-  await prisma.musicTrack.deleteMany({ where: { sourceLabel: 'editorial' } });
   for (const track of tracks) {
-    await prisma.musicTrack.create({
-      data: {
-        ...track,
+    const existing = await prisma.musicTrack.findFirst({
+      where: {
+        title: track.title,
+        artist: track.artist,
         sourceLabel: 'editorial',
-        observedAt: now,
       },
     });
+    if (existing) {
+      await prisma.musicTrack.update({
+        where: { id: existing.id },
+        data: {
+          ...track,
+          sourceLabel: 'editorial',
+          observedAt: existing.observedAt,
+        },
+      });
+    } else {
+      await prisma.musicTrack.create({
+        data: {
+          ...track,
+          sourceLabel: 'editorial',
+          observedAt: now,
+        },
+      });
+    }
   }
 
   const featured = await prisma.trendTopic.findFirst({ where: { isFeatured: true } });

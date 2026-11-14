@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { TrendsService } from './trends.service.js';
+import { parseQueryInt } from '../common/utils/parse-query-int.js';
 
 @Controller('trends')
 export class TrendsController {
@@ -17,8 +18,8 @@ export class TrendsController {
       category,
       region,
       sort,
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
+      limit: parseQueryInt(limit, 24),
+      offset: parseQueryInt(offset, 0),
     });
   }
 
@@ -29,7 +30,7 @@ export class TrendsController {
 
   @Get('ticker')
   ticker(@Query('limit') limit?: string) {
-    return this.trends.ticker(limit ? Number(limit) : 10);
+    return this.trends.ticker(parseQueryInt(limit, 10));
   }
 
   @Get('categories')

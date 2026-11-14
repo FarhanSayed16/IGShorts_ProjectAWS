@@ -60,7 +60,10 @@ export class MusicService {
     const [rows, total] = await Promise.all([
       this.db.musicTrack.findMany({
         where,
-        orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+        orderBy: [
+          { popularityScore: { sort: 'desc', nulls: 'last' } },
+          { observedAt: 'desc' },
+        ],
         take: limit,
         skip: offset,
       }),
@@ -80,7 +83,10 @@ export class MusicService {
 
   async ticker(limit = 8): Promise<MusicTrackCard[]> {
     const rows = await this.db.musicTrack.findMany({
-      orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+      orderBy: [
+        { popularityScore: { sort: 'desc', nulls: 'last' } },
+        { observedAt: 'desc' },
+      ],
       take: Math.min(Math.max(limit, 1), 30),
     });
     return rows.map(toCard);
@@ -89,11 +95,17 @@ export class MusicService {
   async featured(): Promise<MusicTrackCard | null> {
     const row = await this.db.musicTrack.findFirst({
       where: { collections: { has: 'trending' } },
-      orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+      orderBy: [
+        { popularityScore: { sort: 'desc', nulls: 'last' } },
+        { observedAt: 'desc' },
+      ],
     });
     if (row) return toCard(row);
     const fallback = await this.db.musicTrack.findFirst({
-      orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+      orderBy: [
+        { popularityScore: { sort: 'desc', nulls: 'last' } },
+        { observedAt: 'desc' },
+      ],
     });
     return fallback ? toCard(fallback) : null;
   }

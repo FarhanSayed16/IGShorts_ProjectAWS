@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const featured = await fetchFeaturedTrend();
     if (featured) {
       return {
-        title: featured.title,
+        title: `${copy.brand.name} · ${featured.title}`,
         description: featured.summary || copy.brand.mission,
       };
     }
@@ -54,29 +54,42 @@ export default async function HomePage() {
   let pulse: DailyPulseDay | null = null;
   let hasApiError = false;
 
-  try {
-    const [globalRes, indiaRes, metaRes, mixRes, featuredRes, musicRes, moversRes, pulseRes] =
-      await Promise.all([
-        fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 10, offset: 0 }),
-        fetchChartEntries(CHART_KEYS.INDIA_PERSONS, { limit: 5, offset: 0 }),
-        fetchChartMeta(CHART_KEYS.GLOBAL_PERSONS),
-        fetchAudienceMix().catch(() => null),
-        fetchFeaturedTrend().catch(() => null),
-        fetchMusicTracks({ collection: 'on_repeat', limit: 12 }).catch(() => ({ data: [] })),
-        fetchChartMovers(CHART_KEYS.GLOBAL_PERSONS).catch(() => ({ gainers: [], losers: [] })),
-        fetchPulseToday().catch(() => null),
-      ]);
-    globalEntries = globalRes.entries;
-    indiaEntries = indiaRes.entries;
-    globalMeta = metaRes;
-    savedMix = mixRes;
-    featured = featuredRes;
-    onRepeat = musicRes.data;
-    spotlight = moversRes.gainers?.slice(0, 6) || [];
-    pulse = pulseRes;
-  } catch {
+  const [
+    globalRes,
+    indiaRes,
+    metaRes,
+    mixRes,
+    featuredRes,
+    musicRes,
+    moversRes,
+    pulseRes,
+  ] = await Promise.allSettled([
+    fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 10, offset: 0 }),
+    fetchChartEntries(CHART_KEYS.INDIA_PERSONS, { limit: 5, offset: 0 }),
+    fetchChartMeta(CHART_KEYS.GLOBAL_PERSONS),
+    fetchAudienceMix(),
+    fetchFeaturedTrend(),
+    fetchMusicTracks({ collection: 'on_repeat', limit: 12 }),
+    fetchChartMovers(CHART_KEYS.GLOBAL_PERSONS),
+    fetchPulseToday(),
+  ]);
+
+  if (globalRes.status === 'fulfilled') {
+    globalEntries = globalRes.value.entries;
+  } else {
     hasApiError = true;
   }
+  if (indiaRes.status === 'fulfilled') {
+    indiaEntries = indiaRes.value.entries;
+  } else {
+    hasApiError = true;
+  }
+  if (metaRes.status === 'fulfilled') globalMeta = metaRes.value;
+  if (mixRes.status === 'fulfilled') savedMix = mixRes.value;
+  if (featuredRes.status === 'fulfilled') featured = featuredRes.value;
+  if (musicRes.status === 'fulfilled') onRepeat = musicRes.value.data;
+  if (moversRes.status === 'fulfilled') spotlight = moversRes.value.gainers?.slice(0, 6) || [];
+  if (pulseRes.status === 'fulfilled') pulse = pulseRes.value;
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--canvas)] text-[var(--ink)]">

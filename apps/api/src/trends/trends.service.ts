@@ -68,10 +68,16 @@ export class TrendsService {
 
     const orderBy =
       sort === 'rising'
-        ? [{ velocityScore: 'desc' as const }, { observedAt: 'desc' as const }]
+        ? [
+            { velocityScore: { sort: 'desc' as const, nulls: 'last' as const } },
+            { observedAt: 'desc' as const },
+          ]
         : sort === 'new'
           ? [{ observedAt: 'desc' as const }]
-          : [{ popularityScore: 'desc' as const }, { observedAt: 'desc' as const }];
+          : [
+              { popularityScore: { sort: 'desc' as const, nulls: 'last' as const } },
+              { observedAt: 'desc' as const },
+            ];
 
     const [rows, total] = await Promise.all([
       this.db.trendTopic.findMany({ where, orderBy, take: limit, skip: offset }),
@@ -96,14 +102,20 @@ export class TrendsService {
     });
     if (row) return toCard(row);
     const fallback = await this.db.trendTopic.findFirst({
-      orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+      orderBy: [
+        { popularityScore: { sort: 'desc', nulls: 'last' } },
+        { observedAt: 'desc' },
+      ],
     });
     return fallback ? toCard(fallback) : null;
   }
 
   async ticker(limit = 10): Promise<TrendCard[]> {
     const rows = await this.db.trendTopic.findMany({
-      orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+      orderBy: [
+        { popularityScore: { sort: 'desc', nulls: 'last' } },
+        { observedAt: 'desc' },
+      ],
       take: Math.min(Math.max(limit, 1), 30),
     });
     return rows.map(toCard);

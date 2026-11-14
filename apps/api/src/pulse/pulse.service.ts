@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DailyPulseDay, PulseKind } from '@igshorts/shared';
 import { DatabaseService } from '../database/database.service.js';
 import { ChartsService } from '../charts/charts.service.js';
@@ -12,6 +12,10 @@ function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+function isValidDateInput(dateInput: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateInput);
+}
+
 @Injectable()
 export class PulseService {
   constructor(
@@ -20,15 +24,35 @@ export class PulseService {
   ) {}
 
   async forDate(dateInput?: string): Promise<DailyPulseDay> {
-    const day = dateInput ? dateOnly(new Date(`${dateInput}T00:00:00.000Z`)) : dateOnly(new Date());
-    if (Number.isNaN(day.getTime())) {
-      throw new NotFoundException('Invalid pulse date');
+    const requestedToday = !dateInput;
+    if (dateInput && !isValidDateInput(dateInput)) {
+      throw new BadRequestException('Invalid pulse date. Use YYYY-MM-DD.');
     }
 
-    const rows = await this.db.dailyPulseItem.findMany({
+    let day = dateInput ? dateOnly(new Date(`${dateInput}T00:00:00.000Z`)) : dateOnly(new Date());
+    if (Number.isNaN(day.getTime())) {
+      throw new BadRequestException('Invalid pulse date. Use YYYY-MM-DD.');
+    }
+
+    let rows = await this.db.dailyPulseItem.findMany({
       where: { pulseDate: day },
       orderBy: { kind: 'asc' },
     });
+
+    // Keep homepage populated when cron has not yet written today's slots.
+    if (rows.length === 0 && requestedToday) {
+      const latest = await this.db.dailyPulseItem.findFirst({
+        orderBy: { pulseDate: 'desc' },
+        select: { pulseDate: true },
+      });
+      if (latest) {
+        day = dateOnly(latest.pulseDate);
+        rows = await this.db.dailyPulseItem.findMany({
+          where: { pulseDate: day },
+          orderBy: { kind: 'asc' },
+        });
+      }
+    }
 
     const items = rows.map((row) => ({
       kind: row.kind as PulseKind,
@@ -39,7 +63,9 @@ export class PulseService {
       sourceLabel: row.sourceLabel,
     }));
 
-    if (!items.some((i) => i.kind === 'creator')) {
+    const today = dateOnly(new Date());
+    const servingToday = formatDate(day) === formatDate(today);
+    if (!items.some((i) => i.kind === 'creator') && servingToday) {
       const creator = await this.fallbackCreatorOfTheDay();
       if (creator) items.push(creator);
     }
@@ -84,15 +110,24 @@ export class PulseService {
         orderBy: { observedAt: 'desc' },
       });
       const song = await this.db.musicTrack.findFirst({
-        orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+        orderBy: [
+          { popularityScore: { sort: 'desc', nulls: 'last' } },
+          { observedAt: 'desc' },
+        ],
       });
       const story = await this.db.trendTopic.findFirst({
         where: { category: { in: ['news', 'technology', 'entertainment'] } },
-        orderBy: [{ popularityScore: 'desc' }, { observedAt: 'desc' }],
+        orderBy: [
+          { popularityScore: { sort: 'desc', nulls: 'last' } },
+          { observedAt: 'desc' },
+        ],
       });
       const moment = await this.db.trendTopic.findFirst({
         where: { category: 'internet_culture' },
-        orderBy: [{ velocityScore: 'desc' }, { observedAt: 'desc' }],
+        orderBy: [
+          { velocityScore: { sort: 'desc', nulls: 'last' } },
+          { observedAt: 'desc' },
+        ],
       });
 
       const slots: Array<{
@@ -103,6 +138,7 @@ export class PulseService {
         linkUrl: string | null;
         trendTopicId?: string;
         musicTrackId?: string;
+        profileId?: string;
       }> = [];
 
       if (song) {
@@ -146,6 +182,27 @@ export class PulseService {
         });
       }
 
+      try {
+        const movers = await this.charts.getChartMovers(CHART_KEYS.GLOBAL_PERSONS);
+        const top = movers.gainers[0];
+        if (top) {
+          const profile = await this.db.creatorProfile.findFirst({
+            where: { igUsername: top.username },
+            select: { id: true },
+          });
+          slots.push({
+            kind: 'creator',
+            title: top.display_name,
+            summary: `@${top.username} moved up on the Global 100.`,
+            imageUrl: top.avatar_url,
+            linkUrl: `/profiles/${top.username}`,
+            profileId: profile?.id,
+          });
+        }
+      } catch {
+        // Creator slot stays empty until movers exist.
+      }
+
       for (const slot of slots) {
         await this.db.dailyPulseItem.upsert({
           where: { pulseDate_kind: { pulseDate: day, kind: slot.kind } },
@@ -158,6 +215,7 @@ export class PulseService {
             linkUrl: slot.linkUrl,
             trendTopicId: slot.trendTopicId,
             musicTrackId: slot.musicTrackId,
+            profileId: slot.profileId,
             sourceLabel: 'editorial',
           },
           update: {
@@ -167,6 +225,7 @@ export class PulseService {
             linkUrl: slot.linkUrl,
             trendTopicId: slot.trendTopicId,
             musicTrackId: slot.musicTrackId,
+            profileId: slot.profileId,
           },
         });
       }

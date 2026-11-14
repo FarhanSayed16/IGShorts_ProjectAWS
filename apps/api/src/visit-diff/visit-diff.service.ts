@@ -23,42 +23,53 @@ export class VisitDiffService {
       };
     }
 
-    const [newTrendTopics, newMusicTracks, newProfiles, recentStories] = await Promise.all([
-      this.db.trendTopic.count({ where: { createdAt: { gt: since } } }),
-      this.db.musicTrack.count({ where: { createdAt: { gt: since } } }),
-      this.db.creatorProfile.count({
-        where: { createdAt: { gt: since }, isListed: true, isActive: true },
-      }),
-      this.db.trendTopic.findMany({
-        where: {
-          createdAt: { gt: since },
-          category: { in: ['news', 'technology', 'entertainment'] },
-        },
-        orderBy: { observedAt: 'desc' },
-        take: 5,
-        select: { title: true, category: true },
-      }),
-    ]);
+    const [newTrendTopics, newMusicTracks, newProfiles, recentStories, latestRun] =
+      await Promise.all([
+        this.db.trendTopic.count({ where: { createdAt: { gt: since } } }),
+        this.db.musicTrack.count({ where: { createdAt: { gt: since } } }),
+        this.db.creatorProfile.count({
+          where: { createdAt: { gt: since }, isListed: true, isActive: true },
+        }),
+        this.db.trendTopic.findMany({
+          where: {
+            createdAt: { gt: since },
+            category: { in: ['news', 'technology', 'entertainment'] },
+          },
+          orderBy: { observedAt: 'desc' },
+          take: 5,
+          select: { title: true, category: true },
+        }),
+        this.db.rankingRun.findFirst({
+          where: { chartKey: CHART_KEYS.GLOBAL_PERSONS, status: 'success' },
+          orderBy: { finishedAt: 'desc' },
+          select: { finishedAt: true },
+        }),
+      ]);
 
     let creatorMoves: VisitDiff['creatorMoves'] = [];
-    try {
-      const movers = await this.charts.getChartMovers(CHART_KEYS.GLOBAL_PERSONS);
-      creatorMoves = [
-        ...movers.gainers.slice(0, 3).map((g) => ({
-          username: g.username,
-          displayName: g.display_name,
-          direction: 'up' as const,
-          delta: g.rank_delta,
-        })),
-        ...movers.losers.slice(0, 2).map((g) => ({
-          username: g.username,
-          displayName: g.display_name,
-          direction: 'down' as const,
-          delta: g.rank_delta,
-        })),
-      ];
-    } catch {
-      creatorMoves = [];
+    const runFinishedAfterVisit =
+      !!latestRun?.finishedAt && latestRun.finishedAt.getTime() > since.getTime();
+
+    if (runFinishedAfterVisit) {
+      try {
+        const movers = await this.charts.getChartMovers(CHART_KEYS.GLOBAL_PERSONS);
+        creatorMoves = [
+          ...movers.gainers.slice(0, 3).map((g) => ({
+            username: g.username,
+            displayName: g.display_name,
+            direction: 'up' as const,
+            delta: g.rank_delta,
+          })),
+          ...movers.losers.slice(0, 2).map((g) => ({
+            username: g.username,
+            displayName: g.display_name,
+            direction: 'down' as const,
+            delta: g.rank_delta,
+          })),
+        ];
+      } catch {
+        creatorMoves = [];
+      }
     }
 
     return {

@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/news', destination: '/trending/news', permanent: true },
+      { source: '/hashtags', destination: '/trending/internet-culture', permanent: true },
+    ];
+  },
   async rewrites() {
     // Local `next dev` serves the browser at :3000. Client calls use same-origin `/api/v1`
     // (also how staging ALB routes). Proxy those to Nest so they are not Next 404s.
