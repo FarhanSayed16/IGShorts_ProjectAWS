@@ -17,9 +17,19 @@ export const PublicFooter: React.FC = () => {
           </div>
           <div>
             <h4 className="text-[11px] font-bold uppercase tracking-[0.16em] text-white mb-3">
-              Charts
+              Explore
             </h4>
             <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/trending" className="hover:text-white">
+                  Trending
+                </Link>
+              </li>
+              <li>
+                <Link href="/music" className="hover:text-white">
+                  Music
+                </Link>
+              </li>
               <li>
                 <Link href="/charts/global" className="hover:text-white">
                   Global 100

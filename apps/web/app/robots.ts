@@ -11,8 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/admin',
           '/admin/',
-          '/hashtags',
-          '/news',
           '/regions',
           '/scoring',
           '/account',

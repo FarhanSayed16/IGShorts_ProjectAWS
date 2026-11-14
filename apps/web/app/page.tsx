@@ -1,12 +1,28 @@
 import React from 'react';
 import Link from 'next/link';
-import { CHART_KEYS, ChartEntry, ChartMeta } from '@igshorts/shared';
+import { CHART_KEYS, ChartEntry, ChartMeta, DailyPulseDay, MusicTrackCard, TrendCard } from '@igshorts/shared';
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { BillboardList } from '@/components/rank/billboard-list';
 import { ErrorBanner } from '@/components/feedback/error-banner';
 import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
-import { fetchAudienceMix, fetchChartEntries, fetchChartMeta } from '@/lib/api/client';
+import { TrendingTicker } from '@/components/discovery/trending-ticker';
+import { FeaturedTrend } from '@/components/discovery/featured-trend';
+import { CategoryGrid } from '@/components/discovery/category-grid';
+import { NowTrending } from '@/components/discovery/now-trending';
+import { MusicStrip } from '@/components/discovery/music-strip';
+import { CreatorSpotlight } from '@/components/discovery/creator-spotlight';
+import { DailyPulse } from '@/components/discovery/daily-pulse';
+import { SinceLastVisit } from '@/components/discovery/since-last-visit';
+import {
+  fetchAudienceMix,
+  fetchChartEntries,
+  fetchChartMeta,
+  fetchChartMovers,
+  fetchFeaturedTrend,
+  fetchMusicTracks,
+  fetchPulseToday,
+} from '@/lib/api/client';
 import copy from '@/messages/en.json';
 import type { Metadata } from 'next';
 
@@ -14,44 +30,17 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const chart = await fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 3, offset: 0 });
-    const leader = chart.entries[0];
-    const top3 = chart.entries.map((row) => row.display_name).join(', ');
-    return {
-      title: leader ? `#${leader.rank} ${leader.display_name}` : copy.brand.name,
-      description: top3 ? `${copy.brand.mission} Leading names: ${top3}.` : copy.brand.mission,
-    };
+    const featured = await fetchFeaturedTrend();
+    if (featured) {
+      return {
+        title: featured.title,
+        description: featured.summary || copy.brand.mission,
+      };
+    }
   } catch {
-    return { title: copy.brand.name, description: copy.brand.mission };
+    // fall through
   }
-}
-
-function ChartHeading({
-  title,
-  asOf,
-  href,
-}: {
-  title: string;
-  asOf?: string;
-  href: string;
-}) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
-      <div>
-        <h1 className="chart-title text-5xl sm:text-7xl text-[var(--ink)]">
-          {title}
-        </h1>
-        {asOf && (
-          <p className="mt-3 inline-block border border-[var(--ink)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em]">
-            As of {new Date(asOf).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          </p>
-        )}
-      </div>
-      <Link href={href} className="text-xs font-bold uppercase tracking-[0.16em] hover:underline">
-        Full chart →
-      </Link>
-    </div>
-  );
+  return { title: copy.brand.name, description: copy.brand.mission };
 }
 
 export default async function HomePage() {
@@ -59,19 +48,32 @@ export default async function HomePage() {
   let indiaEntries: ChartEntry[] = [];
   let globalMeta: ChartMeta | null = null;
   let savedMix: GroupMixData | null = null;
+  let featured: TrendCard | null = null;
+  let onRepeat: MusicTrackCard[] = [];
+  let spotlight: ChartEntry[] = [];
+  let pulse: DailyPulseDay | null = null;
   let hasApiError = false;
 
   try {
-    const [globalRes, indiaRes, metaRes, mixRes] = await Promise.all([
-      fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 10, offset: 0 }),
-      fetchChartEntries(CHART_KEYS.INDIA_PERSONS, { limit: 5, offset: 0 }),
-      fetchChartMeta(CHART_KEYS.GLOBAL_PERSONS),
-      fetchAudienceMix().catch(() => null),
-    ]);
+    const [globalRes, indiaRes, metaRes, mixRes, featuredRes, musicRes, moversRes, pulseRes] =
+      await Promise.all([
+        fetchChartEntries(CHART_KEYS.GLOBAL_PERSONS, { limit: 10, offset: 0 }),
+        fetchChartEntries(CHART_KEYS.INDIA_PERSONS, { limit: 5, offset: 0 }),
+        fetchChartMeta(CHART_KEYS.GLOBAL_PERSONS),
+        fetchAudienceMix().catch(() => null),
+        fetchFeaturedTrend().catch(() => null),
+        fetchMusicTracks({ collection: 'on_repeat', limit: 12 }).catch(() => ({ data: [] })),
+        fetchChartMovers(CHART_KEYS.GLOBAL_PERSONS).catch(() => ({ gainers: [], losers: [] })),
+        fetchPulseToday().catch(() => null),
+      ]);
     globalEntries = globalRes.entries;
     indiaEntries = indiaRes.entries;
     globalMeta = metaRes;
     savedMix = mixRes;
+    featured = featuredRes;
+    onRepeat = musicRes.data;
+    spotlight = moversRes.gainers?.slice(0, 6) || [];
+    pulse = pulseRes;
   } catch {
     hasApiError = true;
   }
@@ -79,6 +81,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-[var(--canvas)] text-[var(--ink)]">
       <PublicHeader />
+      <TrendingTicker />
 
       <main id="main-content" className="flex-1 max-w-[1120px] mx-auto w-full px-4 sm:px-6 py-10">
         {hasApiError && (
@@ -87,50 +90,47 @@ export default async function HomePage() {
           </div>
         )}
 
-        {savedMix && (
-          <GroupMix
-            mix={savedMix}
-            title="Audience groups in the saved list"
-            context="Counts are the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
-          />
-        )}
+        <FeaturedTrend trend={featured} />
+        <CategoryGrid />
+        <NowTrending />
+        <MusicStrip title="Music on Repeat" tracks={onRepeat} />
+        <CreatorSpotlight creators={spotlight} />
+        <DailyPulse pulse={pulse} />
+        <SinceLastVisit />
 
-        <section className="mb-16">
-          <ChartHeading
-            title="Global 100"
-            asOf={globalMeta?.as_of}
-            href="/charts/global"
-          />
-          <BillboardList entries={globalEntries} featured caption="Global top 10" />
-        </section>
-
-        <section className="mb-16">
-          <ChartHeading title="India 100" href="/charts/india" />
-          <BillboardList entries={indiaEntries} featured={false} caption="India top 5" />
-        </section>
-
-        <section className="border-t border-[var(--line)] pt-10 grid sm:grid-cols-3 gap-8 text-sm">
-          <div>
-            <h3 className="font-display text-xl mb-2">Tracked watchlist</h3>
-            <p className="text-[var(--ink-muted)] text-sm leading-relaxed">
-              A curated universe of public figures. We do not rank all of Instagram.
-            </p>
+        <section className="mb-14 border-t border-[var(--line)] pt-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+            <div>
+              <h2 className="chart-title text-3xl sm:text-4xl">Charts</h2>
+              <p className="mt-2 text-sm text-[var(--ink-muted)]">
+                Global 100 and India 100 remain the curated ranking lists.
+                {globalMeta?.as_of
+                  ? ` As of ${new Date(globalMeta.as_of).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}.`
+                  : ''}
+              </p>
+            </div>
+            <Link href="/charts/global" className="text-xs font-bold uppercase tracking-[0.16em] hover:underline">
+              Open charts →
+            </Link>
           </div>
-          <div>
-            <h3 className="font-display text-xl mb-2">Public followers</h3>
-            <p className="text-[var(--ink-muted)] text-sm leading-relaxed">
-              Rank is competition rank by verified public follower count. Missing counts stay blank.
-            </p>
+          <div className="mb-10">
+            <BillboardList entries={globalEntries} featured caption="Global top 10" />
           </div>
-          <div>
-            <h3 className="font-display text-xl mb-2">How it works</h3>
-            <p className="text-[var(--ink-muted)] text-sm leading-relaxed">
-              <Link href="/methodology" className="underline underline-offset-4">
-                Read the methodology
-              </Link>
-              . Portraits are from Wikipedia, not Instagram.
-            </p>
+          <div className="mb-10">
+            <h3 className="chart-title text-2xl mb-4">India top 5</h3>
+            <BillboardList entries={indiaEntries} featured={false} caption="India top 5" />
           </div>
+          {savedMix && (
+            <GroupMix
+              mix={savedMix}
+              title="Audience groups in the saved list"
+              context="Counts are the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
+            />
+          )}
         </section>
       </main>
 
