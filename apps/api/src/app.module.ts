@@ -27,6 +27,8 @@ import { MusicModule } from './music/music.module.js';
 import { PulseModule } from './pulse/pulse.module.js';
 import { VisitDiffModule } from './visit-diff/visit-diff.module.js';
 import { DiscoveryModule } from './discovery/discovery.module.js';
+import { AnalyticsEventsModule } from './analytics/analytics-events.module.js';
+import { ClaimModule } from './claim/claim.module.js';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { DiscoveryModule } from './discovery/discovery.module.js';
     PulseModule,
     VisitDiffModule,
     DiscoveryModule,
+    AnalyticsEventsModule,
+    ClaimModule,
   ],
 })
 export class AppModule {}

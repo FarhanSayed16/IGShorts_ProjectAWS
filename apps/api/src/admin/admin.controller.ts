@@ -27,6 +27,48 @@ export class AdminController {
     return this.adminService.getOverview();
   }
 
+  @Get('schedules')
+  async getSchedules() {
+    return this.adminService.getScheduleIntents();
+  }
+
+  @Patch('schedules/:jobKey')
+  @Roles(ADMIN_ROLES.ADMIN, ADMIN_ROLES.EDITOR)
+  async setScheduleEnabled(
+    @Param('jobKey') jobKey: string,
+    @Body() body: { enabled: boolean },
+  ) {
+    return this.adminService.setScheduleEnabled(jobKey, Boolean(body?.enabled));
+  }
+
+  @Get('members')
+  async listMembers(@Query() query: PaginationQueryDto) {
+    return this.adminService.listMembers({
+      limit: query.limit ?? 50,
+      offset: query.offset ?? 0,
+      q: query.q,
+    });
+  }
+
+  @Patch('music/:id/preview')
+  @Roles(ADMIN_ROLES.ADMIN, ADMIN_ROLES.EDITOR)
+  async updateMusicPreview(
+    @Req() request: FastifyRequest,
+    @Param('id') id: string,
+    @Body() body: { previewAudioUrl?: string | null },
+  ) {
+    return this.adminService.updateMusicPreview(
+      id,
+      body.previewAudioUrl ?? null,
+      request.adminUser?.email,
+    );
+  }
+
+  @Get('analytics/summary')
+  async getAnalyticsSummary() {
+    return this.adminService.getAnalyticsSummary();
+  }
+
   @Get('watchlist')
   async getWatchlist(@Query() query: PaginationQueryDto) {
     return this.adminService.getWatchlist({

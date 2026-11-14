@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@igshorts/db';
 import { AuditService } from '../audit/audit.service.js';
 import { DatabaseService } from '../database/database.service.js';
@@ -18,7 +19,172 @@ export class AdminService {
     private readonly audit: AuditService,
     private readonly metrics: MetricsService,
     private readonly profiles: ProfilesService,
+    private readonly config: ConfigService,
   ) {}
+
+  private readonly scheduleDefaults = [
+    {
+      jobKey: 'daily_ranking_pipeline',
+      label: 'Daily ranking pipeline',
+      cronExpr: '0 2 * * *',
+      intentTime: '02:00',
+      description: 'Sync due profiles and rebuild Global & India leaderboards.',
+      runEndpoint: 'pipeline' as const,
+    },
+    {
+      jobKey: 'discovery_refresh',
+      label: 'Discovery refresh',
+      cronExpr: '30 3 * * *',
+      intentTime: '03:30',
+      description: 'Refresh Trends / Music / Pulse editorial discovery jobs.',
+      runEndpoint: 'discovery' as const,
+    },
+  ];
+
+  async getScheduleIntents() {
+    const cronEnabled = this.config.get<boolean>('app.cronEnabled') === true;
+    const intents = [];
+    for (const def of this.scheduleDefaults) {
+      const row = await this.db.systemSchedule.upsert({
+        where: { jobKey: def.jobKey },
+        create: {
+          jobKey: def.jobKey,
+          label: def.label,
+          cronExpr: def.cronExpr,
+          enabled: false,
+        },
+        update: {
+          label: def.label,
+          cronExpr: def.cronExpr,
+        },
+      });
+      intents.push({
+        ...def,
+        enabled: row.enabled,
+        enabledByDefault: row.enabled,
+        lastRunAt: row.lastRunAt?.toISOString() ?? null,
+        nextRunAt: row.nextRunAt?.toISOString() ?? null,
+        lastStatus: row.lastStatus,
+        lastError: row.lastError,
+        disabledByEnv: !cronEnabled,
+        disabledByOperator: !row.enabled,
+      });
+    }
+    return {
+      cronEnabled,
+      note:
+        'CRON_ENABLED (env) gates whether Render/cron triggers fire. Operator enable/disable is stored in SystemSchedule and is separate.',
+      intents,
+    };
+  }
+
+  async setScheduleEnabled(jobKey: string, enabled: boolean) {
+    const def = this.scheduleDefaults.find((d) => d.jobKey === jobKey);
+    if (!def) throw new NotFoundException(`Unknown schedule ${jobKey}`);
+    const row = await this.db.systemSchedule.upsert({
+      where: { jobKey },
+      create: {
+        jobKey,
+        label: def.label,
+        cronExpr: def.cronExpr,
+        enabled,
+      },
+      update: { enabled },
+    });
+    await this.audit.logEvent({
+      actor: 'admin',
+      action: enabled ? 'schedule.enable' : 'schedule.disable',
+      entityType: 'SystemSchedule',
+      entityId: row.id,
+      afterSummary: `${jobKey} enabled=${enabled}`,
+    });
+    return row;
+  }
+
+  async markScheduleRun(jobKey: string, status: string, error?: string | null) {
+    try {
+      await this.db.systemSchedule.updateMany({
+        where: { jobKey },
+        data: {
+          lastRunAt: new Date(),
+          lastStatus: status,
+          lastError: error ?? null,
+        },
+      });
+    } catch {
+      // Schedule row may not exist yet
+    }
+  }
+
+  async listMembers(options: { limit?: number; offset?: number; q?: string }) {
+    const limit = Math.min(Math.max(options.limit ?? 50, 1), 100);
+    const offset = Math.max(options.offset ?? 0, 0);
+    const where = options.q
+      ? { email: { contains: options.q, mode: 'insensitive' as const } }
+      : {};
+    const [total, rows] = await Promise.all([
+      this.db.member.count({ where }),
+      this.db.member.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+        select: {
+          id: true,
+          email: true,
+          createdAt: true,
+          lastVisitedAt: true,
+          _count: { select: { tracks: true } },
+        },
+      }),
+    ]);
+    return {
+      data: rows.map((m) => ({
+        id: m.id,
+        email: m.email,
+        createdAt: m.createdAt.toISOString(),
+        lastVisitedAt: m.lastVisitedAt?.toISOString() ?? null,
+        trackCount: m._count.tracks,
+      })),
+      meta: { total, limit, offset, has_more: offset + rows.length < total },
+    };
+  }
+
+  async updateMusicPreview(id: string, previewAudioUrl: string | null, actor?: string) {
+    const track = await this.db.musicTrack.findUnique({ where: { id } });
+    if (!track) throw new NotFoundException('Music track not found');
+    const updated = await this.db.musicTrack.update({
+      where: { id },
+      data: { previewAudioUrl: previewAudioUrl || null },
+    });
+    await this.audit.logEvent({
+      actor: actor || 'admin',
+      action: 'music.preview_url',
+      entityType: 'MusicTrack',
+      entityId: id,
+      afterSummary: previewAudioUrl || '(cleared)',
+    });
+    return updated;
+  }
+
+  async getAnalyticsSummary() {
+    try {
+      const rows = await this.db.analyticsEvent.groupBy({
+        by: ['eventType'],
+        _count: { _all: true },
+      });
+      const byType: Record<string, number> = {};
+      let total = 0;
+      for (const row of rows) {
+        const count = row._count._all;
+        byType[row.eventType] = count;
+        total += count;
+      }
+      return { total, byType, available: true };
+    } catch {
+      return { total: 0, byType: {}, available: false };
+    }
+  }
 
   async getOverview() {
     const [
@@ -89,6 +255,7 @@ export class AdminService {
       isStale: hoursSinceLastRun === null || hoursSinceLastRun > 36,
       recentAuditCount,
       systemStatus: 'healthy',
+      cronEnabled: this.config.get<boolean>('app.cronEnabled') === true,
       timestamp: new Date().toISOString(),
     };
   }
