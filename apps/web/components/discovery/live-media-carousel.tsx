@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, RotateCw } from 'lucide-react';
 import { TrendCard } from '@igshorts/shared';
 import { VideoModal } from './video-modal';
 import { DiscoveryMedia } from './discovery-media';
@@ -86,47 +86,46 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isPausedByUser, setIsPausedByUser] = useState(false);
+  const [isAutoScroll, setIsAutoScroll] = useState(true);
+  const [scrollIntervalSec, setScrollIntervalSec] = useState(5);
+  const [slideProgress, setSlideProgress] = useState(0);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const currentSlide = CAROUSEL_SLIDES[activeIndex];
 
-  // Auto-advance slides every 9 seconds unless user hovers or interacts
+  // Auto-scroll ticker with smooth progress animation at configurable interval
   useEffect(() => {
-    if (isPausedByUser) return;
+    if (!isAutoScroll) {
+      setSlideProgress(0);
+      return;
+    }
+
+    const stepMs = 100;
+    const totalMs = scrollIntervalSec * 1000;
+    const increment = (stepMs / totalMs) * 100;
+
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
-      setProgress(0);
-    }, 9000);
+      setSlideProgress((prev) => {
+        if (prev >= 100) {
+          setActiveIndex((current) => (current + 1) % CAROUSEL_SLIDES.length);
+          return 0;
+        }
+        return prev + increment;
+      });
+    }, stepMs);
+
     return () => clearInterval(interval);
-  }, [isPausedByUser]);
-
-  // Video progress line
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const onTimeUpdate = () => {
-      if (video.duration) {
-        setProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-    video.addEventListener('timeupdate', onTimeUpdate);
-    return () => video.removeEventListener('timeupdate', onTimeUpdate);
-  }, [activeIndex]);
+  }, [isAutoScroll, scrollIntervalSec, activeIndex]);
 
   const toggleVideoPlay = () => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
       setIsPlaying(false);
-      setIsPausedByUser(true);
     } else {
       videoRef.current.play();
       setIsPlaying(true);
-      setIsPausedByUser(false);
     }
   };
 
@@ -136,14 +135,24 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
     setIsMuted(!isMuted);
   };
 
+  const selectSlide = (idx: number) => {
+    setActiveIndex(idx);
+    setSlideProgress(0);
+  };
+
   const goToPrev = () => {
     setActiveIndex((prev) => (prev - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length);
-    setProgress(0);
+    setSlideProgress(0);
   };
 
   const goToNext = () => {
     setActiveIndex((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
-    setProgress(0);
+    setSlideProgress(0);
+  };
+
+  const toggleAutoScroll = () => {
+    setIsAutoScroll((prev) => !prev);
+    setSlideProgress(0);
   };
 
   return (
@@ -151,8 +160,6 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
       <section
         aria-label="Live Media Reel Carousel"
         className="mb-12 border border-[var(--line)] bg-[var(--surface)] overflow-hidden shadow-lg transition-all"
-        onMouseEnter={() => setIsPausedByUser(true)}
-        onMouseLeave={() => setIsPausedByUser(false)}
       >
         {/* Top Control Bar with Slide Numbers & Live Telemetry */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 bg-[var(--canvas)] border-b border-[var(--line)]">
@@ -166,33 +173,57 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
             </span>
           </div>
 
-          {/* Slide Indicator Buttons */}
-          <div className="flex items-center gap-2 font-mono text-xs">
+          {/* Slide Indicator Buttons & Auto-Scroll Controls */}
+          <div className="flex items-center gap-2 sm:gap-3 font-mono text-xs">
+            {/* Auto-Scroll Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleAutoScroll}
+              className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider border rounded-sm flex items-center gap-1 transition-all ${
+                isAutoScroll
+                  ? 'bg-[var(--accent)] text-black border-[var(--accent)]'
+                  : 'bg-[var(--canvas)] text-[var(--ink-muted)] border-[var(--line)] hover:border-[var(--ink)]'
+              }`}
+              title={isAutoScroll ? 'Pause automatic scrolling' : 'Enable automatic scrolling'}
+            >
+              <RotateCw
+                className={`w-3 h-3 ${isAutoScroll ? 'animate-spin' : ''}`}
+                style={{ animationDuration: `${scrollIntervalSec}s` }}
+              />
+              <span className="hidden sm:inline">{isAutoScroll ? `Auto ${scrollIntervalSec}s` : 'Paused'}</span>
+            </button>
+
+            {/* Dynamic Slide Progress Indicators */}
             <div className="flex gap-1.5 items-center">
-              {CAROUSEL_SLIDES.map((slide, idx) => (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveIndex(idx);
-                    setProgress(0);
-                  }}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  className={`h-1.5 rounded-full transition-all ${
-                    activeIndex === idx
-                      ? 'w-6 bg-[var(--accent)]'
-                      : 'w-2 bg-[var(--line-strong)] opacity-30 hover:opacity-75'
-                  }`}
-                />
-              ))}
+              {CAROUSEL_SLIDES.map((slide, idx) => {
+                const isActive = activeIndex === idx;
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => selectSlide(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    className="relative h-2 rounded-full overflow-hidden transition-all group flex items-center"
+                    style={{ width: isActive ? '32px' : '8px' }}
+                  >
+                    <span className="absolute inset-0 bg-[var(--line-strong)] opacity-30 group-hover:opacity-60" />
+                    {isActive && (
+                      <span
+                        className="absolute inset-y-0 left-0 bg-[var(--accent)] transition-all duration-100 ease-linear rounded-full"
+                        style={{ width: isAutoScroll ? `${slideProgress}%` : '100%' }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            <span className="text-[11px] font-mono font-bold text-[var(--ink)] ml-2">
+            <span className="text-[11px] font-mono font-bold text-[var(--ink)] ml-1">
               0{activeIndex + 1} / 0{CAROUSEL_SLIDES.length}
             </span>
 
             {/* Prev / Next controls */}
-            <div className="flex items-center gap-1 ml-2">
+            <div className="flex items-center gap-1 ml-1">
               <button
                 type="button"
                 onClick={goToPrev}
@@ -236,7 +267,7 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-10">
               <div
                 className="h-full bg-[var(--accent)] transition-all duration-100 ease-linear"
-                style={{ width: `${progress}%` }}
+                style={{ width: isAutoScroll ? `${slideProgress}%` : '100%' }}
               />
             </div>
 
@@ -356,9 +387,43 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                 </Link>
               </div>
 
-              <span className="text-[10px] font-mono uppercase text-[var(--ink-muted)]">
-                Auto-rotates every 9s
-              </span>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={toggleAutoScroll}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase font-bold text-[var(--accent)] hover:underline"
+                  title={isAutoScroll ? 'Click to pause auto-scroll' : 'Click to enable auto-scroll'}
+                >
+                  <RotateCw
+                    className={`w-3 h-3 ${isAutoScroll ? 'animate-spin' : ''}`}
+                    style={{ animationDuration: `${scrollIntervalSec}s` }}
+                  />
+                  <span>{isAutoScroll ? `Auto-Scroll: ${scrollIntervalSec}s` : 'Auto-Scroll: Paused'}</span>
+                </button>
+
+                {/* Cadence speed options */}
+                <div className="flex items-center gap-1 font-mono text-[10px]">
+                  {[3, 5, 8].map((sec) => (
+                    <button
+                      key={sec}
+                      type="button"
+                      onClick={() => {
+                        setScrollIntervalSec(sec);
+                        setIsAutoScroll(true);
+                        setSlideProgress(0);
+                      }}
+                      className={`px-1.5 py-0.5 border rounded-xs transition-colors ${
+                        scrollIntervalSec === sec && isAutoScroll
+                          ? 'bg-[var(--ink)] text-[var(--canvas)] border-[var(--ink)] font-bold'
+                          : 'bg-[var(--surface)] text-[var(--ink-muted)] border-[var(--line)] hover:border-[var(--ink)]'
+                      }`}
+                      title={`Set auto-scroll cadence to ${sec} seconds`}
+                    >
+                      {sec}s
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
