@@ -47,7 +47,7 @@ export function CategoryGrid() {
             <Link
               key={slug}
               href={`/trending/${slug}`}
-              className="group border border-[var(--line)] bg-[var(--surface)] overflow-hidden hover:border-[var(--ink)] transition-colors"
+              className="group border border-[var(--line)] bg-[var(--surface)] overflow-hidden hover-lift hover:border-[var(--ink)] transition-all"
             >
               <div className="aspect-[16/10] relative">
                 <DiscoveryMedia

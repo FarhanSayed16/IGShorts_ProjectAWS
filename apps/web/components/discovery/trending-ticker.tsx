@@ -37,12 +37,13 @@ export function TrendingTicker() {
       <Link
         key={`${item.id}-${hidden ? 'clone' : 'main'}-${index}`}
         href={href}
-        className="hover:text-[var(--accent)] shrink-0"
+        className="hover:text-[var(--accent)] shrink-0 transition-colors flex items-center gap-1.5"
         aria-hidden={hidden || undefined}
         tabIndex={hidden ? -1 : undefined}
         {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
-        {TREND_CATEGORY_LABELS[item.category]} · {item.title}
+        <span className="text-[var(--accent)] text-[10px] font-mono">[{TREND_CATEGORY_LABELS[item.category] || item.category}]</span>
+        <span>{item.title}</span>
       </Link>
     );
   };
@@ -50,14 +51,20 @@ export function TrendingTicker() {
   return (
     <div
       role="region"
-      aria-label="Trending topics"
-      className="border-b border-[var(--line)] bg-[var(--ink)] text-white overflow-hidden"
+      aria-label="Live trending topics ticker"
+      className="border-b border-[var(--line)] bg-[var(--ink)] text-white overflow-hidden flex items-center"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className={`relative h-9 flex items-center ${reduceMotion ? 'overflow-x-auto' : ''}`}>
+      {/* Pinned Left Radar Indicator */}
+      <div className="z-10 bg-[var(--ink)] border-r border-neutral-700 px-3 py-1.5 flex items-center gap-1.5 flex-shrink-0 text-[10px] font-mono font-bold tracking-widest text-[var(--accent)] uppercase shadow-md">
+        <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-live-radar" />
+        <span className="hidden sm:inline">LIVE FEED</span>
+      </div>
+
+      <div className={`relative h-9 flex items-center flex-1 min-w-0 ${reduceMotion ? 'overflow-x-auto' : ''}`}>
         <div
           className={`flex gap-8 whitespace-nowrap px-4 text-[11px] font-semibold uppercase tracking-[0.14em] ${
             reduceMotion ? '' : `animate-discovery-ticker ${paused ? 'is-paused' : ''}`

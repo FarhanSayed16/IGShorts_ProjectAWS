@@ -286,6 +286,43 @@
   animation-play-state: paused;
 }
 
+@keyframes soundwave {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+.animate-soundwave-1 { animation: soundwave 0.85s ease-in-out infinite; }
+.animate-soundwave-2 { animation: soundwave 1.15s ease-in-out infinite 0.15s; }
+.animate-soundwave-3 { animation: soundwave 0.75s ease-in-out infinite 0.3s; }
+.animate-soundwave-4 { animation: soundwave 1.25s ease-in-out infinite 0.1s; }
+.animate-soundwave-5 { animation: soundwave 0.95s ease-in-out infinite 0.25s; }
+
+@keyframes live-radar {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(0, 210, 106, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 210, 106, 0);
+  }
+}
+
+.animate-live-radar {
+  animation: live-radar 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

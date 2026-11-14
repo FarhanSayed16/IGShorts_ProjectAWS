@@ -37,7 +37,7 @@ export function CreatorSpotlight({
             <Link
               key={creator.username}
               href={`/profiles/${creator.username}`}
-              className="border border-[var(--line)] bg-[var(--surface)] p-4 flex gap-3 hover:border-[var(--ink)] transition-colors"
+              className="border border-[var(--line)] bg-[var(--surface)] p-4 flex gap-3 hover-lift hover:border-[var(--ink)] transition-all"
             >
               <Avatar src={creator.avatar_url} name={creator.display_name} size="md" />
               <div className="min-w-0 flex-1">

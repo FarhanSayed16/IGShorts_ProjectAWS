@@ -3,6 +3,8 @@ import { Inter, Oswald, JetBrains_Mono } from 'next/font/google';
 import { ReactQueryProvider } from '@/lib/api/query-provider';
 import { ThemeProvider } from '@/lib/theme/theme-provider';
 import { CommandPalette } from '@/components/chrome/command-palette';
+import { AudioPlayerProvider } from '@/lib/audio-player-context';
+import { InteractiveMediaDock } from '@/components/discovery/interactive-media-dock';
 import './globals.css';
 
 const inter = Inter({
@@ -88,8 +90,11 @@ export default function RootLayout({
         </a>
         <ReactQueryProvider>
           <ThemeProvider>
-            <CommandPalette />
-            <div className="flex-1 flex flex-col">{children}</div>
+            <AudioPlayerProvider>
+              <CommandPalette />
+              <div className="flex-1 flex flex-col">{children}</div>
+              <InteractiveMediaDock />
+            </AudioPlayerProvider>
           </ThemeProvider>
         </ReactQueryProvider>
       </body>

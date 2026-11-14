@@ -15,7 +15,7 @@ function categoryHref(category: string) {
 
 export function TrendCard({ trend }: { trend: TrendCardDto }) {
   return (
-    <article className="border border-[var(--line)] bg-[var(--surface)] flex flex-col h-full overflow-hidden hover:border-[var(--ink)] transition-colors">
+    <article className="border border-[var(--line)] bg-[var(--surface)] flex flex-col h-full overflow-hidden hover-lift hover:border-[var(--ink)] transition-all">
       <div className="aspect-[16/10] bg-[var(--canvas)] border-b border-[var(--line)]">
         <DiscoveryMedia imageUrl={trend.imageUrl} category={trend.category} alt={trend.title} />
       </div>
