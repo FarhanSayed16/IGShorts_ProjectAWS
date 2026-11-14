@@ -9,6 +9,7 @@ import { Avatar } from '@/components/rank/avatar';
 import { GroupLadder } from '@/components/rank/group-ladder';
 import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
 import { MemberReport } from '@/components/account/member-report';
+import { FollowerCount } from '@/components/rank/follower-count';
 import { RankDeltaChip } from '@/components/rank/rank-delta-chip';
 import { RankNumber } from '@/components/rank/rank-number';
 import { freshnessState, groupForCount, groupLabel, placeAudienceGroup } from '@/lib/format/audience-group';
@@ -128,15 +129,47 @@ export default async function ProfileDetailPage({ params }: PageProps) {
               <RankNumber rank={latestRankEntry.rank} size="hero" featured={latestRankEntry.rank === 1} />
             )}
             <Avatar src={profile.avatarUrl} name={profile.displayName} size="hero" className="shrink-0" />
-            <div className="min-w-0 flex-1">
-              <h1 className="font-display text-4xl sm:text-6xl leading-none text-[var(--ink)]">
-                {profile.displayName}
-              </h1>
-              <p className="mt-1 text-sm text-[var(--ink-muted)]">@{profile.igUsername}</p>
-              <div className="flex flex-wrap items-center gap-2 mt-3 text-[11px] uppercase tracking-wider text-[var(--ink-muted)]">
-                {profile.category && <span>{profile.category}</span>}
-                {profile.countryRegion && <span>· {profile.countryRegion}</span>}
+            <div className="min-w-0 flex-1 w-full">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div>
+                  <h1 className="font-display text-4xl sm:text-6xl leading-none text-[var(--ink)]">
+                    {profile.displayName}
+                  </h1>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">@{profile.igUsername}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] uppercase tracking-wider text-[var(--ink-muted)]">
+                    {profile.category && <span>{profile.category}</span>}
+                    {profile.countryRegion && <span>· {profile.countryRegion}</span>}
+                    {latestRankEntry && (
+                      <span className="inline-flex items-center gap-1.5 ml-1">
+                        ·
+                        <RankDeltaChip
+                          previousRank={latestRankEntry.previousRank}
+                          delta={latestRankEntry.rankDelta}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border border-[var(--line)] bg-[var(--canvas)] p-3 sm:p-4 text-left md:text-right shrink-0">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink-faint)]">
+                    Verified Public Followers
+                  </span>
+                  {latestFollowerCount !== null ? (
+                    <div className="font-display text-3xl sm:text-4xl font-bold text-[var(--ink)] tabular-nums mt-0.5">
+                      <FollowerCount count={latestFollowerCount} />
+                    </div>
+                  ) : (
+                    <span className="inline-block mt-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                      Unranked · Missing verified count
+                    </span>
+                  )}
+                  <span className="block text-[10px] text-[var(--ink-muted)] mt-1">
+                    Standard competition ranking
+                  </span>
+                </div>
               </div>
+
               {profile.shortBio && (
                 <p className="mt-4 max-w-xl text-sm text-[var(--ink-muted)] leading-relaxed">
                   {profile.shortBio}
@@ -147,10 +180,12 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                   Portrait from Wikipedia / Wikimedia Commons.
                 </p>
               )}
-              <a href={instagramHref} target="_blank" rel="noopener noreferrer" className="btn-primary mt-5 text-xs">
-                View on Instagram
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              <div className="mt-5 flex items-center gap-4">
+                <a href={instagramHref} target="_blank" rel="noopener noreferrer" className="btn-primary text-xs">
+                  View on Instagram
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

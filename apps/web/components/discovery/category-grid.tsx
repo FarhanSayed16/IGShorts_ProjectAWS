@@ -15,9 +15,9 @@ const SLUG_TO_CATEGORY: Record<string, TrendCategory> = {
 const CATEGORY_IMAGES: Partial<Record<TrendCategory, string>> = {
   music:
     'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=900&q=80',
-  news: 'https://images.unsplash.com/photo-1504711434869-ddd1f1e126cd?auto=format&fit=crop&w=900&q=80',
+  news: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=900&q=80',
   internet_culture:
-    'https://images.unsplash.com/photo-1611162617474-5b21e11e480f?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',
   entertainment:
     'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80',
   technology:

@@ -6,6 +6,7 @@ import { PublicFooter } from '@/components/chrome/public-footer';
 import { BillboardList } from '@/components/rank/billboard-list';
 import { ErrorBanner } from '@/components/feedback/error-banner';
 import { GroupMix, GroupMixData } from '@/components/rank/group-mix';
+import { EditorialMasthead } from '@/components/chrome/editorial-masthead';
 import { TrendingTicker } from '@/components/discovery/trending-ticker';
 import { FeaturedTrend } from '@/components/discovery/featured-trend';
 import { CategoryGrid } from '@/components/discovery/category-grid';
@@ -105,6 +106,11 @@ export default async function HomePage() {
             <ErrorBanner message={copy.states.error_banner} />
           </div>
         )}
+
+        <EditorialMasthead
+          totalProfiles={savedMix?.total || 12107}
+          asOf={globalMeta?.as_of}
+        />
 
         <FeaturedTrend trend={featured} />
         <CategoryGrid />

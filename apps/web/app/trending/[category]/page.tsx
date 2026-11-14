@@ -10,6 +10,7 @@ import {
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
 import { TrendingExplorer } from '@/components/discovery/trending-explorer';
+import { CATEGORY_BLURBS } from '@/components/discovery/discovery-media';
 
 export function generateStaticParams() {
   return TREND_CATEGORY_PAGE_SLUGS.map((category) => ({ category }));
@@ -46,7 +47,17 @@ export default async function TrendingCategoryPage({
     <div className="flex flex-col min-h-screen bg-[var(--canvas)] text-[var(--ink)]">
       <PublicHeader />
       <main id="main-content" className="flex-1 max-w-[1120px] mx-auto w-full px-4 sm:px-6 py-10">
-        <h1 className="chart-title text-5xl sm:text-7xl mb-8">{TREND_CATEGORY_LABELS[category]}</h1>
+        <div className="mb-8 border-b border-[var(--line)] pb-6">
+          <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--ink-muted)] mb-2">
+            <span>Trending Discovery</span>
+            <span>·</span>
+            <span>Vertical Lane</span>
+          </div>
+          <h1 className="chart-title text-5xl sm:text-7xl">{TREND_CATEGORY_LABELS[category]}</h1>
+          <p className="mt-3 text-sm text-[var(--ink-muted)] max-w-2xl leading-relaxed">
+            {CATEGORY_BLURBS[category] || 'Curated editorial topics and momentum in this vertical.'}
+          </p>
+        </div>
         <TrendingExplorer category={category} />
       </main>
       <PublicFooter />

@@ -9,7 +9,7 @@ import { FollowerCount } from '@/components/rank/follower-count';
 import { RankDeltaChip } from '@/components/rank/rank-delta-chip';
 import { FollowerDelta } from '@/components/rank/follower-delta';
 import { ErrorBanner } from '@/components/feedback/error-banner';
-import { fetchChartMovers } from '@/lib/api/client';
+import { fetchChartEntries, fetchChartMovers } from '@/lib/api/client';
 
 export const metadata: Metadata = {
   title: 'Movers',
@@ -67,12 +67,17 @@ export default async function MoversPage({
 
   let gainers: ChartEntry[] = [];
   let decliners: ChartEntry[] = [];
+  let leaders: ChartEntry[] = [];
   let hasApiError = false;
 
   try {
-    const moversRes = await fetchChartMovers(chartKey);
+    const [moversRes, leadersRes] = await Promise.all([
+      fetchChartMovers(chartKey),
+      fetchChartEntries(chartKey, { limit: 3, offset: 0 }).catch(() => null),
+    ]);
     gainers = (moversRes.gainers || []).filter((entry) => entry.rank_delta > 0);
     decliners = (moversRes.losers || []).filter((entry) => entry.rank_delta < 0);
+    if (leadersRes) leaders = leadersRes.entries;
   } catch {
     hasApiError = true;
   }
@@ -144,14 +149,46 @@ export default async function MoversPage({
           </section>
         </div>
 
-        <p>
+        {leaders.length > 0 && gainers.length === 0 && (
+          <section className="mb-12 border border-[var(--line)] bg-[var(--surface)] p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                  Active Baseline
+                </span>
+                <h3 className="chart-title text-2xl sm:text-3xl mt-1 text-[var(--ink)]">
+                  Current {isIndia ? 'India' : 'Global'} Board Leaders
+                </h3>
+                <p className="text-xs text-[var(--ink-muted)] mt-1">
+                  While weekly drift is computing, here are the leading accounts anchored to this scope.
+                </p>
+              </div>
+              <Link
+                href={isIndia ? '/charts/india' : '/charts/global'}
+                className="text-xs font-bold uppercase tracking-[0.16em] hover:underline shrink-0"
+              >
+                Full {isIndia ? 'India' : 'Global'} 100 →
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {leaders.map((entry) => (
+                <MoverRow key={entry.username} entry={entry} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <div className="border-t border-[var(--line)] pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[var(--ink-muted)]">
+          <p>
+            Rank velocity computes position drift between successive snapshot cycles. Missing counts are never assigned velocity.
+          </p>
           <Link
-            href={isIndia ? '/charts/india' : '/charts/global'}
-            className="text-sm font-bold uppercase tracking-[0.16em] underline underline-offset-4"
+            href="/methodology"
+            className="font-bold uppercase tracking-wider text-[var(--ink)] hover:underline shrink-0"
           >
-            Full {isIndia ? 'India' : 'Global'} 100 →
+            Velocity Methodology →
           </Link>
-        </p>
+        </div>
       </main>
 
       <PublicFooter />
