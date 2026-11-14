@@ -14,8 +14,7 @@ export default function NotFound() {
         className="flex-1 flex items-center justify-center px-4 sm:px-6 py-24"
       >
         <div className="max-w-lg w-full text-center space-y-6">
-          {/* Large Gradient 404 Headline (§12.11) */}
-          <div className="font-display font-black text-7xl sm:text-9xl bg-gradient-to-r from-[var(--brand-accent)] via-[#F0DCA0] to-[var(--brand-accent)] bg-clip-text text-transparent tracking-tight select-none">
+          <div className="font-display font-black text-7xl sm:text-9xl text-[var(--accent)] tracking-tight select-none">
             404
           </div>
 

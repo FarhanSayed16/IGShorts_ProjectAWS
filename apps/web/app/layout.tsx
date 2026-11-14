@@ -5,6 +5,9 @@ import { ThemeProvider } from '@/lib/theme/theme-provider';
 import { CommandPalette } from '@/components/chrome/command-palette';
 import { AudioPlayerProvider } from '@/lib/audio-player-context';
 import { InteractiveMediaDock } from '@/components/discovery/interactive-media-dock';
+import { PageViewBeacon } from '@/components/analytics/page-view-beacon';
+import { RouteEventBeacon } from '@/components/analytics/route-event-beacon';
+import { SessionExpiredProvider } from '@/components/feedback/session-expired-provider';
 import './globals.css';
 
 const inter = Inter({
@@ -90,11 +93,15 @@ export default function RootLayout({
         </a>
         <ReactQueryProvider>
           <ThemeProvider>
-            <AudioPlayerProvider>
-              <CommandPalette />
-              <div className="flex-1 flex flex-col">{children}</div>
-              <InteractiveMediaDock />
-            </AudioPlayerProvider>
+            <SessionExpiredProvider>
+              <AudioPlayerProvider>
+                <CommandPalette />
+                <PageViewBeacon />
+                <RouteEventBeacon />
+                <div className="flex-1 flex flex-col">{children}</div>
+                <InteractiveMediaDock />
+              </AudioPlayerProvider>
+            </SessionExpiredProvider>
           </ThemeProvider>
         </ReactQueryProvider>
       </body>

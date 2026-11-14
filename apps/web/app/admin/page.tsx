@@ -104,13 +104,29 @@ export default function AdminOverviewPage() {
         </div>
       )}
 
+      {/* Cron status */}
+      {!isLoading && data && (
+        <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 text-xs text-[var(--neutral-300)] font-mono">
+          {typeof data.cronEnabled === 'boolean' ? (
+            <span>
+              CRON_ENABLED:{' '}
+              <span className={data.cronEnabled ? 'text-[#00d26a]' : 'text-amber-400'}>
+                {String(data.cronEnabled)}
+              </span>
+            </span>
+          ) : (
+            <span>CRON: check Render env (CRON_ENABLED)</span>
+          )}
+        </div>
+      )}
+
       {/* Operational Banner Notice */}
       {actionMessage && (
-        <div className="p-4 rounded-xl bg-blue-950/70 border border-blue-700/60 text-blue-200 text-xs flex items-center justify-between gap-3 shadow-md">
+        <div className="p-4 rounded-xl bg-emerald-950/50 border border-[#00d26a]/40 text-emerald-100 text-xs flex items-center justify-between gap-3 shadow-md">
           <span>{actionMessage}</span>
           <button
             onClick={() => setActionMessage('')}
-            className="text-blue-400 hover:text-blue-100 font-bold px-1"
+            className="text-[#00d26a] hover:text-white font-bold px-1 cursor-pointer"
           >
             ✕
           </button>

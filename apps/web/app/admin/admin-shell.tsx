@@ -15,6 +15,12 @@ import {
   ChevronRight,
   Activity,
   RefreshCw,
+  Clapperboard,
+  CalendarClock,
+  UserRound,
+  BarChart3,
+  Monitor,
+  Settings,
 } from 'lucide-react';
 import {
   getStoredAdminToken,
@@ -25,11 +31,16 @@ import {
 const NAV_ITEMS = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Watchlist', href: '/admin/watchlist', icon: Users },
+  { label: 'Content', href: '/admin/content', icon: Clapperboard },
   { label: 'Import Seed', href: '/admin/import', icon: FileSpreadsheet },
   { label: 'Sync Pipeline', href: '/admin/sync', icon: RefreshCw },
   { label: 'Rankings Engine', href: '/admin/rankings', icon: Trophy },
   { label: 'Job Schedules', href: '/admin/jobs', icon: Activity },
+  { label: 'Schedules', href: '/admin/schedules', icon: CalendarClock },
+  { label: 'Members', href: '/admin/members', icon: UserRound },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Audit Trail', href: '/admin/audit', icon: History },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 function environmentLabel() {
@@ -76,12 +87,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <aside className="w-full md:w-64 bg-[var(--brand-deep)] border-r border-[var(--brand-slate)] flex flex-col shrink-0">
         <div className="p-5 border-b border-[var(--brand-slate)] flex items-center justify-between">
           <Link href="/admin" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-400/40 text-sky-400 flex items-center justify-center font-bold shadow-[0_0_12px_rgba(14,165,233,0.25)]">
+            <div className="w-8 h-8 rounded-lg bg-[#00d26a]/15 border border-[#00d26a]/40 text-[#00d26a] flex items-center justify-center font-bold">
               <Trophy className="w-4 h-4" />
             </div>
             <div>
               <span className="font-display font-bold text-base text-white tracking-tight">
-                IG<span className="text-sky-400">shorts</span>
+                IG<span className="text-[#00d26a]">shorts</span>
               </span>
               <span className="block text-[10px] font-mono uppercase tracking-wider text-[var(--neutral-400)]">
                 Admin Console
@@ -102,17 +113,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 href={item.href}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-[var(--brand-slate)] text-sky-400 border border-sky-400/30 border-l-4 border-l-sky-400 shadow-sm'
+                    ? 'bg-[var(--brand-slate)] text-[#00d26a] border border-[#00d26a]/30 border-l-4 border-l-[#00d26a] shadow-sm'
                     : 'text-[var(--neutral-400)] hover:text-white hover:bg-[var(--brand-slate)]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-[var(--neutral-400)]'}`}
+                    className={`w-4 h-4 ${isActive ? 'text-[#00d26a]' : 'text-[var(--neutral-400)]'}`}
                   />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-sky-400" />}
+                {isActive && <ChevronRight className="w-3.5 h-3.5 text-[#00d26a]" />}
               </Link>
             );
           })}
@@ -151,15 +162,20 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#070B14]">
+        <div className="md:hidden px-4 py-2.5 bg-black border-b border-[#00d26a]/30 text-[11px] text-[#00d26a] font-semibold flex items-center gap-2">
+          <Monitor className="w-3.5 h-3.5 shrink-0" />
+          <span>Admin is optimized for desktop</span>
+        </div>
+
         <header className="h-14 bg-[var(--brand-deep)] border-b border-[var(--brand-slate)] px-6 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[var(--status-up)] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#00d26a] animate-pulse" />
             <span className="font-mono text-[var(--neutral-400)] text-[11px]">
               API: {environmentLabel()}
             </span>
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-mono text-[11px]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[var(--status-up)]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[#00d26a]" />
             <span>Operator Mode Active</span>
           </div>
         </header>

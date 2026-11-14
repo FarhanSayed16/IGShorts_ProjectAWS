@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PublicHeader } from '@/components/chrome/public-header';
 import { PublicFooter } from '@/components/chrome/public-footer';
+import { SinceLastVisit } from '@/components/discovery/since-last-visit';
 import { FollowerCount } from '@/components/rank/follower-count';
 import { memberFetch, writeMemberToken } from '@/lib/member-session';
 import { useMemberSession } from '@/lib/use-member-session';
@@ -160,9 +161,35 @@ function AccountPanel() {
             </button>
           </div>
           <div>
+            <h2 className="chart-title text-2xl mb-3">Insights</h2>
+            {tracks.length === 0 ? (
+              <div className="border border-[var(--line)] bg-[var(--canvas)] px-4 py-5 space-y-3">
+                <p className="text-sm text-[var(--ink)]">
+                  You haven&apos;t tracked any profiles yet. Start by browsing the Global 100.
+                </p>
+                <Link href="/charts/global" className="btn-primary text-xs inline-flex">
+                  Open Global 100
+                </Link>
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--ink-muted)] mb-3">
+                Stored follower counts for profiles you track. No fake engagement metrics.
+              </p>
+            )}
+            <div className="mt-4">
+              <SinceLastVisit />
+            </div>
+          </div>
+          <div>
             <h2 className="chart-title text-2xl mb-3">Tracked profiles</h2>
             {tracks.length === 0 ? (
-              <p className="text-sm text-[var(--ink-muted)]">None yet. Open a profile and choose Track.</p>
+              <p className="text-sm text-[var(--ink-muted)]">
+                None yet. Open a profile and choose Track, or start from the{' '}
+                <Link href="/charts/global" className="underline">
+                  Global 100
+                </Link>
+                .
+              </p>
             ) : (
               <ul className="divide-y divide-[var(--line)] border border-[var(--line)]">
                 {tracks.map((track) => (
