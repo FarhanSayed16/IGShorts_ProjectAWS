@@ -140,14 +140,6 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
           </div>
         </div>
 
-        {mix && (
-          <GroupMix
-            mix={mix}
-            title="Saved list split"
-            context="Names on this chart stay on their own ranking. The ring counts the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
-          />
-        )}
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-[var(--ink-faint)] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -253,6 +245,16 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {mix && (
+          <div className="mt-14 pt-10 border-t border-[var(--line)]">
+            <GroupMix
+              mix={mix}
+              title="Saved list split"
+              context="Names on this chart stay on their own ranking. The ring counts the saved public index: FastSocial Top Charts, CC BY 4.0, together with the IGshorts seed lists."
+            />
           </div>
         )}
 

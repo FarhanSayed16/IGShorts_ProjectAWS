@@ -88,7 +88,10 @@ export default async function HomePage() {
   if (mixRes.status === 'fulfilled') savedMix = mixRes.value;
   if (featuredRes.status === 'fulfilled') featured = featuredRes.value;
   if (musicRes.status === 'fulfilled') onRepeat = musicRes.value.data;
-  if (moversRes.status === 'fulfilled') spotlight = moversRes.value.gainers?.slice(0, 6) || [];
+  const moverGainers =
+    moversRes.status === 'fulfilled' ? moversRes.value.gainers?.slice(0, 6) || [] : [];
+  spotlight = moverGainers.length > 0 ? moverGainers : globalEntries.slice(0, 6);
+  const spotlightMode: 'movers' | 'chart' = moverGainers.length > 0 ? 'movers' : 'chart';
   if (pulseRes.status === 'fulfilled') pulse = pulseRes.value;
 
   return (
@@ -107,7 +110,7 @@ export default async function HomePage() {
         <CategoryGrid />
         <NowTrending />
         <MusicStrip title="Music on Repeat" tracks={onRepeat} />
-        <CreatorSpotlight creators={spotlight} />
+        <CreatorSpotlight creators={spotlight} mode={spotlightMode} />
         <DailyPulse pulse={pulse} />
         <SinceLastVisit />
 
