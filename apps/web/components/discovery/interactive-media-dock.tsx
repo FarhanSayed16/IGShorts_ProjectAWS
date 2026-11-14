@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Volume2, Volume1, VolumeX } from 'lucide-react';
 import { useAudioPlayer } from '@/lib/audio-player-context';
 import { DiscoveryMedia } from './discovery-media';
 
@@ -147,10 +148,16 @@ export function InteractiveMediaDock() {
               type="button"
               onClick={toggleMute}
               aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
-              className="text-[var(--ink-muted)] hover:text-[var(--ink)] text-xs"
+              className="text-[var(--ink-muted)] hover:text-[var(--ink)] flex items-center justify-center p-1"
               title={isMuted ? 'Unmute' : 'Mute'}
             >
-              {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
+              {isMuted || volume === 0 ? (
+                <VolumeX className="w-3.5 h-3.5" />
+              ) : volume < 0.5 ? (
+                <Volume1 className="w-3.5 h-3.5" />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5" />
+              )}
             </button>
             <input
               type="range"

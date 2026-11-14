@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Flame, Gem, Rocket, Play } from 'lucide-react';
 import { DailyPulseDay } from '@igshorts/shared';
 import { DiscoveryMedia } from './discovery-media';
 import { useAudioPlayer } from '@/lib/audio-player-context';
@@ -148,7 +149,10 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                             Playing Lo-Fi
                           </>
                         ) : (
-                          <>▶ Play Ambient</>
+                          <>
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            Play Ambient
+                          </>
                         )}
                       </button>
                     </div>
@@ -193,38 +197,41 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                       <button
                         type="button"
                         onClick={(e) => react(item.kind, 'hype', e)}
-                        className={`px-2 py-1 text-[11px] font-mono border rounded transition-all ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono border rounded transition-all ${
                           activeReaction === `${item.kind}-hype`
-                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-110'
+                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-105'
                             : 'bg-[var(--canvas)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--ink)]'
                         }`}
                         title="Cheer with Hype"
                       >
-                        🔥 {currentReactions.hype}
+                        <Flame className={`w-3.5 h-3.5 ${activeReaction === `${item.kind}-hype` ? 'text-black fill-black' : 'text-amber-500 fill-amber-500/25'}`} />
+                        <span>{currentReactions.hype}</span>
                       </button>
                       <button
                         type="button"
                         onClick={(e) => react(item.kind, 'gem', e)}
-                        className={`px-2 py-1 text-[11px] font-mono border rounded transition-all ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono border rounded transition-all ${
                           activeReaction === `${item.kind}-gem`
-                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-110'
+                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-105'
                             : 'bg-[var(--canvas)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--ink)]'
                         }`}
                         title="Highlight as Gem"
                       >
-                        💎 {currentReactions.gem}
+                        <Gem className={`w-3.5 h-3.5 ${activeReaction === `${item.kind}-gem` ? 'text-black fill-black' : 'text-emerald-500 fill-emerald-500/25'}`} />
+                        <span>{currentReactions.gem}</span>
                       </button>
                       <button
                         type="button"
                         onClick={(e) => react(item.kind, 'viral', e)}
-                        className={`px-2 py-1 text-[11px] font-mono border rounded transition-all ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono border rounded transition-all ${
                           activeReaction === `${item.kind}-viral`
-                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-110'
+                            ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-105'
                             : 'bg-[var(--canvas)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--ink)]'
                         }`}
                         title="Predict Viral Peak"
                       >
-                        🚀 {currentReactions.viral}
+                        <Rocket className={`w-3.5 h-3.5 ${activeReaction === `${item.kind}-viral` ? 'text-black fill-black' : 'text-indigo-500 fill-indigo-500/25'}`} />
+                        <span>{currentReactions.viral}</span>
                       </button>
                     </div>
                   </div>

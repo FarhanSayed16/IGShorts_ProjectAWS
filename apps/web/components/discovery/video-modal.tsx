@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { Play, Pause, Volume2, VolumeX, X } from 'lucide-react';
 
 interface VideoModalProps {
   isOpen: boolean;
@@ -119,18 +120,26 @@ export function VideoModal({
             <button
               type="button"
               onClick={togglePlay}
-              className="p-2 bg-black/80 hover:bg-black text-white border border-white/30 text-xs"
+              className="p-2 bg-black/80 hover:bg-black text-white border border-white/30 flex items-center justify-center rounded-sm"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isPlaying ? (
+                <Pause className="w-4 h-4 fill-current" />
+              ) : (
+                <Play className="w-4 h-4 fill-current" />
+              )}
             </button>
             <button
               type="button"
               onClick={toggleMute}
-              className="p-2 bg-black/80 hover:bg-black text-white border border-white/30 text-xs"
+              className="p-2 bg-black/80 hover:bg-black text-white border border-white/30 flex items-center justify-center rounded-sm"
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
-              {isMuted ? '🔇' : '🔊'}
+              {isMuted ? (
+                <VolumeX className="w-4 h-4" />
+              ) : (
+                <Volume2 className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>

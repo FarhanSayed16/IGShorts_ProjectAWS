@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Flame, Zap } from 'lucide-react';
 import { Avatar } from '@/components/rank/avatar';
 
 interface CreatorShowdownProps {
@@ -128,13 +129,14 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               type="button"
               onClick={() => cheer('c1')}
               aria-label={`Cheer ${c1.fullName}`}
-              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center transition-all ${
+              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center gap-1.5 transition-all ${
                 hasCheered === 'c1'
                   ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-[1.02]'
                   : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--line)] hover:border-[var(--ink)]'
               }`}
             >
-              🔥 Cheer ({c1Cheers.toLocaleString()})
+              <Flame className={`w-4 h-4 ${hasCheered === 'c1' ? 'text-black fill-black' : 'text-amber-500 fill-amber-500/25'}`} />
+              <span>Cheer ({c1Cheers.toLocaleString()})</span>
             </button>
           </div>
 
@@ -165,13 +167,14 @@ export function CreatorShowdown({ creator1, creator2 }: CreatorShowdownProps) {
               type="button"
               onClick={() => cheer('c2')}
               aria-label={`Cheer ${c2.fullName}`}
-              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center transition-all ${
+              className={`w-full sm:w-auto min-h-[44px] px-4 py-2 font-mono text-xs font-bold uppercase border flex items-center justify-center gap-1.5 transition-all ${
                 hasCheered === 'c2'
                   ? 'bg-[var(--accent)] text-black border-[var(--accent)] scale-[1.02]'
                   : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--line)] hover:border-[var(--ink)]'
               }`}
             >
-              ⚡ Cheer ({c2Cheers.toLocaleString()})
+              <Zap className={`w-4 h-4 ${hasCheered === 'c2' ? 'text-black fill-black' : 'text-emerald-500 fill-emerald-500/25'}`} />
+              <span>Cheer ({c2Cheers.toLocaleString()})</span>
             </button>
           </div>
         </div>

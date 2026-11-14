@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Play } from 'lucide-react';
 import { TREND_CATEGORY_LABELS, TrendCard } from '@igshorts/shared';
 import { DiscoveryMedia } from './discovery-media';
 import { VideoModal } from './video-modal';
@@ -81,7 +82,8 @@ export function FeaturedTrend({ trend }: { trend: TrendCard | null }) {
                 onClick={() => setIsVideoModalOpen(true)}
                 className="inline-flex items-center gap-1.5 border-2 border-[var(--accent)] bg-[var(--accent)] text-black px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-wider hover:bg-black hover:text-[var(--accent)] hover:border-black transition-colors"
               >
-                ▶ Watch Reel Brief
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Watch Reel Brief</span>
               </button>
               <Link
                 href={trend.sourceUrl || `/trending/${trend.category.replace(/_/g, '-')}`}

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Play, Pause } from 'lucide-react';
 import { MusicTrackCard } from '@igshorts/shared';
 import { DiscoveryMedia } from './discovery-media';
 import { useAudioPlayer } from '@/lib/audio-player-context';
@@ -95,7 +96,17 @@ export function MusicCard({ track }: { track: MusicTrackCard }) {
             onClick={handlePlayClick}
             className="text-[var(--accent)] hover:underline flex items-center gap-1"
           >
-            {isCurrentlyPlaying ? '■ Pause' : '▶ Preview'}
+            {isCurrentlyPlaying ? (
+              <>
+                <Pause className="w-3 h-3 fill-current" />
+                <span>Pause</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3 h-3 fill-current" />
+                <span>Preview</span>
+              </>
+            )}
           </button>
           <div className="flex gap-2">
             {track.spotifyUrl && (
