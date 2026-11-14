@@ -52,19 +52,24 @@ export function TrendingTicker() {
     <div
       role="region"
       aria-label="Live trending topics ticker"
-      className="border-b border-[var(--line)] bg-[var(--ink)] text-white overflow-hidden flex items-center"
+      className="border-b border-[var(--solid-line)] bg-[var(--solid)] text-[var(--on-solid)] overflow-hidden flex items-center"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
       {/* Pinned Left Radar Indicator */}
-      <div className="z-10 bg-[var(--ink)] border-r border-neutral-700 px-3 py-1.5 flex items-center gap-1.5 flex-shrink-0 text-[10px] font-mono font-bold tracking-widest text-[var(--accent)] uppercase shadow-md">
+      <div className="z-10 bg-[var(--solid)] border-r border-[var(--solid-line)] px-3 py-1.5 flex items-center gap-1.5 flex-shrink-0 text-[10px] font-mono font-bold tracking-widest text-[var(--accent)] uppercase shadow-md">
         <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-live-radar" />
+        <span className="sm:hidden">LIVE</span>
         <span className="hidden sm:inline">LIVE FEED</span>
       </div>
 
       <div className={`relative h-9 flex items-center flex-1 min-w-0 ${reduceMotion ? 'overflow-x-auto' : ''}`}>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 z-[1] bg-gradient-to-r from-[var(--solid)] to-transparent"
+        />
         <div
           className={`flex gap-8 whitespace-nowrap px-4 text-[11px] font-semibold uppercase tracking-[0.14em] ${
             reduceMotion ? '' : `animate-discovery-ticker ${paused ? 'is-paused' : ''}`

@@ -42,7 +42,7 @@ export function MusicTicker() {
     <div
       role="region"
       aria-label="Trending music"
-      className="border-b border-[var(--line)] bg-[var(--ink)] text-white overflow-hidden"
+      className="border-b border-[var(--solid-line)] bg-[var(--solid)] text-[var(--on-solid)] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
