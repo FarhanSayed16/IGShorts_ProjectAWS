@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { AuditService } from '../audit/audit.service.js';
 import { DatabaseService } from '../database/database.service.js';
+import { DiscoveryRefreshService } from '../discovery/discovery-refresh.service.js';
 import { IngestionService } from '../ingestion/ingestion.service.js';
 import { RankingService } from '../ranking/ranking.service.js';
 
@@ -33,6 +34,7 @@ export class JobsService {
     private readonly ingestionService: IngestionService,
     private readonly audit: AuditService,
     private readonly config: ConfigService,
+    private readonly discovery: DiscoveryRefreshService,
   ) {}
 
   @Cron('0 2 * * *')
@@ -42,6 +44,16 @@ export class JobsService {
     }
     this.logger.log('Cron-triggered daily pipeline starting');
     await this.runDailyPipeline();
+  }
+
+  @Cron('30 3 * * *')
+  async scheduledDiscoveryRefresh() {
+    if (!this.config.get<boolean>('app.cronEnabled')) {
+      return;
+    }
+    this.logger.log('Cron-triggered discovery refresh starting');
+    await this.discovery.runDiscoveryRefresh();
+    await this.discovery.runPulseAssembly();
   }
 
   async checkStaleStatus(): Promise<{

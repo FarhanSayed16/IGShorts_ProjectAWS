@@ -114,7 +114,21 @@ export class MembersService {
     if (!member) {
       throw new UnauthorizedException('Invalid member session');
     }
-    return { authenticated: true, user: { email: member.email } };
+    return {
+      authenticated: true,
+      user: {
+        email: member.email,
+        lastVisitedAt: member.lastVisitedAt?.toISOString() ?? null,
+      },
+    };
+  }
+
+  async touchVisit(memberId: string) {
+    const member = await this.db.member.update({
+      where: { id: memberId },
+      data: { lastVisitedAt: new Date() },
+    });
+    return { lastVisitedAt: member.lastVisitedAt?.toISOString() ?? null };
   }
 
   async deleteAccount(memberId: string) {

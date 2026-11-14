@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -31,6 +32,12 @@ export class MembersController {
   @UseGuards(MemberAuthGuard)
   me(@Req() request: FastifyRequest) {
     return this.members.getMe(request.memberUser!.id);
+  }
+
+  @Patch('me/visit')
+  @UseGuards(MemberAuthGuard)
+  touchVisit(@Req() request: FastifyRequest) {
+    return this.members.touchVisit(request.memberUser!.id);
   }
 
   @Delete('me')
