@@ -117,7 +117,7 @@ export default async function HomePage() {
       category: 'music',
       region: 'global',
       summary:
-        'Creators across travel, tech, and storytelling reels are pivoting toward 80s analog synthesizer textures and calm tempos to maximize average watch duration and algorithm distribution.',
+        'Editorial fallback note on ambient and indie textures gaining public music-chart chatter. Not a live scrape and not an invented performance metric.',
       imageUrl:
         'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80',
       sourceUrl: '/trending/music',
@@ -142,7 +142,7 @@ export default async function HomePage() {
         region: 'global',
         collections: ['on_repeat'],
         popularityScore: 95,
-        creatorUsageCount: 41200,
+        creatorUsageCount: null,
         sourceLabel: 'editorial',
         observedAt: new Date().toISOString(),
       },
@@ -157,7 +157,7 @@ export default async function HomePage() {
         region: 'global',
         collections: ['on_repeat'],
         popularityScore: 88,
-        creatorUsageCount: 28900,
+        creatorUsageCount: null,
         sourceLabel: 'editorial',
         observedAt: new Date().toISOString(),
       },
@@ -172,7 +172,7 @@ export default async function HomePage() {
         region: 'global',
         collections: ['on_repeat'],
         popularityScore: 82,
-        creatorUsageCount: 19400,
+        creatorUsageCount: null,
         sourceLabel: 'editorial',
         observedAt: new Date().toISOString(),
       },
@@ -187,7 +187,7 @@ export default async function HomePage() {
         region: 'global',
         collections: ['on_repeat'],
         popularityScore: 78,
-        creatorUsageCount: 15800,
+        creatorUsageCount: null,
         sourceLabel: 'editorial',
         observedAt: new Date().toISOString(),
       },
@@ -206,7 +206,7 @@ export default async function HomePage() {
           kind: 'song',
           title: 'Midnight Echoes — Lunar Pulse',
           summary:
-            'Driving over 40,000 reel soundtracks this week with an atmospheric downtempo hook.',
+            'Editorial song of the day. Open Spotify or YouTube to listen — usage counts are shown only when proven.',
           imageUrl:
             'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
           sourceLabel: 'editorial',
@@ -214,9 +214,9 @@ export default async function HomePage() {
         },
         {
           kind: 'story',
-          title: 'Algorithmic Shift Favors Audio-First Creators',
+          title: 'Policy & platform notes for creator desks',
           summary:
-            'Engagement metrics reveal video completion rates jump 28% when paired with high-tempo audio transitions.',
+            'Editorial story slot covering public reporting on platform rules and creator-economy updates.',
           imageUrl:
             'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80',
           sourceLabel: 'editorial',
@@ -226,7 +226,7 @@ export default async function HomePage() {
           kind: 'trend',
           title: 'Cinematic Hyper-Lapse Travel Transitions',
           summary:
-            'Rapid point-of-view city tours are dominating explore tabs across North America and Europe.',
+            'Editorial culture note on travel-transition formats circulating in public conversation.',
           imageUrl:
             'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
           sourceLabel: 'editorial',
@@ -234,9 +234,9 @@ export default async function HomePage() {
         },
         {
           kind: 'creator',
-          title: 'Cristiano Ronaldo Retains #1 Hegemony',
+          title: 'Cristiano Ronaldo holds #1 on Global 100',
           summary:
-            'Surpassing 679.8M followers with consistent match highlights and backstage lifestyle short-form series.',
+            'Editorial creator slot pointing to the live Global 100 leader — open the profile for verified public follower counts.',
           imageUrl:
             'https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg',
           sourceLabel: 'editorial',
@@ -244,13 +244,13 @@ export default async function HomePage() {
         },
         {
           kind: 'moment',
-          title: 'The Viral Global Symphony Challenge',
+          title: 'Meme formats circulating this week',
           summary:
-            'Hundreds of indie instrumentalists layering impromptu jazz harmonies over one viral beat.',
+            'Editorial internet-moment slot. Not a live scrape — browse the culture lane for the current selection.',
           imageUrl:
             'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80',
           sourceLabel: 'editorial',
-          linkUrl: '/trending/entertainment',
+          linkUrl: '/trending/internet-culture',
         },
       ],
     };

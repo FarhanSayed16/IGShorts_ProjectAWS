@@ -45,8 +45,12 @@ export function MusicCard({ track }: { track: MusicTrackCard }) {
           <button
             type="button"
             onClick={handlePlayClick}
-            aria-label={isCurrentlyPlaying ? `Pause ${track.title}` : `Play lo-fi sample of ${track.title}`}
-            className="p-3 rounded-full bg-[var(--accent)] text-black shadow-xl hover:scale-110 transition-transform"
+            aria-label={
+              isCurrentlyPlaying
+                ? `Pause ambient preview of ${track.title}`
+                : `Play ambient preview of ${track.title}`
+            }
+            className="p-3 rounded-full bg-[var(--accent)] text-[var(--accent-ink)] shadow-xl hover:scale-110 transition-transform"
           >
             {isCurrentlyPlaying ? (
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -67,7 +71,7 @@ export function MusicCard({ track }: { track: MusicTrackCard }) {
             <span className="w-1 h-2.5 bg-[var(--accent)] animate-soundwave-1" />
             <span className="w-1 h-2.5 bg-[var(--accent)] animate-soundwave-2" />
             <span className="w-1 h-2.5 bg-[var(--accent)] animate-soundwave-3" />
-            <span className="ml-1">ON AIR</span>
+            <span className="ml-1">Preview</span>
           </div>
         )}
       </div>
@@ -86,7 +90,7 @@ export function MusicCard({ track }: { track: MusicTrackCard }) {
           </p>
         ) : (
           <p className="text-[10px] font-mono uppercase text-[var(--ink-muted)]">
-            Viral Track
+            {track.sourceLabel === 'editorial' ? 'Editorial selection' : 'Discovery track'}
           </p>
         )}
 

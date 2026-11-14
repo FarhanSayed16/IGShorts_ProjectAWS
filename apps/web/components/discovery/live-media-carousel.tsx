@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Play, Pause, Volume2, VolumeX, RotateCw } from 'lucide-react';
 import { TrendCard } from '@igshorts/shared';
 import { VideoModal } from './video-modal';
-import { DiscoveryMedia } from './discovery-media';
 
 interface SlideItem {
   id: string;
@@ -16,69 +15,69 @@ interface SlideItem {
   posterUrl: string;
   categorySlug: string;
   badge: string;
-  stats: {
-    views: string;
-    velocity: string;
-    shares: string;
-  };
+  /** Honest editorial chips — never invent Instagram view/share metrics */
+  chips: [string, string, string];
 }
+
+/** Public-domain Wikimedia demo reels for lively UI — not Instagram footage. */
+const DEMO_REEL =
+  'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.vp9.webm';
+/** Second public demo reel (Elephants Dream) for variety — still not Instagram media. */
+const DEMO_REEL_B =
+  'https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e8/Elephants_Dream_%28high_quality_version%29.ogv/Elephants_Dream_%28high_quality_version%29.ogv.480p.vp9.webm';
 
 const CAROUSEL_SLIDES: SlideItem[] = [
   {
     id: 'slide-1',
     category: 'Technology',
     categorySlug: 'technology',
-    badge: 'LIVE BROADCAST',
+    badge: 'EDITORIAL REEL',
     title: 'AI Tools Reshaping Short-Form Storytelling & Creator Workflows',
     summary:
-      'Generative video pipelines and automated pacing cuts are cutting post-production turnaround by 70%, propelling indie creators into algorithmic spotlight.',
-    videoUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.vp9.webm',
+      'Editorial briefing on public AI editing and scripting tools creators are testing. Sample reel media is demo footage — not an Instagram scrape.',
+    videoUrl: DEMO_REEL,
     posterUrl:
       'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
-    stats: { views: '18.4M', velocity: '+420%', shares: '840K' },
+    chips: ['Editorial', 'Demo reel', 'Tech lane'],
   },
   {
     id: 'slide-2',
     category: 'Music',
     categorySlug: 'music',
-    badge: 'AUDIO SPOTLIGHT',
-    title: 'The Viral Resurgence of Lo-Fi Ambient Soundtracks',
+    badge: 'MUSIC DESK',
+    title: 'Ambient & Indie Audio Climbing Public Attention',
     summary:
-      'Creators across travel and tech reels are adopting vintage analog synth textures and warm rhythms to achieve record-high watch-through percentages.',
-    videoUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.vp9.webm',
+      'Editorial music desk note on tracks and textures gaining public chart chatter. Open Spotify or YouTube for real listening — IGshorts does not stream licensed audio.',
+    videoUrl: DEMO_REEL_B,
     posterUrl:
       'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80',
-    stats: { views: '29.1M', velocity: '+380%', shares: '1.2M' },
+    chips: ['Editorial', 'Demo reel', 'Music lane'],
   },
   {
     id: 'slide-3',
     category: 'Sports & Gaming',
     categorySlug: 'sports-gaming',
-    badge: 'CREATOR SERIES',
-    title: 'Matchday Behind-the-Scenes: The Ronaldo Global Phenomenon',
+    badge: 'SPORTS DESK',
+    title: 'Matchday Energy & Global Sports Conversation',
     summary:
-      'Exclusive tactical warmups, locker-room access, and post-game shorts generated over 120M cumulative reel impressions across 3 days.',
-    videoUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.vp9.webm',
+      'Editorial sports note pairing public chart icons with match-week cultural momentum. Demo reel illustrates the lane — not exclusive locker-room footage.',
+    videoUrl: DEMO_REEL,
     posterUrl:
       'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1200&q=80',
-    stats: { views: '44.8M', velocity: '+510%', shares: '2.4M' },
+    chips: ['Editorial', 'Demo reel', 'Sports lane'],
   },
   {
     id: 'slide-4',
     category: 'Internet Culture',
     categorySlug: 'internet-culture',
-    badge: 'VIRAL MOMENTUM',
-    title: 'Cinematic Hyper-Lapse Travel Transitions Sweeping Feeds',
+    badge: 'CULTURE DESK',
+    title: 'Formats, Memes & Feed-Native Story Styles',
     summary:
-      'Seamless multi-city jump-cuts coupled with rhythmic beat drops are dominating the global explore page, raising audience retention to 82%.',
-    videoUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.vp9.webm',
+      'Editorial culture desk on remix formats and short-form storytelling patterns. Sample media is a public demo reel used only for UI motion.',
+    videoUrl: DEMO_REEL_B,
     posterUrl:
       'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
-    stats: { views: '14.2M', velocity: '+290%', shares: '620K' },
+    chips: ['Editorial', 'Demo reel', 'Culture lane'],
   },
 ];
 
@@ -169,7 +168,7 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
               {currentSlide.badge}
             </span>
             <span className="hidden sm:inline-block text-[10px] font-mono text-[var(--ink-muted)]">
-              • High-Velocity Reels
+              • Demo reels · not Instagram scrapes
             </span>
           </div>
 
@@ -333,7 +332,7 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                   {currentSlide.category}
                 </span>
                 <span className="text-[10px] font-mono uppercase text-[var(--ink-muted)]">
-                  Algorithm Spotlight
+                  Editorial spotlight
                 </span>
               </div>
 
@@ -345,26 +344,17 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
                 {currentSlide.summary}
               </p>
 
-              {/* Live Metric Pills */}
+              {/* Honest editorial chips — no fabricated Instagram metrics */}
               <div className="grid grid-cols-3 gap-2 mt-5 pt-4 border-t border-[var(--line)] font-mono text-center">
-                <div className="p-2.5 bg-[var(--canvas)] border border-[var(--line)] rounded-sm">
-                  <span className="block text-[10px] text-[var(--ink-muted)] uppercase">24H Views</span>
-                  <span className="font-bold text-xs sm:text-sm text-[var(--ink)]">
-                    {currentSlide.stats.views}
-                  </span>
-                </div>
-                <div className="p-2.5 bg-[var(--canvas)] border border-[var(--line)] rounded-sm">
-                  <span className="block text-[10px] text-[var(--ink-muted)] uppercase">Velocity</span>
-                  <span className="font-bold text-xs sm:text-sm text-[var(--accent)]">
-                    {currentSlide.stats.velocity}
-                  </span>
-                </div>
-                <div className="p-2.5 bg-[var(--canvas)] border border-[var(--line)] rounded-sm">
-                  <span className="block text-[10px] text-[var(--ink-muted)] uppercase">Shares</span>
-                  <span className="font-bold text-xs sm:text-sm text-[var(--ink)]">
-                    {currentSlide.stats.shares}
-                  </span>
-                </div>
+                {currentSlide.chips.map((chip) => (
+                  <div
+                    key={chip}
+                    className="p-2.5 bg-[var(--canvas)] border border-[var(--line)] rounded-sm"
+                  >
+                    <span className="block text-[10px] text-[var(--ink-muted)] uppercase">Lane</span>
+                    <span className="font-bold text-xs sm:text-sm text-[var(--ink)]">{chip}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -434,11 +424,12 @@ export function LiveMediaCarousel({ initialTrend }: { initialTrend?: TrendCard |
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         title={currentSlide.title}
-        creatorName="Editorial Newsroom"
+        creatorName="IGshorts Editorial Desk"
         creatorUsername="igshorts"
         category={currentSlide.category}
         description={currentSlide.summary}
-        stats={currentSlide.stats}
+        chips={currentSlide.chips}
+        videoUrl={currentSlide.videoUrl}
       />
     </>
   );

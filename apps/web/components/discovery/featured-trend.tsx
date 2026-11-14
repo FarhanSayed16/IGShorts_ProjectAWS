@@ -111,7 +111,7 @@ export function FeaturedTrend({ trend }: { trend: TrendCard | null }) {
         creatorUsername="igshorts"
         category={categoryLabel}
         description={trend.summary || undefined}
-        stats={{ views: '24.2M', velocity: '+380%', shares: '920K' }}
+        chips={['Editorial', 'Featured', categoryLabel]}
       />
     </>
   );

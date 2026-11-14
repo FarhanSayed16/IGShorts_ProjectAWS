@@ -26,13 +26,13 @@ const KIND_CATEGORY: Record<string, string> = {
 export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
   const { playTrack, playingTrack, isPlaying } = useAudioPlayer();
 
-  // Reaction counters per kind: { [kind]: { hype: number, gem: number, viral: number } }
+  // Local-only reactions (start at 0 — never present as global audience metrics)
   const [reactions, setReactions] = useState<Record<string, { hype: number; gem: number; viral: number }>>({
-    song: { hype: 342, gem: 128, viral: 512 },
-    story: { hype: 189, gem: 245, viral: 410 },
-    trend: { hype: 521, gem: 194, viral: 890 },
-    creator: { hype: 760, gem: 312, viral: 940 },
-    moment: { hype: 415, gem: 280, viral: 670 },
+    song: { hype: 0, gem: 0, viral: 0 },
+    story: { hype: 0, gem: 0, viral: 0 },
+    trend: { hype: 0, gem: 0, viral: 0 },
+    creator: { hype: 0, gem: 0, viral: 0 },
+    moment: { hype: 0, gem: 0, viral: 0 },
   });
 
   const [activeReaction, setActiveReaction] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
     e.stopPropagation();
 
     setReactions((prev) => {
-      const current = prev[kind] || { hype: 100, gem: 50, viral: 200 };
+      const current = prev[kind] || { hype: 0, gem: 0, viral: 0 };
       const updated = {
         ...prev,
         [kind]: {
@@ -107,7 +107,7 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
             const external = /^https?:\/\//i.test(href);
             const isSong = item.kind === 'song';
             const isCurrentlyPlaying = isSong && isPlaying && playingTrack?.title === item.title;
-            const currentReactions = reactions[item.kind] || { hype: 240, gem: 110, viral: 430 };
+            const currentReactions = reactions[item.kind] || { hype: 0, gem: 0, viral: 0 };
 
             const content = (
               <div className="border border-[var(--line)] bg-[var(--surface)] flex flex-col h-full overflow-hidden hover-lift hover:border-[var(--ink)] transition-all">
@@ -146,12 +146,12 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                               <span className="w-1 h-3 bg-black animate-soundwave-2" />
                               <span className="w-1 h-3 bg-black animate-soundwave-3" />
                             </span>
-                            Playing Lo-Fi
+                            Ambient preview
                           </>
                         ) : (
                           <>
                             <Play className="w-3.5 h-3.5 fill-current" />
-                            Play Ambient
+                            Play ambient
                           </>
                         )}
                       </button>
@@ -168,12 +168,12 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                 <div className="p-4 flex flex-col gap-2 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
-                      {item.sourceLabel === 'editorial' ? 'Editorial Pick' : 'Viral Spike'}
+                      {item.sourceLabel === 'editorial' ? 'Editorial Pick' : 'Discovery'}
                     </span>
                     {isCurrentlyPlaying && (
                       <span className="text-[10px] font-mono text-[var(--accent)] flex items-center gap-1 font-bold">
                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-live-radar" />
-                        ON AIR
+                        Preview
                       </span>
                     )}
                   </div>
@@ -191,7 +191,7 @@ export function DailyPulse({ pulse }: { pulse: DailyPulseDay | null }) {
                   {/* Interactive Micro-Reactions Bar */}
                   <div className="mt-auto pt-3 border-t border-[var(--line)]">
                     <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase mb-1.5">
-                      Audience Pulse:
+                      Your reactions (local):
                     </div>
                     <div className="flex items-center gap-1.5">
                       <button
