@@ -1,0 +1,6 @@
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' WHERE lower(title) = 'midnight drive' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' WHERE lower(title) = 'city lights' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' WHERE lower(title) = 'signal noise' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3' WHERE lower(title) = 'afterglow loop' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3' WHERE lower(title) = 'monsoon frequency' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');
+UPDATE "music_tracks" SET "preview_audio_url" = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3' WHERE lower(title) = 'studio warmup' AND ("preview_audio_url" IS NULL OR "preview_audio_url" = '');

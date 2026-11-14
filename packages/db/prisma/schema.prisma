@@ -201,6 +201,7 @@ model MusicTrack {
   artworkUrl        String?   @map("artwork_url")
   spotifyUrl        String?   @map("spotify_url")
   youtubeUrl        String?   @map("youtube_url")
+  previewAudioUrl   String?   @map("preview_audio_url")
   region            String    @default("both")
   popularityScore   Float?    @map("popularity_score")
   collections       String[]
@@ -267,4 +268,56 @@ model JobRun {
 
   @@index([jobName, startedAt(sort: Desc)])
   @@map("job_runs")
+}
+
+model SystemSchedule {
+  id          String    @id @default(cuid())
+  jobKey      String    @unique // e.g. daily_ranking_pipeline, discovery_refresh
+  label       String
+  cronExpr    String?
+  enabled     Boolean   @default(false)
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  lastStatus  String?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ProfileRefreshState {
+  id              String    @id @default(cuid())
+  profileId       String    @unique
+  band            String?
+  lastRefreshedAt DateTime?
+  nextRefreshAt   DateTime?
+  stale           Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventType String   // page_view | profile_view | chart_view | music_preview | search
+  path      String?
+  meta      Json?
+  anonId    String?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([createdAt])
+}
+
+model ClaimRequest {
+  id        String   @id @default(cuid())
+  handle    String
+  email     String
+  note      String?
+  status    String   @default("pending_verification")
+  ip        String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([handle, createdAt])
+  @@index([status, createdAt])
+  @@map("claim_requests")
 }
