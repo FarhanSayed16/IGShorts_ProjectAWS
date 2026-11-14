@@ -6,6 +6,8 @@ import { Search } from 'lucide-react';
 import { fetchProfiles } from '@/lib/api/client';
 
 const SHORTCUTS = [
+  { label: 'Trending', href: '/trending' },
+  { label: 'Music', href: '/music' },
   { label: 'Global 100', href: '/charts/global' },
   { label: 'India 100', href: '/charts/india' },
   { label: 'Movers', href: '/movers' },

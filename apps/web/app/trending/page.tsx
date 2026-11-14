@@ -5,8 +5,13 @@ import { PublicFooter } from '@/components/chrome/public-footer';
 import { TrendingExplorer } from '@/components/discovery/trending-explorer';
 
 export const metadata: Metadata = {
-  title: 'Trending',
-  description: 'Topics gaining attention across music, news, internet culture, entertainment, technology, and sports.',
+  title: 'IGshorts · Trending',
+  description:
+    'Topics gaining attention across music, news, internet culture, entertainment, technology, and sports.',
+  openGraph: {
+    title: 'IGshorts · Trending',
+    description: 'Browse editorial and attributed trending topics by category and region.',
+  },
 };
 
 export default function TrendingPage() {

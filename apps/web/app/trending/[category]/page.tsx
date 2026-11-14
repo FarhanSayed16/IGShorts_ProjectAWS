@@ -22,10 +22,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category: slug } = await params;
   const category = TREND_CATEGORY_SLUGS[slug];
-  if (!category) return { title: 'Trending' };
+  if (!category) return { title: 'IGshorts · Trending' };
   return {
-    title: `${TREND_CATEGORY_LABELS[category]} · Trending`,
+    title: `IGshorts · ${TREND_CATEGORY_LABELS[category]}`,
     description: `Trending topics in ${TREND_CATEGORY_LABELS[category]}.`,
+    openGraph: {
+      title: `IGshorts · ${TREND_CATEGORY_LABELS[category]}`,
+      description: `Browse ${TREND_CATEGORY_LABELS[category]} trends on IGshorts.`,
+    },
   };
 }
 
