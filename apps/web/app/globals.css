@@ -31,6 +31,12 @@
 @layer base {
   html {
     background-color: var(--canvas);
+    color-scheme: light;
+  }
+
+  html[data-theme='dark'],
+  html.dark {
+    color-scheme: dark;
   }
 
   body {

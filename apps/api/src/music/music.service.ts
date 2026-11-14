@@ -9,6 +9,7 @@ function toCard(row: {
   artworkUrl: string | null;
   spotifyUrl: string | null;
   youtubeUrl: string | null;
+  previewAudioUrl?: string | null;
   region: string;
   collections: string[];
   popularityScore: number | null;
@@ -23,6 +24,7 @@ function toCard(row: {
     artworkUrl: row.artworkUrl,
     spotifyUrl: row.spotifyUrl,
     youtubeUrl: row.youtubeUrl,
+    previewAudioUrl: row.previewAudioUrl ?? null,
     region: row.region as TrendRegion,
     collections: row.collections as MusicCollection[],
     popularityScore: row.popularityScore,

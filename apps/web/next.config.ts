@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
     return [
       { source: '/news', destination: '/trending/news', permanent: true },
       { source: '/hashtags', destination: '/trending/internet-culture', permanent: true },
+      { source: '/favicon.ico', destination: '/favicon.svg', permanent: false },
     ];
   },
   async rewrites() {
