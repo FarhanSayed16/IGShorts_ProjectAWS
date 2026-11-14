@@ -49,6 +49,8 @@ export interface MusicTrackCard {
   artworkUrl: string | null;
   spotifyUrl: string | null;
   youtubeUrl: string | null;
+  /** Optional licensed/CC preview stream; preferred over demo beds when set */
+  previewAudioUrl?: string | null;
   region: TrendRegion;
   collections: MusicCollection[];
   popularityScore: number | null;
