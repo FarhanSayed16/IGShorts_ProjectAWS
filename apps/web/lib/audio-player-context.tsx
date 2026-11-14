@@ -18,6 +18,9 @@ export interface PlayableTrack {
   reels_count?: number;
   spotify_search_url?: string;
   youtube_search_url?: string;
+  /** stream = real mp3, radio = live station, synth = generated fallback, unavailable = failed stream */
+  mode?: 'stream' | 'radio' | 'synth' | 'unavailable';
+  source_note?: string;
 }
 
 interface AudioPlayerContextValue {
@@ -245,40 +248,85 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
   const playTrack = useCallback(
     (track: PlayableTrack) => {
-      setPlayingTrack(track);
+      const resolvedMode = track.mode || (track.audio_url ? 'stream' : 'synth');
+      const isDemo =
+        Boolean(track.audio_url && track.audio_url.includes('soundhelix.com')) ||
+        /preview bed/i.test(track.source_note || '');
+      const enriched: PlayableTrack = {
+        ...track,
+        mode: resolvedMode,
+        source_note:
+          track.source_note ||
+          (resolvedMode === 'radio'
+            ? 'Live radio stream'
+            : resolvedMode === 'stream'
+              ? isDemo
+                ? 'Preview bed (not the commercial track)'
+                : 'Licensed preview stream'
+              : 'Ambient preview'),
+      };
+      setPlayingTrack(enriched);
       setIsPlaying(true);
       setCurrentTime(0);
 
+      const markUnavailable = () => {
+        stopSynth();
+        if (audioElementRef.current) {
+          audioElementRef.current.pause();
+        }
+        setIsPlaying(false);
+        setPlayingTrack({
+          ...enriched,
+          mode: 'unavailable',
+          source_note: 'Stream unavailable — listen on Spotify/YouTube',
+        });
+      };
+
       // Handle HTML5 audio if track has a direct audio stream URL
-      if (track.audio_url) {
+      if (enriched.audio_url) {
         stopSynth();
         if (!audioElementRef.current) {
           audioElementRef.current = new Audio();
         }
         const audio = audioElementRef.current;
-        audio.src = track.audio_url;
+        audio.src = enriched.audio_url;
         audio.volume = isMuted ? 0 : volume;
+        audio.muted = isMuted;
         audio.play().catch(() => {
-          // Fall back to synth if external audio stream is blocked or fails
-          startSynth();
+          markUnavailable();
         });
 
         audio.ontimeupdate = () => {
           setCurrentTime(audio.currentTime);
-          if (audio.duration && !isNaN(audio.duration)) {
+          if (audio.duration && Number.isFinite(audio.duration)) {
             setDuration(audio.duration);
+          } else if (enriched.mode === 'radio') {
+            setDuration(0);
           }
         };
 
+        audio.loop = enriched.mode === 'radio';
         audio.onended = () => {
+          if (enriched.mode === 'radio') {
+            setCurrentTime(0);
+            audio.play().catch(() => {});
+            return;
+          }
+          setIsPlaying(false);
           setCurrentTime(0);
-          audio.play().catch(() => {});
+        };
+        audio.onerror = () => {
+          markUnavailable();
         };
       } else {
-        // Fall back to rich Web Audio lo-fi beat engine
         if (audioElementRef.current) {
           audioElementRef.current.pause();
         }
+        setPlayingTrack({
+          ...enriched,
+          mode: 'synth',
+          source_note: enriched.source_note || 'Ambient preview',
+        });
         startSynth();
       }
     },
@@ -293,6 +341,18 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     }
   }, [stopSynth]);
 
+  const resumeTrack = useCallback(() => {
+    if (!playingTrack) return;
+    setIsPlaying(true);
+    if (playingTrack.audio_url && audioElementRef.current?.src) {
+      audioElementRef.current.play().catch(() => {
+        playTrack(playingTrack);
+      });
+      return;
+    }
+    playTrack(playingTrack);
+  }, [playingTrack, playTrack]);
+
   const stopTrack = useCallback(() => {
     setIsPlaying(false);
     setPlayingTrack(null);
@@ -306,17 +366,17 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
   const togglePlay = useCallback(
     (track?: PlayableTrack) => {
-      if (track && (!playingTrack || playingTrack.title !== track.title)) {
+      if (track && (!playingTrack || playingTrack.title !== track.title || playingTrack.id !== track.id)) {
         playTrack(track);
         return;
       }
       if (isPlaying) {
         pauseTrack();
       } else if (playingTrack) {
-        playTrack(playingTrack);
+        resumeTrack();
       }
     },
-    [isPlaying, playingTrack, playTrack, pauseTrack]
+    [isPlaying, playingTrack, playTrack, pauseTrack, resumeTrack]
   );
 
   const toggleMute = useCallback(() => {

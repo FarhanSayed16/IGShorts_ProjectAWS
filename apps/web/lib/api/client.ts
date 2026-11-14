@@ -87,10 +87,22 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     if (!text.trim()) {
       return null as T;
     }
-    return JSON.parse(text) as T;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new ApiClientError(
+        `IGshorts API returned invalid JSON (${res.status}) for ${endpoint}`,
+        res.status,
+        false,
+      );
+    }
   } catch (err: unknown) {
     if (err instanceof ApiClientError) {
       throw err;
+    }
+    // Next/React sometimes surfaces bare SyntaxError from JSON.parse up the RSC tree
+    if (err instanceof SyntaxError) {
+      throw new ApiClientError(`IGshorts API returned invalid JSON for ${endpoint}`, undefined, false);
     }
     const message = err instanceof Error ? err.message : 'Unknown network failure';
     throw new ApiClientError(`Unable to reach IGshorts API: ${message}`, undefined, true);

@@ -123,7 +123,7 @@ export function FollowerPyramid({
 
           <div className="flex items-center gap-3">
             <div className="px-3 py-1 bg-[var(--surface)] border border-[var(--line)] font-mono text-sm sm:text-base font-bold text-[var(--ink)] tabular-nums">
-              {followerCount.toLocaleString()} followers
+              {followerCount.toLocaleString('en-US')} followers
             </div>
             <span className="px-2 py-1 bg-[var(--accent)] text-black font-mono text-xs font-bold uppercase tracking-wider">
               {activeTier.name}
@@ -348,7 +348,7 @@ export function FollowerPyramid({
                   Watchlist Share
                 </span>
                 <span className="font-bold text-[var(--ink)]">
-                  {inspectedTier.percentage}% ({inspectedTier.trackedCount.toLocaleString()})
+                  {inspectedTier.percentage}% ({inspectedTier.trackedCount.toLocaleString('en-US')})
                 </span>
               </div>
               <div className="p-2.5 bg-[var(--surface)] border border-[var(--line)]">

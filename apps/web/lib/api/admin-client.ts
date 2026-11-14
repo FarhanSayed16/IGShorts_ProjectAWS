@@ -33,6 +33,11 @@ async function adminRequest<T>(endpoint: string, options?: RequestInit): Promise
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
   const token = getStoredAdminToken();
   if (!token) {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('igshorts-session-expired', { detail: { kind: 'admin' } }),
+      );
+    }
     throw new Error('Admin session required');
   }
 
@@ -45,6 +50,16 @@ async function adminRequest<T>(endpoint: string, options?: RequestInit): Promise
       ...options?.headers,
     },
   });
+
+  if (res.status === 401 || res.status === 403) {
+    clearAdminSession();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('igshorts-session-expired', { detail: { kind: 'admin' } }),
+      );
+    }
+    throw new Error('Admin session expired');
+  }
 
   if (!res.ok) {
     let msg = `Admin request failed: ${res.statusText}`;
@@ -99,6 +114,8 @@ export async function getAdminOverview() {
     recentAuditCount: number;
     systemStatus: string;
     timestamp: string;
+    /** Present when API exposes Render/cron config */
+    cronEnabled?: boolean;
   }>('/admin/overview');
 }
 
@@ -308,4 +325,99 @@ export async function getAdminAuditLogs() {
       createdAt: string;
     }>
   >('/admin/audit');
+}
+
+export async function triggerWikipediaEnrichment() {
+  return adminRequest<{
+    scanned?: number;
+    updated?: number;
+    skipped?: number;
+    failed?: number;
+    [key: string]: unknown;
+  }>('/admin/enrichment/wikipedia', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+
+export async function triggerDiscoveryRefresh() {
+  return adminRequest<Record<string, unknown>>('/admin/jobs/discovery', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+
+export type ScheduleIntent = {
+  jobKey: string;
+  label: string;
+  cronExpr: string;
+  intentTime: string;
+  description: string;
+  runEndpoint: 'pipeline' | 'discovery';
+  enabledByDefault: boolean;
+  enabled?: boolean;
+  lastRunAt?: string | null;
+  nextRunAt?: string | null;
+  lastStatus?: string | null;
+  lastError?: string | null;
+  disabledByEnv?: boolean;
+  disabledByOperator?: boolean;
+};
+
+export async function getAdminSchedules() {
+  return adminRequest<{
+    cronEnabled: boolean;
+    note?: string;
+    intents: ScheduleIntent[];
+  }>('/admin/schedules');
+}
+
+export async function setAdminScheduleEnabled(jobKey: string, enabled: boolean) {
+  return adminRequest(`/admin/schedules/${encodeURIComponent(jobKey)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+export async function getAdminMembers(params?: { limit?: number; offset?: number; q?: string }) {
+  const searchParams = new URLSearchParams();
+  if (params?.limit !== undefined) searchParams.set('limit', String(params.limit));
+  if (params?.offset !== undefined) searchParams.set('offset', String(params.offset));
+  if (params?.q) searchParams.set('q', params.q);
+  const query = searchParams.toString();
+  return adminRequest<{
+    data: Array<{
+      id: string;
+      email: string;
+      createdAt: string;
+      lastVisitedAt: string | null;
+      trackCount: number;
+    }>;
+    meta: { total: number; limit: number; offset: number; has_more: boolean };
+  }>(`/admin/members${query ? `?${query}` : ''}`);
+}
+
+export async function updateMusicPreviewUrl(id: string, previewAudioUrl: string | null) {
+  return adminRequest(`/admin/music/${id}/preview`, {
+    method: 'PATCH',
+    body: JSON.stringify({ previewAudioUrl }),
+  });
+}
+
+export async function getAdminAnalyticsSummary() {
+  return adminRequest<{
+    total: number;
+    byType: Record<string, number>;
+    available: boolean;
+  }>('/admin/analytics/summary');
+}
+
+export async function recordEditorialMetric(
+  profileId: string,
+  data: { followerCount: number; note: string },
+) {
+  return adminRequest(`/admin/watchlist/${profileId}/editorial-metric`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
