@@ -22,6 +22,11 @@ import { ScoringModule } from './scoring/scoring.module.js';
 import { HashtagsModule } from './hashtags/hashtags.module.js';
 import { NewsModule } from './news/news.module.js';
 import { RegionsModule } from './regions/regions.module.js';
+import { TrendsModule } from './trends/trends.module.js';
+import { MusicModule } from './music/music.module.js';
+import { PulseModule } from './pulse/pulse.module.js';
+import { VisitDiffModule } from './visit-diff/visit-diff.module.js';
+import { DiscoveryModule } from './discovery/discovery.module.js';
 
 @Module({
   imports: [
@@ -46,6 +51,11 @@ import { RegionsModule } from './regions/regions.module.js';
     HashtagsModule,
     NewsModule,
     RegionsModule,
+    TrendsModule,
+    MusicModule,
+    PulseModule,
+    VisitDiffModule,
+    DiscoveryModule,
   ],
 })
 export class AppModule {}
