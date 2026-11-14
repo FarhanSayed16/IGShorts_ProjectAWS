@@ -74,7 +74,15 @@ export default function AdminJobsPage() {
                 <tr key={job.id} className="hover:bg-[var(--brand-slate)]/40 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-white">{job.jobName}</td>
                   <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border shadow-sm ${
+                        /fail|error/i.test(String(job.status || ''))
+                          ? 'bg-red-950/80 text-red-400 border-red-800/60'
+                          : /run|pend|progress/i.test(String(job.status || ''))
+                            ? 'bg-amber-950/80 text-amber-400 border-amber-800/60'
+                            : 'bg-emerald-950/80 text-emerald-400 border-emerald-800/60'
+                      }`}
+                    >
                       {job.status}
                     </span>
                   </td>
@@ -84,8 +92,10 @@ export default function AdminJobsPage() {
                   <td className="py-3.5 px-4 font-mono text-[var(--neutral-400)] text-[11px]">
                     {job.finishedAt ? new Date(job.finishedAt).toLocaleString() : 'Running'}
                   </td>
-                  <td className="py-3.5 px-4 text-right font-mono text-white">
-                    {job.stats || 'Success'}
+                  <td className="py-3.5 px-4 text-right font-mono text-white max-w-[220px]">
+                    <span className="block truncate" title={job.error || job.stats || ''}>
+                      {job.error || job.stats || (/fail|error/i.test(String(job.status || '')) ? 'Failed' : '—')}
+                    </span>
                   </td>
                 </tr>
               ))}

@@ -1,23 +1,43 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RefreshCw, Play, AlertTriangle, CheckCircle2, Activity } from 'lucide-react';
-import { triggerWatchlistSync, triggerDailyPipeline } from '@/lib/api/admin-client';
+import {
+  RefreshCw,
+  Play,
+  AlertTriangle,
+  CheckCircle2,
+  Activity,
+  BookOpen,
+  Sparkles,
+} from 'lucide-react';
+import {
+  triggerWatchlistSync,
+  triggerDailyPipeline,
+  triggerWikipediaEnrichment,
+  triggerDiscoveryRefresh,
+} from '@/lib/api/admin-client';
+
+type SyncMode = 'sync' | 'pipeline' | 'wikipedia' | 'discovery';
 
 export default function AdminSyncPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [report, setReport] = useState<Record<string, unknown> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
-  const [mode, setMode] = useState<'sync' | 'pipeline'>('sync');
+  const [mode, setMode] = useState<SyncMode>('sync');
 
-  const run = async (kind: 'sync' | 'pipeline') => {
+  const run = async (kind: SyncMode) => {
     setIsRunning(true);
     setErrorMsg('');
     setReport(null);
     setMode(kind);
     try {
-      const res = kind === 'sync' ? await triggerWatchlistSync() : await triggerDailyPipeline();
-      setReport(res as Record<string, unknown>);
+      let res: Record<string, unknown>;
+      if (kind === 'sync') res = (await triggerWatchlistSync()) as Record<string, unknown>;
+      else if (kind === 'pipeline') res = (await triggerDailyPipeline()) as Record<string, unknown>;
+      else if (kind === 'wikipedia')
+        res = (await triggerWikipediaEnrichment()) as Record<string, unknown>;
+      else res = await triggerDiscoveryRefresh();
+      setReport(res);
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Sync failed.');
     } finally {
@@ -53,14 +73,14 @@ export default function AdminSyncPage() {
                 Calls the ingestion adapter. Seed mode does not overwrite existing counts with null.
               </p>
             </div>
-            <div className="p-3 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 shrink-0">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[#00d26a] shrink-0">
               <RefreshCw className="w-5 h-5" />
             </div>
           </div>
           <button
             onClick={() => run('sync')}
             disabled={isRunning}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white text-xs font-display font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-[0_4px_16px_rgba(2,132,199,0.25)] cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl bg-[#00d26a] hover:bg-white text-black text-xs font-display font-bold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
           >
             <span className="inline-flex items-center gap-2 justify-center">
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -77,7 +97,7 @@ export default function AdminSyncPage() {
                 Sync due profiles, then automatically recompute Global & India leaderboards.
               </p>
             </div>
-            <div className="p-3 rounded-xl bg-sky-950/80 border border-sky-800/60 text-sky-400 shrink-0">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white shrink-0">
               <Activity className="w-5 h-5" />
             </div>
           </div>
@@ -87,8 +107,56 @@ export default function AdminSyncPage() {
             className="w-full py-3 px-4 rounded-xl bg-[var(--brand-slate)] hover:bg-[var(--brand-slate)]/80 text-white text-xs font-display font-bold uppercase tracking-wider border border-[var(--neutral-700)]/60 transition-all disabled:opacity-50 cursor-pointer"
           >
             <span className="inline-flex items-center gap-2 justify-center">
-              <Play className="w-3.5 h-3.5 fill-current text-[var(--brand-accent)]" />
+              <Play className="w-3.5 h-3.5 fill-current text-[#00d26a]" />
               {isRunning && mode === 'pipeline' ? 'Executing Pipeline...' : 'Run Daily Pipeline'}
+            </span>
+          </button>
+        </div>
+
+        <div className="p-6 sm:p-8 rounded-2xl bg-[var(--brand-navy)] border border-[var(--brand-slate)] shadow-lg space-y-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-base font-display font-bold text-white">Wikipedia Enrichment</h2>
+              <p className="text-xs text-[var(--neutral-400)] mt-1.5 leading-relaxed">
+                Pull public Wikipedia portraits for listed people missing avatars.
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white shrink-0">
+              <BookOpen className="w-5 h-5" />
+            </div>
+          </div>
+          <button
+            onClick={() => run('wikipedia')}
+            disabled={isRunning}
+            className="w-full py-3 px-4 rounded-xl bg-[var(--brand-slate)] hover:bg-[var(--brand-slate)]/80 text-white text-xs font-display font-bold uppercase tracking-wider border border-[var(--neutral-700)]/60 transition-all disabled:opacity-50 cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2 justify-center">
+              <Play className="w-3.5 h-3.5 fill-current text-[#00d26a]" />
+              {isRunning && mode === 'wikipedia' ? 'Enriching…' : 'Run Wikipedia Enrichment'}
+            </span>
+          </button>
+        </div>
+
+        <div className="p-6 sm:p-8 rounded-2xl bg-[var(--brand-navy)] border border-[var(--brand-slate)] shadow-lg space-y-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-base font-display font-bold text-white">Discovery Refresh</h2>
+              <p className="text-xs text-[var(--neutral-400)] mt-1.5 leading-relaxed">
+                Refresh Trends / Music / Pulse editorial discovery jobs.
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[#00d26a] shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+          </div>
+          <button
+            onClick={() => run('discovery')}
+            disabled={isRunning}
+            className="w-full py-3 px-4 rounded-xl bg-[var(--brand-slate)] hover:bg-[var(--brand-slate)]/80 text-white text-xs font-display font-bold uppercase tracking-wider border border-[var(--neutral-700)]/60 transition-all disabled:opacity-50 cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2 justify-center">
+              <Play className="w-3.5 h-3.5 fill-current text-[#00d26a]" />
+              {isRunning && mode === 'discovery' ? 'Refreshing…' : 'Run Discovery Jobs'}
             </span>
           </button>
         </div>
