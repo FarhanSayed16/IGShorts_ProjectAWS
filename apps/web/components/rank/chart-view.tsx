@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ChartEntry, ChartMeta } from '@igshorts/shared';
 import { StatusRibbon } from '@/components/chrome/status-ribbon';
 import { BillboardList } from '@/components/rank/billboard-list';
@@ -114,19 +114,6 @@ export function ChartView({ chartKey, scope, initialMeta, initialEntries }: Char
       )}
 
       <StatusRibbon meta={meta} />
-
-      {meta?.is_stale && (
-        <div className="border-b border-[var(--warn)] bg-[var(--warn-bg)] px-4 py-2 text-center text-xs font-semibold text-[var(--warn)] flex items-center justify-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          Counts last checked{' '}
-          {new Date(meta.as_of).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-          .
-        </div>
-      )}
 
       <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 py-10 flex-1">
         <div className="mb-8">

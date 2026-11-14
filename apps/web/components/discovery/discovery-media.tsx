@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { TREND_CATEGORY_LABELS, TrendCategory } from '@igshorts/shared';
 
 const CATEGORY_TONE: Record<TrendCategory, { from: string; to: string; label: string }> = {
@@ -23,10 +25,17 @@ export function DiscoveryMedia({
   className?: string;
   label?: string;
 }) {
-  if (imageUrl) {
+  const [failed, setFailed] = useState(false);
+
+  if (imageUrl && !failed) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={imageUrl} alt={alt} className={`w-full h-full object-cover ${className}`} />
+      <img
+        src={imageUrl}
+        alt={alt}
+        onError={() => setFailed(true)}
+        className={`w-full h-full object-cover ${className}`}
+      />
     );
   }
 
