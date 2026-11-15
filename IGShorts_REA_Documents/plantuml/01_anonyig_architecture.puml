@@ -1,0 +1,47 @@
+@startuml
+title AnonyIG - Technical Architecture (Sequence)
+
+actor Visitor as User
+participant "Vue SPA\n(anonyig.com)" as FE
+participant "Query Parser\n+ Search Controller" as Ctrl
+participant "Signer Chunk\n(link.chunk.js)" as Signer
+participant "Turnstile / Token Store" as Gate
+participant "Worker Hub API\napi-wh.anonyig.com" as Hub
+participant "Scraper Orchestrator" as Orch
+participant "Session Pool" as Sessions
+participant "Residential Proxy Pool" as Proxies
+participant "Instagram\nWeb/Mobile Surfaces" as IG
+participant "Media Proxy CDN\nmedia.anonyig.com" as Media
+
+User -> FE : Enter @username or Instagram URL
+FE -> Ctrl : onSearch / submit
+Ctrl -> Ctrl : Classify query\n(userInfo / stories / posts / convert)
+Ctrl -> Signer : Build request envelope
+Signer -> Signer : Compute ts + signature _s
+Signer --> Ctrl : Signed payload
+Ctrl -> Gate : Attach x-token / wh-cf-token
+Gate -> Hub : POST /api/v2/instagram/{resource}
+
+alt Abuse signal 422 or 429
+  Hub --> FE : Captcha required
+  FE -> Gate : Complete Cloudflare Turnstile
+  Gate -> Hub : Retry with fresh wh-cf-token
+end
+
+Hub -> Orch : Validate signature and dispatch
+Orch -> Sessions : Acquire session if required
+Orch -> Proxies : Rotate residential IP
+Proxies -> IG : Fetch profile / stories / posts JSON
+IG --> Proxies : Raw Instagram payload
+Proxies --> Orch : Relay
+Orch -> Orch : Normalize to client schema
+Orch -> Media : Rewrite media URLs
+Hub --> Ctrl : Normalized JSON
+Ctrl --> User : Render profile, stories, posts, downloads
+
+note right of Hub
+  Browser never scrapes Instagram directly.
+  Worker Hub does acquisition server-side.
+end note
+
+@enduml

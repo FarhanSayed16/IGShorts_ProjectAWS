@@ -1,0 +1,31 @@
+@startuml
+title FastVideoSave - Technical Architecture (Sequence)
+
+actor Visitor as User
+participant "Static Frontend\nfastvideosave.net" as Site
+participant "Client Script\n(tool.js)" as Tool
+participant "Client Crypto\n(AES-CBC)" as Crypto
+participant "Media Aggregator API\napi.getrequest.dev" as Agg
+participant "Download Proxy CDN\ncdn.turbosave.app" as CDN
+participant "Instagram\nMedia Sources" as IG
+
+User -> Site : Paste Instagram video / reel URL
+Site -> Tool : onSubmit
+Tool -> Crypto : Encrypt target URL
+note right of Crypto
+  Anti-leech protection for upstream
+  aggregator (not Meta authentication)
+end note
+Crypto --> Tool : Ciphertext for header
+Tool -> Agg : Resolve media request
+Agg -> Agg : Decrypt / parse request
+Agg -> IG : Resolve playable media references
+IG --> Agg : Media locations / metadata
+Agg --> Tool : JSON with stream URLs
+Tool -> CDN : Request downloadable stream
+CDN -> IG : Fetch media bytes
+IG --> CDN : Binary stream
+CDN --> User : MP4 / downloadable output
+Site --> User : Ads shown around utility
+
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+title Inflact - Technical Architecture (Sequence)
+
+actor Visitor as User
+participant "Inflact Web UI" as UI
+participant "Cloudflare\n+ Freemium Gate" as Edge
+participant "API Gateway\n/ App Server" as API
+participant "Cache Resolver\nTTL 12-24h" as Resolver
+database "Cache DB\nPostgreSQL / Redis" as Cache
+queue "Job Queue" as Queue
+participant "Worker Orchestrator" as Orch
+participant "HTTP / Headless\nWorkers" as Workers
+participant "Session Pool" as Sessions
+participant "Residential\nProxy Fleet" as Proxies
+participant "Instagram\nJSON Surfaces" as IG
+participant "Optional Meta Graph\nbusiness_discovery" as Meta
+participant "Analytics Engine" as Calc
+
+User -> UI : Search @username
+UI -> Edge : Submit request
+Edge -> API : Pass bot + quota checks
+API -> Resolver : Lookup profile
+Resolver -> Cache : Read snapshot
+
+alt Cache HIT (fresh)
+  Cache --> API : Stored profile + analytics
+  API --> UI : Render fast (about 50ms)
+  UI --> User : Show profile + ER and stats
+else Cache MISS or STALE
+  API -> Queue : Enqueue ingestion job
+  Queue -> Orch : Dispatch
+  Orch -> Workers : Start fetch
+  Workers -> Sessions : Attach cookies if needed
+  Workers -> Proxies : Rotate egress IP
+  Proxies -> IG : Fetch profile + recent posts
+  IG --> Workers : Raw JSON
+  Workers -> Meta : Optional official path\n(for eligible pro accounts)
+  Meta --> Workers : Official payload if used
+  Workers -> Calc : Compute analytics set
+  note right of Calc
+    ER = (avg likes + avg comments)
+    / followers * 100
+    Also: posting frequency, top tags,
+    outlier posts, follower deltas
+  end note
+  Calc -> Cache : Write snapshot + metrics
+  Cache --> API : Fresh payload
+  API --> UI : Render profile + post grid
+  UI --> User : Show results + SaaS upsell
+end
+
+@enduml
