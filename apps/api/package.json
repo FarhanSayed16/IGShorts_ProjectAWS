@@ -13,6 +13,7 @@
     "job:pipeline": "node dist/scripts/run-pipeline.js",
     "job:discovery": "node dist/scripts/run-discovery.js",
     "seed:discovery": "node dist/scripts/seed-discovery.js",
+    "meta:lookup": "node dist/scripts/meta-lookup.js",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",
     "clean": "rimraf dist"

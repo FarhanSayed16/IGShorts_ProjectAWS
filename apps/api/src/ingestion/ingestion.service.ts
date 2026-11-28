@@ -296,8 +296,10 @@ export class IngestionService {
 
     for (const profile of profiles) {
       try {
+        let result: Awaited<ReturnType<NonNullable<typeof adapter>['fetchProfileData']>> | undefined;
+
         if (adapter) {
-          const result = await adapter.fetchProfileData(profile.igUsername);
+          result = await adapter.fetchProfileData(profile.igUsername);
           if (result.followerCount === null || result.followerCount === undefined) {
             skipped.push(profile.igUsername);
             await this.db.creatorProfile.update({
@@ -333,6 +335,9 @@ export class IngestionService {
         await this.db.creatorProfile.update({
           where: { id: profile.id },
           data: {
+            ...(result?.displayName ? { displayName: result.displayName } : {}),
+            ...(result?.avatarUrl ? { avatarUrl: result.avatarUrl, avatarSource: 'meta_graph' } : {}),
+            ...(result?.profileUrl ? { profileUrl: result.profileUrl } : {}),
             lastSyncedAt: new Date(),
             lastSyncStatus: adapter ? 'success' : 'seed_provider',
             lastSyncError: null,
